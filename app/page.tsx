@@ -1,69 +1,117 @@
-import Image from "next/image";
+import {
+  authorCounts,
+  topicCounts,
+  listArticles,
+  listMembers,
+} from "@/lib/repo";
+import { site } from "@/lib/site";
+import { StudyIntro } from "@/components/home/StudyIntro";
+import { ArticleMasonry } from "@/components/article/ArticleMasonry";
+import { TopicsIndex } from "@/components/home/TopicsIndex";
+import { MembersStrip } from "@/components/home/MembersStrip";
+import { SectionHead } from "@/components/ui/SectionHead";
+import { Reveal } from "@/components/ui/Reveal";
+import { ButtonLink } from "@/components/ui/Button";
+import { PageFrame } from "@/components/site/PageFrame";
+import { GridRule } from "@/components/site/GridRule";
+import { formatDate } from "@/lib/utils";
 
-export default function Home() {
+/** Home samples the archive rather than listing it — four columns, three
+ *  rows deep, then a link into /articles. */
+const HOME_ARTICLE_COUNT = 12;
+
+export default async function HomePage() {
+  const [all, members, counts, byAuthor] = await Promise.all([
+    listArticles(),
+    listMembers(),
+    topicCounts(),
+    authorCounts(),
+  ]);
+
+  const latest = all.slice(0, HOME_ARTICLE_COUNT);
+  const today = new Date().toISOString().slice(0, 10);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <PageFrame>
+      <StudyIntro articleCount={all.length} memberCount={members.length} />
+
+      <GridRule />
+
+      {/* Masthead strip */}
+      <div className="shell">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 py-4">
+          <p className="lede-serif t-body-lg text-ink-muted">{site.intro}</p>
+          <p className="t-caption text-ink-faint">{formatDate(today)} · Seoul</p>
+        </div>
+      </div>
+
+      <GridRule />
+
+      <section className="shell section-pad" aria-labelledby="latest">
+        <SectionHead
+          bare
+          label="The Archive"
+          title="Latest"
+          note={`${all.length}편의 아티클이 발행되어 있습니다.`}
+          action={{ label: "All articles", href: "/articles" }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+        <div id="latest" className="mt-12">
+          <ArticleMasonry articles={latest} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="mt-12 flex justify-center">
+          <ButtonLink href="/articles" variant="secondary">
+            아티클 전체 보기 ({all.length}) →
+          </ButtonLink>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <GridRule />
+
+      <section className="shell section-pad" aria-labelledby="topics">
+        <SectionHead
+          bare
+          label="Index of subjects"
+          title="Topics"
+          note="관심 있는 주제부터 읽어보세요."
+        />
+        <div id="topics">
+          <TopicsIndex counts={counts} />
+        </div>
+      </section>
+
+      <GridRule />
+
+      <section className="shell section-pad" aria-labelledby="members">
+        <SectionHead
+          bare
+          label="Who writes here"
+          title="Members"
+          action={{ label: "All members", href: "/members" }}
+        />
+        <div id="members">
+          <MembersStrip members={members} counts={byAuthor} />
+        </div>
+      </section>
+
+      <GridRule />
+
+      <Reveal as="section" className="shell section-pad-t">
+        <p className="t-display text-balance">
+          We study how people
+          <br />
+          experience things —
+          <span className="text-ink-faint"> slowly, in writing.</span>
+        </p>
+        <div className="mt-12 flex flex-wrap items-center gap-3">
+          <ButtonLink href="/about" variant="secondary">
+            About the study →
+          </ButtonLink>
+          <ButtonLink href="/studio" variant="ghost" className="px-4">
+            멤버라면 글을 써주세요
+          </ButtonLink>
+        </div>
+      </Reveal>
+    </PageFrame>
   );
 }
