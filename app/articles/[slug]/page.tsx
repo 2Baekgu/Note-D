@@ -85,13 +85,18 @@ export default async function ArticlePage({
           <p className="t-body-lg mt-6 text-ink-muted">{article.subtitle}</p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 border-y border-line py-4">
-            <Link href={`/members/${article.author.handle}`} className="group flex items-center gap-3">
+            {/* One line: name and role read together, then the rest of the
+                byline, rather than the name stacking over its own title. */}
+            <Link
+              href={`/members/${article.author.handle}`}
+              className="group flex items-center gap-3"
+            >
               <Avatar name={article.author.name} src={article.author.profileImage} size="md" />
-              <span>
-                <span className="t-body block font-medium leading-tight transition-colors duration-[var(--duration-base)] group-hover:text-accent">
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span className="t-body font-medium transition-colors duration-[var(--duration-base)] group-hover:text-accent">
                   {article.author.name}
                 </span>
-                <span className="t-caption block text-ink-faint">{article.author.title}</span>
+                <span className="t-caption text-ink-faint">{article.author.title}</span>
               </span>
             </Link>
             <Divider vertical className="h-6" />
