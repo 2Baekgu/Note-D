@@ -108,19 +108,40 @@ export async function persistArticle(article: Article): Promise<SaveResult> {
   return { ok: true, storage: "local" };
 }
 
-/** Uploads a cover image to Supabase Storage; falls back to a data URL locally. */
-export async function uploadCover(file: File): Promise<{ url?: string; error?: string }> {
+/** 10MB. Body images go into the article text, and in demo mode that means a
+ *  base64 data URL in localStorage — which has a few megabytes to spend. */
+export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+
+/** Uploads an image to Supabase Storage; falls back to a data URL locally.
+ *  `folder` separates covers from the images dropped into a body. */
+export async function uploadImage(
+  file: File,
+  folder: "covers" | "body" = "covers",
+): Promise<{ url?: string; error?: string }> {
+  if (!file.type.startsWith("image/")) {
+    return { error: `${file.name}은(는) 이미지 파일이 아닙니다.` };
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    const mb = (file.size / 1024 / 1024).toFixed(1);
+    return { error: `${file.name}이(가) 너무 큽니다 (${mb}MB). 10MB 이하로 줄여주세요.` };
+  }
+
   const supabase = getSupabaseBrowserClient();
   if (!supabase) {
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = () => resolve({ url: String(reader.result) });
-      reader.onerror = () => resolve({ error: "파일을 읽지 못했습니다." });
+      reader.onerror = () => resolve({ error: `${file.name}을(를) 읽지 못했습니다.` });
       reader.readAsDataURL(file);
     });
   }
 
-  const path = `covers/${Date.now()}-${slugify(file.name) || "cover"}`;
+  const ext = file.name.includes(".") ? file.name.split(".").pop() : "png";
+  const base = slugify(file.name.replace(/\.[^.]+$/, "")) || folder;
+  // The markdown image syntax stops the src at the first space, so the stored
+  // path must never contain one.
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${base}.${ext}`;
+
   const { error } = await supabase.storage.from("media").upload(path, file, {
     cacheControl: "3600",
     upsert: false,
@@ -130,3 +151,6 @@ export async function uploadCover(file: File): Promise<{ url?: string; error?: s
   const { data } = supabase.storage.from("media").getPublicUrl(path);
   return { url: data.publicUrl };
 }
+
+/** Kept for the cover field, which only ever uploads one file. */
+export const uploadCover = (file: File) => uploadImage(file, "covers");

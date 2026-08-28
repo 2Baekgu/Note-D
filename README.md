@@ -167,6 +167,8 @@ select email, role, handle from public.profiles order by joined_at;
 ## 본문 문법
 
 Studio 에디터와 샘플 아티클이 같은 파서(`lib/content/parse.ts`)를 씁니다.
+본문 이미지는 문법을 몰라도 됩니다 — 에디터에 끌어다 놓거나 붙여넣으면
+Storage에 올라가고 `![alt](url)`이 커서 자리에 들어갑니다.
 
 | 문법 | 결과 |
 | --- | --- |
