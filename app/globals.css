@@ -21,6 +21,13 @@
 
   --accent: #e8452a;
   --accent-soft: rgba(232, 69, 42, 0.1);
+  /* Posting streak, four steps of the accent. One post a week is the study's
+     own rhythm, so one post fills a cell and more deepens it. */
+  --streak-0: rgba(22, 21, 15, 0.07);
+  --streak-1: rgba(232, 69, 42, 0.3);
+  --streak-2: rgba(232, 69, 42, 0.55);
+  --streak-3: rgba(232, 69, 42, 0.78);
+  --streak-4: var(--accent);
   --on-accent: #ffffff;
 
   --inverse: #16150f;

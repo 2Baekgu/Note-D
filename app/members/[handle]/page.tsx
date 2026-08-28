@@ -5,6 +5,7 @@ import { getMemberByHandle, listArticles, memberHandles } from "@/lib/repo";
 import { ArticleMasonry } from "@/components/article/ArticleMasonry";
 import { ChipLink } from "@/components/ui/Chip";
 import { ProfileIdentity } from "@/components/members/ProfileIdentity";
+import { PostingStreak } from "@/components/members/PostingStreak";
 import { PageFrame } from "@/components/site/PageFrame";
 import { GridRule } from "@/components/site/GridRule";
 import { topicSlug, formatDate } from "@/lib/utils";
@@ -51,6 +52,10 @@ export default async function MemberPage({
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div>
             <ProfileIdentity member={member} />
+
+            <PostingStreak
+              posts={articles.map((a) => ({ title: a.title, publishedAt: a.publishedAt }))}
+            />
 
             {member.links && member.links.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">
