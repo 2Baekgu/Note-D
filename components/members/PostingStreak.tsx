@@ -29,6 +29,7 @@ const LEVELS = [
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const PER_ROW = 13; // a quarter
 const ROWS = 4;
+const START_YEAR = 2025; // the study's first year — every profile opens on it
 const ROW_LABEL = ["Jan", "Apr", "Jul", "Oct"];
 const SIDE_BY_SIDE = 2; // years shown at once
 
@@ -68,9 +69,12 @@ export function PostingStreak({
       .map((p) => new Date(`${p.publishedAt}T00:00:00`))
       .filter((d) => !Number.isNaN(d.getTime()))
       .map((d) => d.getFullYear());
+    // Somebody who joined this month has one year of their own, and a lone
+    // year draws a card half the width of everyone else's. Start every
+    // profile at the study's first year; the empty ones are simply grey.
     const now = new Date().getFullYear();
-    const first = found.length ? Math.min(...found) : now;
-    const last = Math.max(now, ...(found.length ? found : [now]));
+    const first = Math.min(START_YEAR, ...found);
+    const last = Math.max(now, START_YEAR, ...found);
 
     const out: { year: number; rows: Cell[][]; posts: number }[] = [];
     for (let y = first; y <= last; y++) {
@@ -100,7 +104,6 @@ export function PostingStreak({
   // Opens on the most recent years, the way a profile should.
   const [index, setIndex] = useState(() => Math.max(0, years.length - SIDE_BY_SIDE));
 
-  if (!posts.length) return null;
   const start = Math.min(index, Math.max(0, years.length - SIDE_BY_SIDE));
   const shown = years.slice(start, start + SIDE_BY_SIDE);
   const span =
