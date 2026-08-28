@@ -28,7 +28,14 @@ export function Footer() {
             <p className="wordmark t-display">{site.name}</p>
             <p className="t-body mt-4 max-w-[30ch] text-ink-muted">{site.tagline}</p>
             <p className="t-label mt-8 text-ink-faint">
-              Since {site.since} · {site.issue}
+              Since {site.since} · {site.kind}
+            </p>
+            <p className="t-label mt-3 text-ink-faint">
+              문의 ·{" "}
+              {/* t-label uppercases; an address should read as it is written. */}
+              <a href={`mailto:${site.contact}`} className="link-underline normal-case">
+                {site.contact}
+              </a>
             </p>
           </div>
 
@@ -65,7 +72,7 @@ export function Footer() {
       <div className="frame-row">
         <div className="grid md:grid-cols-2">
           <p className="frame-cell t-caption py-6 text-ink-faint">
-            © {new Date().getFullYear()} {site.name}. 비동기로 읽고 쓰는 UX/UI 스터디.
+            © {new Date().getFullYear()} {site.name}. 디자인을 읽고 쓰는 UX/UI 스터디.
           </p>
           <p className="frame-cell t-caption py-6 text-ink-faint md:text-right">
             글의 저작권은 각 작성자에게 있습니다.
