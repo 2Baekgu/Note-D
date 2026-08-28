@@ -25,11 +25,15 @@ export function RichEditor({
   value,
   onChange,
   meta,
+  header,
 }: {
   value: string;
   onChange: (next: string) => void;
   /** Small text for the toolbar's right side, e.g. the length. */
   meta?: React.ReactNode;
+  /** Sits inside the sheet above the body, on the body's own column —
+   *  the title, in practice. */
+  header?: React.ReactNode;
 }) {
   const { mode } = useAuth();
   const [uploading, setUploading] = useState(0);
@@ -109,6 +113,9 @@ export function RichEditor({
       <Toolbar editor={editor} uploading={uploading} onPick={insertImages} meta={meta} />
 
       <div className="surface mt-3 min-h-[34rem] px-6 py-12 sm:px-14 sm:py-16">
+        {header && (
+          <div className="editor-column mb-10 border-b border-line pb-8">{header}</div>
+        )}
         <EditorContent editor={editor} />
       </div>
 

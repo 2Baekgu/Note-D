@@ -268,3 +268,14 @@ export const toPlainText = (content: string): string =>
 
 export const readingTime = (content: string): number =>
   readingTimeOf(toPlainText(content));
+
+/** The opening sentence of a document. The editor no longer asks for a
+ *  subtitle, so an article without one is summarised by its first line. */
+export function firstLine(content: string): string {
+  for (const block of toBlocks(content)) {
+    if (block.type !== "paragraph") continue;
+    const text = block.text.trim();
+    if (text) return text;
+  }
+  return "";
+}

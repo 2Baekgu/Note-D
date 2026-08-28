@@ -1,6 +1,7 @@
 import type { Article, Reference } from "@/lib/types";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
+import { firstLine } from "@/lib/content/doc";
 
 const LOCAL_KEY = "noted:articles";
 
@@ -80,6 +81,9 @@ export function normalize(article: Article): Article {
   return {
     ...article,
     slug: article.slug.trim() || slugify(article.title) || article.id,
+    // Nobody types a subtitle any more. One already written is left alone;
+    // an article without one is summarised by its opening line.
+    subtitle: article.subtitle.trim() || firstLine(article.content),
     topics: article.topics.map((t) => t.trim()).filter(Boolean),
     references: article.references.filter((r: Reference) => r.label.trim()),
     updatedAt: new Date().toISOString(),

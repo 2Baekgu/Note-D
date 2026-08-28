@@ -14,7 +14,7 @@ import { Chip, ChipButton } from "@/components/ui/Chip";
 import { useStuck } from "@/components/ui/useStuck";
 import { RichEditor } from "./RichEditor";
 import { emptyArticle, persistArticle } from "@/lib/studio";
-import { readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
+import { firstLine, readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
 import { cn, formatDate, slugify } from "@/lib/utils";
 
 export function ArticleEditor({ initial }: { initial?: Article }) {
@@ -191,43 +191,27 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
         <div className="min-w-0">
           {mode === "write" ? (
             <>
-              {/* Title and subtitle sit in a sheet of their own, on the same
-                  padding and the same measure the body uses, so all three
-                  placeholders start on one left edge. */}
-              <div className="surface px-6 py-10 sm:px-14 sm:py-12">
-                <div className="editor-column">
-                  <label htmlFor="title" className="t-label text-ink-faint">
-                    Title
-                  </label>
-                  <input
-                    id="title"
-                    value={article.title}
-                    onChange={(e) => patch({ title: e.target.value })}
-                    placeholder="무엇에 대해 쓰고 있나요?"
-                    className="t-h1 serif-heads mt-2 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
-                  />
-
-                  <label htmlFor="subtitle" className="t-label mt-10 block text-ink-faint">
-                    Subtitle
-                  </label>
-                  <textarea
-                    id="subtitle"
-                    value={article.subtitle}
-                    onChange={(e) => patch({ subtitle: e.target.value })}
-                    rows={2}
-                    placeholder="한두 문장으로 이 글을 요약해주세요."
-                    className="t-body-lg mt-2 w-full resize-y border-0 bg-transparent p-0 text-ink-muted outline-none placeholder:text-ink-faint"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <RichEditor
-                  value={article.content}
-                  onChange={(content) => patch({ content })}
-                  meta={`${toPlainText(article.content).length.toLocaleString()}자 · 약 ${readingTime(article.content)}분`}
-                />
-              </div>
+              {/* One sheet: the title sits at the top of the page you are
+                  writing, above the rule, the way it reads when published. */}
+              <RichEditor
+                value={article.content}
+                onChange={(content) => patch({ content })}
+                meta={`${toPlainText(article.content).length.toLocaleString()}자 · 약 ${readingTime(article.content)}분`}
+                header={
+                  <>
+                    <label htmlFor="title" className="sr-only">
+                      Title
+                    </label>
+                    <input
+                      id="title"
+                      value={article.title}
+                      onChange={(e) => patch({ title: e.target.value })}
+                      placeholder="제목을 입력하세요"
+                      className="t-h1 serif-heads w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+                    />
+                  </>
+                }
+              />
 
               <p className="t-label mt-16 text-ink-faint">References</p>
               <div className="mt-3 space-y-3">
@@ -406,8 +390,11 @@ function Preview({ article, authorName }: { article: Article; authorName: string
       </div>
 
       <h1 className="t-h1 mt-6 text-balance">{article.title || "제목 없음"}</h1>
-      {article.subtitle && (
-        <p className="t-body-lg mt-6 max-w-[50ch] text-ink-muted">{article.subtitle}</p>
+      {/* The same line saving would derive, so the preview is honest. */}
+      {(article.subtitle.trim() || firstLine(article.content)) && (
+        <p className="t-body-lg mt-6 max-w-[50ch] text-ink-muted">
+          {article.subtitle.trim() || firstLine(article.content)}
+        </p>
       )}
 
       <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-line py-3">
