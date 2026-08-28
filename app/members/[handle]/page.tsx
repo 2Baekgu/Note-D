@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getMemberByHandle, listArticles, memberHandles } from "@/lib/repo";
 import { ArticleMasonry } from "@/components/article/ArticleMasonry";
-import { Avatar } from "@/components/ui/Avatar";
 import { ChipLink } from "@/components/ui/Chip";
+import { ProfileIdentity } from "@/components/members/ProfileIdentity";
 import { PageFrame } from "@/components/site/PageFrame";
 import { GridRule } from "@/components/site/GridRule";
 import { topicSlug, formatDate } from "@/lib/utils";
@@ -50,15 +50,7 @@ export default async function MemberPage({
       <header className="shell section-pad">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div>
-            <div className="flex items-center gap-6">
-              <Avatar name={member.name} src={member.profileImage} size="xl" />
-              <div>
-                <h1 className="t-display">{member.name}</h1>
-                <p className="t-label mt-3 text-accent">{member.title}</p>
-              </div>
-            </div>
-
-            <p className="t-body-lg mt-8 max-w-[52ch] text-ink-muted">{member.bio}</p>
+            <ProfileIdentity member={member} />
 
             {member.links && member.links.length > 0 && (
               <div className="mt-6 flex flex-wrap gap-2">

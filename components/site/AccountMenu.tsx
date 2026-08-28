@@ -81,11 +81,8 @@ export function AccountMenu() {
               내 프로필
             </Link>
 
-            {canPublish ? (
-              <Link href="/studio" onClick={close} className={itemClass} role="menuitem">
-                Studio
-              </Link>
-            ) : (
+            {/* No Studio entry: the header's own button is right beside this. */}
+            {!canPublish && (
               <p className="t-caption px-4 py-2.5 text-ink-faint">
                 글을 쓰려면 운영자 승인이 필요합니다.
               </p>

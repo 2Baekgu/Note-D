@@ -169,6 +169,16 @@ async function resolveUser(
     profile_image: string | null;
     role: string;
   };
+  // Google hands us a picture, but the rest of the site reads `profiles` —
+  // article cards, the members list. Copy it across once, and never over a
+  // picture the person chose here.
+  if (!row.profile_image && fallback.image) {
+    void supabase
+      .from("profiles")
+      .update({ profile_image: fallback.image })
+      .eq("id", fallback.id);
+  }
+
   return {
     id: fallback.id,
     name: row.name || fallback.name,

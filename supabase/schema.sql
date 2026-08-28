@@ -221,7 +221,12 @@ create policy "media is public" on storage.objects
 drop policy if exists "members upload media" on storage.objects;
 create policy "members upload media" on storage.objects
   for insert to authenticated
-  with check (bucket_id = 'media' and public.can_publish());
+  with check (
+    bucket_id = 'media'
+    -- Article images are publishing; a profile picture is not, so a guest
+    -- may still set their own avatar.
+    and (public.can_publish() or (storage.foldername(name))[1] = 'avatars')
+  );
 
 -- ── first admin ─────────────────────────────────────────────
 --  Sign in with Google once, then run this with that address so the

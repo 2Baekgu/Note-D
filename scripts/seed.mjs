@@ -85,7 +85,9 @@ for (const m of members) {
       name: m.name,
       handle: m.handle,
       email,
-      profile_image: m.profileImage,
+      // Only set a picture if the roster has one. Writing null here wiped the
+      // avatar Google had already filled in.
+      ...(m.profileImage ? { profile_image: m.profileImage } : {}),
       role: m.role,
       title: m.title,
       bio: m.bio,
