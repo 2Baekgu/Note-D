@@ -111,8 +111,8 @@ export const imageSizes: Record<string, [number, number]> = {
     1437
   ],
   "/images/cocktail-party-effect/01.png": [
-    100,
-    67
+    1536,
+    1024
   ],
   "/images/confirmation-bias/01.png": [
     1699,
@@ -151,12 +151,12 @@ export const imageSizes: Record<string, [number, number]> = {
     695
   ],
   "/images/decision-fatigue/01.png": [
-    100,
-    74
+    1522,
+    1122
   ],
   "/images/decision-fatigue/02.png": [
-    100,
-    49
+    2910,
+    1436
   ],
   "/images/emotional-design-to-lifestyle-ux/01.png": [
     1584,
@@ -187,8 +187,8 @@ export const imageSizes: Record<string, [number, number]> = {
     880
   ],
   "/images/face-ism-effect/01.png": [
-    100,
-    67
+    1536,
+    1024
   ],
   "/images/filter-bubble/01.png": [
     2000,
@@ -659,16 +659,16 @@ export const imageSizes: Record<string, [number, number]> = {
     1040
   ],
   "/images/postels-law/01.png": [
-    100,
-    48
+    1510,
+    728
   ],
   "/images/postels-law/02.png": [
-    100,
-    49
+    2940,
+    1436
   ],
   "/images/postels-law/03.png": [
-    100,
-    56
+    1284,
+    724
   ],
   "/images/postels-law/04.png": [
     3338,
@@ -679,20 +679,20 @@ export const imageSizes: Record<string, [number, number]> = {
     1501
   ],
   "/images/primacy-effect/01.png": [
-    100,
-    62
+    2326,
+    1435
   ],
   "/images/primacy-effect/02.png": [
-    100,
-    54
+    2502,
+    1339
   ],
   "/images/primacy-effect/03.png": [
-    100,
-    47
+    2910,
+    1382
   ],
   "/images/primacy-effect/04.png": [
-    100,
-    56
+    998,
+    560
   ],
   "/images/principle-of-pragnanz/01.png": [
     2000,
