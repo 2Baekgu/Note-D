@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 /** A contribution graph on the study's own unit. GitHub counts a day and
  *  takes its height from the seven weekdays; a week has no such axis, so a
  *  year in weeks is one long line. One year at a time, folded at the half —
- *  twenty-six weeks a row, two rows — fills the column without growing past
- *  the card beside it. Cells flex, so the grid fits whatever width it gets. */
+ *  twenty-six weeks a row, two rows — keeps the cells the size of a
+ *  contribution square rather than a tile; the card gets its height from
+ *  padding instead. Cells flex, so the grid fills the width it is given. */
 
 type Cell = {
   key: string;
@@ -119,7 +120,7 @@ export function PostingStreak({
     "flex h-5 w-5 items-center justify-center rounded-sm text-ink-faint transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.06)] hover:text-ink disabled:pointer-events-none disabled:opacity-30";
 
   return (
-    <div ref={boxRef} className="surface relative mt-10 px-5 py-4">
+    <div ref={boxRef} className="surface relative mt-10 px-6 py-7">
       <div className="flex items-baseline justify-between gap-4">
         <p className="t-label text-ink-faint">Posting streak</p>
         <p className="t-caption text-ink-muted">
@@ -128,7 +129,7 @@ export function PostingStreak({
       </div>
 
       {/* Year picker and key share a line, so the card stays short. */}
-      <div className="mt-3 flex items-center justify-between gap-4">
+      <div className="mt-5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -164,7 +165,7 @@ export function PostingStreak({
         </div>
       </div>
 
-      <div className="mt-3 space-y-[5px]">
+      <div className="mt-5 space-y-[6px]">
         {shown.rows.map((row, r) => (
           <div key={r} className="flex items-center gap-[5px]">
             <span
