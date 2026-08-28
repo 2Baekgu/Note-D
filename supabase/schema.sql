@@ -136,7 +136,13 @@ $$;
 create or replace function public.guard_profile_role()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
-  if new.role is distinct from old.role and not public.is_admin() then
+  -- auth.uid() is null only when there is no end user behind the request,
+  -- i.e. the service role — which already bypasses RLS and is how seeding
+  -- and other server-side work assigns roles. An anonymous caller never
+  -- reaches this trigger, because no RLS policy lets it update a profile.
+  if new.role is distinct from old.role
+     and auth.uid() is not null
+     and not public.is_admin() then
     new.role := old.role;
   end if;
   return new;

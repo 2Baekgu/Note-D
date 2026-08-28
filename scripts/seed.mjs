@@ -6,6 +6,7 @@
  * Members are created as real auth users (password-less) so that the article
  * author_id foreign keys resolve. Re-running is safe: rows are upserted.
  */
+import { readdir } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -19,7 +20,22 @@ if (!url || !serviceKey) {
 // Node 22.6+ strips the types from these .ts modules natively. Every import
 // in them is `import type`, so nothing needs the `@/` alias at runtime.
 const { members } = await import("../lib/data/members.ts");
-const { sampleArticles } = await import("../lib/data/articles/index.ts");
+
+// Read the post files directly rather than through articles/index.ts — that
+// barrel imports without file extensions, which TypeScript resolves and Node
+// does not.
+const postsDir = new URL("../lib/data/articles/posts/", import.meta.url);
+const postFiles = (await readdir(postsDir)).filter((f) => f.endsWith(".ts")).sort();
+const sampleArticles = [];
+for (const f of postFiles) {
+  const mod = await import(new URL(f, postsDir).href);
+  for (const value of Object.values(mod)) {
+    if (value && typeof value === "object" && typeof value.slug === "string") {
+      sampleArticles.push(value);
+    }
+  }
+}
+sampleArticles.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 
 const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
 
