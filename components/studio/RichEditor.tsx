@@ -4,8 +4,8 @@ import { useState } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
 import Highlight from "@tiptap/extension-highlight";
+import { CaptionedImage } from "./CaptionedImage";
 import Placeholder from "@tiptap/extension-placeholder";
 import { blocksToDoc, isDoc, type DocNode } from "@/lib/content/doc";
 import { parseContent } from "@/lib/content/parse";
@@ -45,7 +45,7 @@ export function RichEditor({
         heading: { levels: [2, 3] },
         link: { openOnClick: false, HTMLAttributes: { rel: "noreferrer noopener" } },
       }),
-      Image.configure({ HTMLAttributes: { class: "rounded-md" } }),
+      CaptionedImage,
       Highlight,
       Placeholder.configure({
         placeholder: ({ node }) =>
@@ -109,7 +109,39 @@ export function RichEditor({
         <EditorContent editor={editor} />
       </div>
 
-      <BubbleMenu editor={editor} className="surface flex items-center gap-1 px-1.5 py-1 shadow-float">
+      {/* Selecting a picture offers its caption. `title` is where TipTap keeps
+          it and where the renderer reads it from. */}
+      <BubbleMenu
+        editor={editor}
+        pluginKey="imageMenu"
+        shouldShow={({ editor: e }) => e.isActive("image")}
+        className="surface flex items-center gap-2 px-2 py-1.5 shadow-float"
+      >
+        <span className="t-label shrink-0 text-ink-faint">주석</span>
+        <input
+          value={(editor.getAttributes("image").title as string) ?? ""}
+          onChange={(e) =>
+            editor.chain().focus().updateAttributes("image", { title: e.target.value }).run()
+          }
+          placeholder="사진 설명을 적어주세요"
+          className="t-caption w-56 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+        />
+        <ChipButton
+          size="sm"
+          tone="ghost"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => editor.chain().focus().deleteSelection().run()}
+        >
+          삭제
+        </ChipButton>
+      </BubbleMenu>
+
+      <BubbleMenu
+        editor={editor}
+        pluginKey="textMenu"
+        shouldShow={({ editor: e, from, to }) => !e.isActive("image") && from !== to}
+        className="surface flex items-center gap-1 px-1.5 py-1 shadow-float"
+      >
         <Mark editor={editor} name="bold" onClick={() => editor.chain().focus().toggleBold().run()}>
           <strong>B</strong>
         </Mark>

@@ -113,33 +113,39 @@ function BlockView({ block, index, seed }: { block: Block; index: number; seed: 
       const dims = imageSizes[block.src];
       return (
         <figure className={cn(BLEED, "my-16")}>
-          {generated ? (
-            <div className="media aspect-[16/9]">
-              <CoverArt seed={`${seed}-${index}`} tone={tone} />
-            </div>
-          ) : (
-            /* Real proportions, never upscaled past the source. Width and
-               height are set so nothing shifts while the image loads. */
-            <div
-              className="media mx-auto"
-              style={dims ? { maxWidth: `${dims[0]}px` } : undefined}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={block.src}
-                alt={block.alt}
-                width={dims?.[0]}
-                height={dims?.[1]}
-                className="block h-auto w-full"
-                loading="lazy"
-              />
-            </div>
-          )}
-          {(block.caption || block.alt) && (
-            <figcaption className="t-caption mt-4 text-ink-faint">
-              {block.caption ?? block.alt}
-            </figcaption>
-          )}
+          {/* Caption and image share this box, so the caption is as wide as
+              the picture and centred under it — whatever size it is. */}
+          <div
+            className="mx-auto"
+            style={!generated && dims ? { maxWidth: `${dims[0]}px` } : undefined}
+          >
+            {generated ? (
+              <div className="media aspect-[16/9]">
+                <CoverArt seed={`${seed}-${index}`} tone={tone} />
+              </div>
+            ) : (
+              /* Real proportions, never upscaled past the source. Width and
+                 height are set so nothing shifts while the image loads. */
+              <div className="media">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={block.src}
+                  alt={block.alt}
+                  width={dims?.[0]}
+                  height={dims?.[1]}
+                  className="block h-auto w-full"
+                  loading="lazy"
+                />
+              </div>
+            )}
+            {/* Only a caption the author wrote. `alt` on the imported images is
+                the article title, which read as a caption under every one. */}
+            {block.caption && (
+              <figcaption className="t-caption mt-3 text-center text-ink-faint">
+                {block.caption}
+              </figcaption>
+            )}
+          </div>
         </figure>
       );
     }

@@ -13,8 +13,8 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Chip, ChipButton } from "@/components/ui/Chip";
 import { useStuck } from "@/components/ui/useStuck";
 import { RichEditor } from "./RichEditor";
-import { emptyArticle, persistArticle, uploadCover } from "@/lib/studio";
-import { readingTime, toPlainText } from "@/lib/content/doc";
+import { emptyArticle, persistArticle } from "@/lib/studio";
+import { readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
 import { cn, formatDate, slugify } from "@/lib/utils";
 
 const CHEATSHEET = [
@@ -39,7 +39,6 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
-  const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
   const [actionsRef, actionsStuck] = useStuck<HTMLDivElement>();
 
   // The session may arrive after the first render, so the author falls back
@@ -56,7 +55,21 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
 
   const patch = (values: Partial<Article>) => setArticle((a) => ({ ...a, ...values }));
 
-  const computedSlug = slugTouched ? article.slug : slugify(article.title);
+  // A published article keeps the slug it went out with — changing it would
+  // break its URL — so only a new one takes its slug from the title.
+  const computedSlug = initial?.slug ? article.slug : slugify(article.title);
+
+  /** Covers come from the article's own pictures — uploading a separate file
+   *  only ever produced a cover that appeared nowhere in the piece. */
+  const bodyImages = useMemo(() => {
+    const seen = new Set<string>();
+    for (const block of toBlocks(article.content)) {
+      if (block.type === "image" && block.src && !block.src.startsWith("art:")) {
+        seen.add(block.src);
+      }
+    }
+    return [...seen];
+  }, [article.content]);
   const valid = article.title.trim().length > 1 && article.content.trim().length > 10;
 
   async function save(status: Article["status"]) {
@@ -71,7 +84,14 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
       return;
     }
 
-    const result = await persistArticle({ ...article, authorId, slug: computedSlug, status });
+    const result = await persistArticle({
+      ...article,
+      authorId,
+      slug: computedSlug,
+      status,
+      // Nothing chosen? Lead with the first picture in the piece.
+      coverImage: article.coverImage ?? bodyImages[0] ?? null,
+    });
     setSaving(false);
 
     if (!result.ok) {
@@ -154,41 +174,45 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
         <p className="surface t-caption mt-4 px-4 py-3 text-ink-muted">{notice}</p>
       )}
 
-      <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        {/* ── Main pane ─────────────────────────────── */}
+      {/* One column. The article column inside RichEditor already holds the
+          measure, so the sidebar was only ever squeezing it. */}
+      <div className="mt-12">
         <div className="min-w-0">
           {mode === "write" ? (
             <>
-              <label htmlFor="title" className="t-label text-ink-faint">
-                Title
-              </label>
-              <input
-                id="title"
-                value={article.title}
-                onChange={(e) => patch({ title: e.target.value })}
-                placeholder="무엇에 대해 쓰고 있나요?"
-                className="t-display mt-3 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
-              />
-
-              <label htmlFor="subtitle" className="t-label mt-12 block text-ink-faint">
-                Subtitle
-              </label>
-              <textarea
-                id="subtitle"
-                value={article.subtitle}
-                onChange={(e) => patch({ subtitle: e.target.value })}
-                rows={2}
-                placeholder="한두 문장으로 이 글을 요약해주세요."
-                className="field mt-3 resize-y"
-              />
-
-              <div className="mt-12 flex flex-wrap items-baseline justify-between gap-3">
-                <label htmlFor="content" className="t-label text-ink-faint">
-                  Content
+              <div className="article-column">
+                <label htmlFor="title" className="t-label text-ink-faint">
+                  Title
                 </label>
-                <span className="t-caption text-ink-faint">
-                  {toPlainText(article.content).length.toLocaleString()}자 · 약 {readingTime(article.content)}분
-                </span>
+                <input
+                  id="title"
+                  value={article.title}
+                  onChange={(e) => patch({ title: e.target.value })}
+                  placeholder="무엇에 대해 쓰고 있나요?"
+                  className="t-h1 serif-heads mt-3 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+                />
+
+                <label htmlFor="subtitle" className="t-label mt-10 block text-ink-faint">
+                  Subtitle
+                </label>
+                <textarea
+                  id="subtitle"
+                  value={article.subtitle}
+                  onChange={(e) => patch({ subtitle: e.target.value })}
+                  rows={2}
+                  placeholder="한두 문장으로 이 글을 요약해주세요."
+                  className="field mt-3 resize-y"
+                />
+
+                <div className="mt-10 flex flex-wrap items-baseline justify-between gap-3">
+                  <label htmlFor="content" className="t-label text-ink-faint">
+                    Content
+                  </label>
+                  <span className="t-caption text-ink-faint">
+                    {toPlainText(article.content).length.toLocaleString()}자 · 약{" "}
+                    {readingTime(article.content)}분
+                  </span>
+                </div>
               </div>
               <RichEditor
                 value={article.content}
@@ -212,7 +236,7 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                 </dl>
               </details>
 
-              <p className="t-label mt-12 text-ink-faint">References</p>
+              <p className="t-label mt-16 text-ink-faint">References</p>
               <div className="mt-3 space-y-3">
                 {article.references.map((ref, i) => (
                   <div
@@ -279,113 +303,84 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                   + Add reference
                 </ChipButton>
               </div>
+
+              {/* ── Article details ─────────────────────────
+                  Below the writing, not beside it — none of this needs to be
+                  in view while you are actually writing. */}
+              <section className="article-column mt-20 border-t border-line pt-10">
+                <p className="t-label text-ink-faint">Article details</p>
+
+                <div className="mt-8 grid gap-8 sm:grid-cols-2">
+                  <Field label="Author">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={author.name} src={author.profileImage} size="md" />
+                      <div className="min-w-0">
+                        <p className="t-body truncate">{author.name}</p>
+                        <p className="t-caption text-ink-faint">본인 명의로만 발행됩니다.</p>
+                      </div>
+                    </div>
+                  </Field>
+
+                  <Field label="Published date">
+                    <input
+                      type="date"
+                      value={article.publishedAt}
+                      onChange={(e) => patch({ publishedAt: e.target.value })}
+                      className="field"
+                      aria-label="발행일"
+                    />
+                  </Field>
+                </div>
+
+                <div className="mt-8">
+                  <Field label="Topics">
+                    {/* Pick as many as apply — the first one picked leads the card. */}
+                    <div className="flex flex-wrap gap-2">
+                      {topics.map((t) => {
+                        const on = article.topics.includes(t.name);
+                        return (
+                          <ChipButton
+                            key={t.slug}
+                            tone={on ? "solid" : "outline"}
+                            size="sm"
+                            aria-pressed={on}
+                            onClick={() =>
+                              patch({
+                                topics: on
+                                  ? article.topics.filter((x) => x !== t.name)
+                                  : [...article.topics, t.name],
+                              })
+                            }
+                          >
+                            {t.name}
+                          </ChipButton>
+                        );
+                      })}
+                    </div>
+                    <p className="t-caption mt-3 text-ink-faint">
+                      {article.topics.length > 0
+                        ? article.topics.join(" · ")
+                        : "하나 이상 선택해 주세요."}
+                    </p>
+                  </Field>
+                </div>
+
+                <div className="mt-8">
+                  <Field label="Cover image">
+                    <CoverPicker
+                      images={bodyImages}
+                      value={article.coverImage}
+                      onPick={(src) => patch({ coverImage: src })}
+                    />
+                  </Field>
+                </div>
+              </section>
             </>
           ) : (
             <Preview article={{ ...article, slug: computedSlug }} authorName={author.name} />
           )}
         </div>
 
-        {/* ── Sidebar ───────────────────────────────── */}
-        <aside className="space-y-8 lg:sticky lg:top-[9rem] lg:self-start">
-          <Field label="Author">
-            <div className="flex items-center gap-3">
-              <Avatar name={author.name} src={author.profileImage} size="md" />
-              <div className="min-w-0">
-                <p className="t-body truncate">{author.name}</p>
-                <p className="t-caption text-ink-faint">본인 명의로만 발행됩니다.</p>
-              </div>
-            </div>
-          </Field>
-
-          <Field label="Topics">
-            {/* Pick as many as apply — the first one picked leads the card. */}
-            <div className="flex flex-wrap gap-2">
-              {topics.map((t) => {
-                const on = article.topics.includes(t.name);
-                return (
-                  <ChipButton
-                    key={t.slug}
-                    tone={on ? "solid" : "outline"}
-                    size="sm"
-                    aria-pressed={on}
-                    onClick={() =>
-                      patch({
-                        topics: on
-                          ? article.topics.filter((x) => x !== t.name)
-                          : [...article.topics, t.name],
-                      })
-                    }
-                  >
-                    {t.name}
-                  </ChipButton>
-                );
-              })}
-            </div>
-            <p className="t-caption mt-3 text-ink-faint">
-              {article.topics.length > 0
-                ? article.topics.join(" · ")
-                : "하나 이상 선택해 주세요."}
-            </p>
-          </Field>
-
-          <Field label="Cover image">
-            <div className="media aspect-[4/3]">
-              <CoverMedia
-                src={article.coverImage}
-                alt=""
-                seed={computedSlug || "new-article"}
-                topic={article.topics[0]}
-              />
-            </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const res = await uploadCover(file);
-                if (res.url) patch({ coverImage: res.url });
-                else setNotice(res.error ?? "업로드에 실패했습니다.");
-              }}
-              aria-label="커버 이미지 업로드"
-              className="t-caption mt-3 block w-full text-ink-muted file:mr-3 file:rounded-pill file:border file:border-line file:bg-transparent file:px-3 file:py-2 file:text-[length:var(--text-label)] file:font-semibold file:uppercase file:tracking-[0.06em]"
-            />
-            <input
-              value={article.coverImage ?? ""}
-              onChange={(e) => patch({ coverImage: e.target.value || null })}
-              placeholder="또는 이미지 URL"
-              className="field mt-2"
-              aria-label="커버 이미지 URL"
-            />
-            <p className="t-caption mt-2 text-ink-faint">
-              비워두면 슬러그와 카테고리로 생성된 커버 아트가 사용됩니다.
-            </p>
-          </Field>
-
-          <Field label="Published date">
-            <input
-              type="date"
-              value={article.publishedAt}
-              onChange={(e) => patch({ publishedAt: e.target.value })}
-              className="field"
-              aria-label="발행일"
-            />
-          </Field>
-
-          <Field label="Slug">
-            <input
-              value={computedSlug}
-              onChange={(e) => {
-                setSlugTouched(true);
-                patch({ slug: slugify(e.target.value) });
-              }}
-              placeholder="auto-from-title"
-              className="field"
-              aria-label="슬러그"
-            />
-            <p className="t-caption mt-2 text-ink-faint">/articles/{computedSlug || "…"}</p>
-          </Field>
-        </aside>
       </div>
     </div>
   );
@@ -402,7 +397,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function Preview({ article, authorName }: { article: Article; authorName: string }) {
   return (
-    <div className="surface p-6 sm:p-12">
+    /* `serif-heads` is what the real article page puts around this — without
+       it the preview showed sans headings the published page never uses. */
+    <div className="surface serif-heads p-6 sm:p-12">
       <p className="t-label mb-8 text-ink-faint">Preview</p>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -445,5 +442,63 @@ function Preview({ article, authorName }: { article: Article; authorName: string
         )}
       </div>
     </div>
+  );
+}
+
+/** Pick the cover from the pictures already in the article. */
+function CoverPicker({
+  images,
+  value,
+  onPick,
+}: {
+  images: string[];
+  value: string | null;
+  onPick: (src: string | null) => void;
+}) {
+  // An article imported with its own cover has one that appears nowhere in
+  // the body; keep it on offer so the current choice is always visible.
+  const options = value && !images.includes(value) ? [value, ...images] : images;
+
+  if (!options.length) {
+    return (
+      <p className="t-caption text-ink-muted">
+        본문에 이미지를 넣으면 그중에서 커버를 고를 수 있습니다. 없으면 주제를 시드로 한
+        커버 아트가 대신 그려집니다.
+      </p>
+    );
+  }
+
+  const active = value ?? options[0];
+
+  return (
+    <>
+      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+        {options.map((src) => {
+          const on = src === active;
+          return (
+            <li key={src}>
+              <button
+                type="button"
+                onClick={() => onPick(src)}
+                aria-pressed={on}
+                className={cn(
+                  "media block w-full overflow-hidden rounded-md transition-all duration-[var(--duration-base)]",
+                  "aspect-[4/3] ring-offset-2",
+                  on ? "ring-2 ring-accent" : "opacity-70 hover:opacity-100",
+                )}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" className="h-full w-full object-cover" />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="t-caption mt-3 text-ink-faint">
+        {value
+          ? "카드와 목록에 이 이미지가 쓰입니다."
+          : "고르지 않으면 첫 번째 이미지가 커버가 됩니다."}
+      </p>
+    </>
   );
 }

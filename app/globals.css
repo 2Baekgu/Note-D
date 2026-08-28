@@ -1058,49 +1058,73 @@ select.field {
 
 /* ═══════════════════════════════════════════════════════════
    EDITOR  (TipTap / ProseMirror)
+
+   These mirror ContentBody block for block — same sizes, same rhythm, same
+   measure — so what you type is what the article looks like. If one changes,
+   change the other.
    ═══════════════════════════════════════════════════════════ */
 
 .tiptap {
   outline: none;
+  max-width: var(--measure);
+  margin-inline: auto;
   word-break: keep-all;
   overflow-wrap: break-word;
-}
-
-.tiptap > * + * {
-  margin-top: 1rem;
+  color: var(--ink);
 }
 
 .tiptap p {
   font-size: var(--text-body-lg);
-  line-height: 1.9;
+  line-height: 1.75;
+  color: var(--ink-muted);
+  margin-bottom: 1.5rem;
 }
 
+/* Sans, like the article. `.serif-heads` only reaches --t-display and t-h1,
+   so headings inside a piece have always been Pretendard. */
 .tiptap h2,
 .tiptap h3 {
-  font-family: var(--font-serif);
   font-weight: 600;
-  margin-top: 2.5rem;
+  color: var(--ink);
 }
 
 .tiptap h2 {
-  font-size: var(--text-h1);
+  font-size: var(--text-h2);
+  line-height: 1.34;
+  letter-spacing: -0.018em;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
 }
 
 .tiptap h3 {
-  font-size: var(--text-h2);
+  font-size: var(--text-h3);
+  line-height: 1.45;
+  letter-spacing: -0.012em;
+  margin-top: 3rem;
+  margin-bottom: 0.75rem;
 }
 
 .tiptap blockquote {
-  border-left: 2px solid var(--ink);
-  padding-left: 1rem;
-  font-style: italic;
+  border-left: 2px solid var(--accent);
+  padding-left: 1.5rem;
+  margin-block: 4rem;
+}
+
+.tiptap blockquote p {
+  font-family: var(--font-serif);
+  font-size: var(--text-h2);
+  line-height: 1.35;
+  color: var(--ink);
+  margin-bottom: 0;
 }
 
 .tiptap ul,
 .tiptap ol {
-  padding-left: 1.25rem;
+  padding-left: 1.5rem;
+  margin-bottom: 2rem;
   font-size: var(--text-body-lg);
-  line-height: 1.9;
+  line-height: 1.75;
+  color: var(--ink-muted);
 }
 
 .tiptap ul {
@@ -1111,26 +1135,51 @@ select.field {
   list-style: decimal;
 }
 
-.tiptap li::marker {
-  color: var(--ink-faint);
+.tiptap li {
+  margin-bottom: 0.75rem;
 }
 
-.tiptap img {
+.tiptap li p {
+  margin-bottom: 0;
+}
+
+.tiptap li::marker {
+  color: var(--accent);
+  font-size: 0.85em;
+}
+
+/* Figure, not a bare image — the caption belongs to the picture's width, the
+   same as in the published article. */
+.tiptap .tiptap-figure {
+  margin-block: 4rem;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.tiptap .tiptap-figure img {
   display: block;
   height: auto;
   max-width: 100%;
   border-radius: var(--radius-md);
 }
 
-.tiptap img.ProseMirror-selectednode {
+.tiptap .tiptap-figure figcaption {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+}
+
+.tiptap .tiptap-figure[data-selected="true"] img {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .tiptap hr {
   border: 0;
   border-top: var(--border-width) solid var(--line);
-  margin-block: 2rem;
+  margin-block: 4rem;
 }
 
 .tiptap code {
@@ -1147,6 +1196,7 @@ select.field {
 }
 
 .tiptap a {
+  color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
