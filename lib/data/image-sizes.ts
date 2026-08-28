@@ -10,6 +10,42 @@ export const imageSizes: Record<string, [number, number]> = {
     806,
     544
   ],
+  "/images/baemin-address-setting/01.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/02.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/03.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/04.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/05.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/06.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/07.png": [
+    466,
+    1010
+  ],
+  "/images/baemin-address-setting/08.jpg": [
+    800,
+    947
+  ],
+  "/images/baemin-address-setting/09.png": [
+    512,
+    512
+  ],
   "/images/bounce-rate-vs-exit-rate/01.png": [
     2000,
     2000
@@ -74,6 +110,10 @@ export const imageSizes: Record<string, [number, number]> = {
     1269,
     1437
   ],
+  "/images/cocktail-party-effect/01.png": [
+    100,
+    67
+  ],
   "/images/confirmation-bias/01.png": [
     1699,
     774
@@ -86,9 +126,69 @@ export const imageSizes: Record<string, [number, number]> = {
     420,
     410
   ],
+  "/images/coupang-interface-intent/01.png": [
+    1273,
+    297
+  ],
+  "/images/coupang-interface-intent/02.png": [
+    1267,
+    702
+  ],
+  "/images/coupang-interface-intent/03.png": [
+    1235,
+    697
+  ],
+  "/images/coupang-interface-intent/04.png": [
+    1238,
+    693
+  ],
+  "/images/coupang-interface-intent/05.png": [
+    1239,
+    699
+  ],
+  "/images/coupang-interface-intent/06.png": [
+    1236,
+    695
+  ],
+  "/images/decision-fatigue/01.png": [
+    100,
+    74
+  ],
+  "/images/decision-fatigue/02.png": [
+    100,
+    49
+  ],
+  "/images/emotional-design-to-lifestyle-ux/01.png": [
+    1584,
+    1160
+  ],
+  "/images/emotional-design-to-lifestyle-ux/02.png": [
+    1764,
+    1160
+  ],
+  "/images/emotional-design-to-lifestyle-ux/03.png": [
+    1582,
+    1096
+  ],
+  "/images/emotional-design-to-lifestyle-ux/04.png": [
+    1758,
+    1098
+  ],
+  "/images/emotional-design-to-lifestyle-ux/05.jpg": [
+    840,
+    473
+  ],
+  "/images/emotional-design-to-lifestyle-ux/06.jpg": [
+    840,
+    540
+  ],
   "/images/empathy-gap/01.png": [
     1024,
     880
+  ],
+  "/images/face-ism-effect/01.png": [
+    100,
+    67
   ],
   "/images/filter-bubble/01.png": [
     2000,
@@ -145,6 +245,10 @@ export const imageSizes: Record<string, [number, number]> = {
   "/images/framing-effect/02.png": [
     1284,
     989
+  ],
+  "/images/fresh-start-effect/02.png": [
+    1072,
+    978
   ],
   "/images/fundamental-attribution-error/01.png": [
     1000,
@@ -278,6 +382,50 @@ export const imageSizes: Record<string, [number, number]> = {
     622,
     1280
   ],
+  "/images/if-design-trend-2026/01.png": [
+    1513,
+    848
+  ],
+  "/images/if-design-trend-2026/02.png": [
+    885,
+    564
+  ],
+  "/images/if-design-trend-2026/03.png": [
+    514,
+    677
+  ],
+  "/images/if-design-trend-2026/04.png": [
+    729,
+    626
+  ],
+  "/images/if-design-trend-2026/05.png": [
+    625,
+    472
+  ],
+  "/images/if-design-trend-2026/06.png": [
+    622,
+    563
+  ],
+  "/images/if-design-trend-2026/07.png": [
+    1271,
+    673
+  ],
+  "/images/if-design-trend-2026/08.png": [
+    624,
+    679
+  ],
+  "/images/if-design-trend-2026/09.png": [
+    1270,
+    677
+  ],
+  "/images/if-design-trend-2026/10.png": [
+    1272,
+    676
+  ],
+  "/images/if-design-trend-2026/11.png": [
+    515,
+    573
+  ],
   "/images/ikea-effect/01.jpg": [
     1153,
     649
@@ -290,6 +438,82 @@ export const imageSizes: Record<string, [number, number]> = {
     985,
     1011
   ],
+  "/images/is-personalization-good-ux/01.jpg": [
+    614,
+    354
+  ],
+  "/images/is-personalization-good-ux/02.jpg": [
+    547,
+    365
+  ],
+  "/images/is-personalization-good-ux/03.png": [
+    1078,
+    638
+  ],
+  "/images/is-personalization-good-ux/04.jpg": [
+    590,
+    320
+  ],
+  "/images/is-personalization-good-ux/05.png": [
+    571,
+    502
+  ],
+  "/images/is-personalization-good-ux/06.png": [
+    1003,
+    604
+  ],
+  "/images/is-personalization-good-ux/07.png": [
+    1280,
+    720
+  ],
+  "/images/is-personalization-good-ux/08.jpg": [
+    1167,
+    700
+  ],
+  "/images/is-personalization-good-ux/09.png": [
+    674,
+    296
+  ],
+  "/images/is-personalization-good-ux/10.png": [
+    696,
+    280
+  ],
+  "/images/is-personalization-good-ux/11.png": [
+    290,
+    410
+  ],
+  "/images/is-personalization-good-ux/12.png": [
+    509,
+    463
+  ],
+  "/images/is-personalization-good-ux/13.jpg": [
+    1280,
+    488
+  ],
+  "/images/is-personalization-good-ux/14.png": [
+    599,
+    306
+  ],
+  "/images/is-personalization-good-ux/15.jpg": [
+    357,
+    560
+  ],
+  "/images/is-personalization-good-ux/16.jpg": [
+    1280,
+    727
+  ],
+  "/images/is-personalization-good-ux/17.jpg": [
+    1280,
+    995
+  ],
+  "/images/is-personalization-good-ux/18.jpg": [
+    720,
+    499
+  ],
+  "/images/is-personalization-good-ux/19.jpg": [
+    720,
+    1114
+  ],
   "/images/jakobs-law/01.png": [
     727,
     610
@@ -301,6 +525,14 @@ export const imageSizes: Record<string, [number, number]> = {
   "/images/jakobs-law/03.png": [
     1474,
     914
+  ],
+  "/images/method-of-loci/01.jpg": [
+    934,
+    716
+  ],
+  "/images/method-of-loci/02.png": [
+    700,
+    434
   ],
   "/images/millers-law/01.png": [
     2000,
@@ -322,6 +554,42 @@ export const imageSizes: Record<string, [number, number]> = {
     3430,
     2368
   ],
+  "/images/naver-booking-access/01.png": [
+    902,
+    1214
+  ],
+  "/images/naver-booking-access/02.png": [
+    902,
+    1214
+  ],
+  "/images/naver-booking-access/03.png": [
+    872,
+    1232
+  ],
+  "/images/naver-booking-access/04.png": [
+    1280,
+    823
+  ],
+  "/images/naver-booking-access/05.png": [
+    1280,
+    729
+  ],
+  "/images/naver-booking-access/06.png": [
+    882,
+    1596
+  ],
+  "/images/naver-booking-access/07.png": [
+    882,
+    1596
+  ],
+  "/images/naver-booking-access/08.png": [
+    876,
+    1608
+  ],
+  "/images/naver-booking-access/09.jpg": [
+    161,
+    161
+  ],
   "/images/normans-seven-stages-of-action/01.png": [
     1000,
     1000
@@ -329,6 +597,30 @@ export const imageSizes: Record<string, [number, number]> = {
   "/images/normans-seven-stages-of-action/02.png": [
     800,
     383
+  ],
+  "/images/novelty-effect/01.jpg": [
+    1400,
+    933
+  ],
+  "/images/peak-end-rule/01.png": [
+    2000,
+    2000
+  ],
+  "/images/peak-end-rule/02.png": [
+    605,
+    404
+  ],
+  "/images/peak-end-rule/03.jpg": [
+    860,
+    400
+  ],
+  "/images/peak-end-rule/04.jpg": [
+    1200,
+    800
+  ],
+  "/images/peak-end-rule/05.jpg": [
+    720,
+    500
   ],
   "/images/poka-yoke/01.png": [
     1000,
@@ -365,6 +657,42 @@ export const imageSizes: Record<string, [number, number]> = {
   "/images/poka-yoke/09.png": [
     1280,
     1040
+  ],
+  "/images/postels-law/01.png": [
+    100,
+    48
+  ],
+  "/images/postels-law/02.png": [
+    100,
+    49
+  ],
+  "/images/postels-law/03.png": [
+    100,
+    56
+  ],
+  "/images/postels-law/04.png": [
+    3338,
+    1687
+  ],
+  "/images/postels-law/05.png": [
+    3338,
+    1501
+  ],
+  "/images/primacy-effect/01.png": [
+    100,
+    62
+  ],
+  "/images/primacy-effect/02.png": [
+    100,
+    54
+  ],
+  "/images/primacy-effect/03.png": [
+    100,
+    47
+  ],
+  "/images/primacy-effect/04.png": [
+    100,
+    56
   ],
   "/images/principle-of-pragnanz/01.png": [
     2000,
@@ -445,6 +773,46 @@ export const imageSizes: Record<string, [number, number]> = {
   "/images/provide-exit-points/01.png": [
     1456,
     372
+  ],
+  "/images/reactance-effect/01.jpg": [
+    960,
+    540
+  ],
+  "/images/reactance-effect/02.png": [
+    1418,
+    960
+  ],
+  "/images/reactance-effect/03.png": [
+    1920,
+    1053
+  ],
+  "/images/recognition-over-recall/01.png": [
+    1256,
+    1044
+  ],
+  "/images/recognition-over-recall/02.png": [
+    900,
+    704
+  ],
+  "/images/recognition-over-recall/03.png": [
+    847,
+    541
+  ],
+  "/images/recognition-over-recall/04.png": [
+    1099,
+    723
+  ],
+  "/images/recognition-over-recall/05.jpg": [
+    1600,
+    900
+  ],
+  "/images/recognition-over-recall/06.png": [
+    1177,
+    672
+  ],
+  "/images/recognition-over-recall/07.png": [
+    1248,
+    702
   ],
   "/images/social-proof/01.png": [
     1000,

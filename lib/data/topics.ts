@@ -11,8 +11,9 @@ export const topics: Topic[] = [
   { id: "t5", name: "Interaction", slug: "interaction", tone: 4, description: "반응과 리듬, 그리고 시간의 디자인" },
   { id: "t6", name: "UX Research", slug: "ux-research", tone: 3, description: "묻고, 관찰하고, 해석하는 방법에 대하여" },
   { id: "t7", name: "Product", slug: "product", tone: 6, description: "만드는 일과 파는 일 사이의 긴장" },
-  { id: "t8", name: "Design Theory", slug: "design-theory", tone: 9, description: "우리가 물려받은 규칙을 다시 읽기" },
-  { id: "t9", name: "AI & UX", slug: "ai-ux", tone: 8, description: "확률적인 시스템을 위한 인터페이스" },
+  { id: "t8", name: "Case Study", slug: "case-study", tone: 7, description: "실제 서비스를 뜯어보며 배운 것" },
+  { id: "t9", name: "Design Theory", slug: "design-theory", tone: 9, description: "우리가 물려받은 규칙을 다시 읽기" },
+  { id: "t10", name: "AI & UX", slug: "ai-ux", tone: 8, description: "확률적인 시스템을 위한 인터페이스" },
 ];
 
 export const topicBySlug = (slug: string) => topics.find((t) => t.slug === slug);

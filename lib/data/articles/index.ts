@@ -1,71 +1,106 @@
 import type { Article } from "@/lib/types";
 
-import { confirmationBias } from "./posts/confirmation-bias";
-import { jakobsLaw } from "./posts/jakobs-law";
 import { anchoringEffect } from "./posts/anchoring-effect";
-import { fittssLaw } from "./posts/fittss-law";
-import { ikeaEffect } from "./posts/ikea-effect";
-import { vonRestorffEffect } from "./posts/von-restorff-effect";
+import { baeminAddressSetting } from "./posts/baemin-address-setting";
+import { bounceRateVsExitRate } from "./posts/bounce-rate-vs-exit-rate";
 import { cashlessEffect } from "./posts/cashless-effect";
-import { provideExitPoints } from "./posts/provide-exit-points";
-import { progressiveDisclosure } from "./posts/progressive-disclosure";
-import { framingEffect } from "./posts/framing-effect";
-import { filterBubble } from "./posts/filter-bubble";
-import { empathyGap } from "./posts/empathy-gap";
-import { normansSevenStagesOfAction } from "./posts/normans-seven-stages-of-action";
-import { hicksLaw } from "./posts/hicks-law";
-import { principleOfPragnanz } from "./posts/principle-of-pragnanz";
-import { zeigarnikEffect } from "./posts/zeigarnik-effect";
-import { gestaltPrinciples } from "./posts/gestalt-principles";
-import { millersLaw } from "./posts/millers-law";
 import { chunking } from "./posts/chunking";
+import { cocktailPartyEffect } from "./posts/cocktail-party-effect";
+import { confirmationBias } from "./posts/confirmation-bias";
+import { coupangInterfaceIntent } from "./posts/coupang-interface-intent";
+import { decisionFatigue } from "./posts/decision-fatigue";
+import { emotionalDesignToLifestyleUx } from "./posts/emotional-design-to-lifestyle-ux";
+import { empathyGap } from "./posts/empathy-gap";
+import { faceIsmEffect } from "./posts/face-ism-effect";
+import { filterBubble } from "./posts/filter-bubble";
+import { fittssLaw } from "./posts/fittss-law";
+import { framingEffect } from "./posts/framing-effect";
+import { freshStartEffect } from "./posts/fresh-start-effect";
+import { fundamentalAttributionError } from "./posts/fundamental-attribution-error";
+import { gestaltPrinciples } from "./posts/gestalt-principles";
+import { hicksLaw } from "./posts/hicks-law";
+import { holisticVsAnalyticCognition } from "./posts/holistic-vs-analytic-cognition";
+import { ifDesignTrend2026 } from "./posts/if-design-trend-2026";
+import { ikeaEffect } from "./posts/ikea-effect";
+import { isPersonalizationGoodUx } from "./posts/is-personalization-good-ux";
+import { jakobsLaw } from "./posts/jakobs-law";
+import { memoryAndUx } from "./posts/memory-and-ux";
+import { methodOfLoci } from "./posts/method-of-loci";
+import { millersLaw } from "./posts/millers-law";
+import { naverBookingAccess } from "./posts/naver-booking-access";
+import { normansSevenStagesOfAction } from "./posts/normans-seven-stages-of-action";
+import { noveltyEffect } from "./posts/novelty-effect";
+import { peakEndRule } from "./posts/peak-end-rule";
+import { pokaYoke } from "./posts/poka-yoke";
+import { postelsLaw } from "./posts/postels-law";
+import { primacyEffect } from "./posts/primacy-effect";
+import { principleOfPragnanz } from "./posts/principle-of-pragnanz";
+import { progressiveDisclosure } from "./posts/progressive-disclosure";
+import { prototyping } from "./posts/prototyping";
+import { provideExitPoints } from "./posts/provide-exit-points";
+import { reactanceEffect } from "./posts/reactance-effect";
+import { recognitionOverRecall } from "./posts/recognition-over-recall";
 import { shaping } from "./posts/shaping";
 import { socialProof } from "./posts/social-proof";
-import { weberFechnerLaw } from "./posts/weber-fechner-law";
-import { pokaYoke } from "./posts/poka-yoke";
-import { temptationBundling } from "./posts/temptation-bundling";
-import { fundamentalAttributionError } from "./posts/fundamental-attribution-error";
 import { streisandEffect } from "./posts/streisand-effect";
-import { userScanning } from "./posts/user-scanning";
-import { bounceRateVsExitRate } from "./posts/bounce-rate-vs-exit-rate";
+import { temptationBundling } from "./posts/temptation-bundling";
 import { userResearch } from "./posts/user-research";
-import { prototyping } from "./posts/prototyping";
+import { userScanning } from "./posts/user-scanning";
+import { vonRestorffEffect } from "./posts/von-restorff-effect";
+import { weberFechnerLaw } from "./posts/weber-fechner-law";
 import { xrUxAndAiGlass } from "./posts/xr-ux-and-ai-glass";
-import { holisticVsAnalyticCognition } from "./posts/holistic-vs-analytic-cognition";
+import { zeigarnikEffect } from "./posts/zeigarnik-effect";
 
-/** Every article in the archive, imported from the study's original posts
- *  on Tistory and Notion. Newest first. */
+/** Every imported article, newest first. Generated from posts/. */
 export const sampleArticles: Article[] = [
-  confirmationBias,
-  jakobsLaw,
   anchoringEffect,
-  fittssLaw,
-  ikeaEffect,
-  vonRestorffEffect,
+  baeminAddressSetting,
+  bounceRateVsExitRate,
   cashlessEffect,
-  provideExitPoints,
-  progressiveDisclosure,
-  framingEffect,
-  filterBubble,
-  empathyGap,
-  normansSevenStagesOfAction,
-  hicksLaw,
-  principleOfPragnanz,
-  zeigarnikEffect,
-  gestaltPrinciples,
-  millersLaw,
   chunking,
+  cocktailPartyEffect,
+  confirmationBias,
+  coupangInterfaceIntent,
+  decisionFatigue,
+  emotionalDesignToLifestyleUx,
+  empathyGap,
+  faceIsmEffect,
+  filterBubble,
+  fittssLaw,
+  framingEffect,
+  freshStartEffect,
+  fundamentalAttributionError,
+  gestaltPrinciples,
+  hicksLaw,
+  holisticVsAnalyticCognition,
+  ifDesignTrend2026,
+  ikeaEffect,
+  isPersonalizationGoodUx,
+  jakobsLaw,
+  memoryAndUx,
+  methodOfLoci,
+  millersLaw,
+  naverBookingAccess,
+  normansSevenStagesOfAction,
+  noveltyEffect,
+  peakEndRule,
+  pokaYoke,
+  postelsLaw,
+  primacyEffect,
+  principleOfPragnanz,
+  progressiveDisclosure,
+  prototyping,
+  provideExitPoints,
+  reactanceEffect,
+  recognitionOverRecall,
   shaping,
   socialProof,
-  weberFechnerLaw,
-  pokaYoke,
-  temptationBundling,
-  fundamentalAttributionError,
   streisandEffect,
-  userScanning,
-  bounceRateVsExitRate,
+  temptationBundling,
   userResearch,
-  prototyping,
+  userScanning,
+  vonRestorffEffect,
+  weberFechnerLaw,
   xrUxAndAiGlass,
-  holisticVsAnalyticCognition,
+  zeigarnikEffect,
 ].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
