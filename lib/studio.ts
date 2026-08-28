@@ -33,6 +33,22 @@ export function saveLocalArticle(article: Article) {
   writeLocal(list);
 }
 
+/** Removes a published article. The row policy allows this for its author
+ *  and for an admin; anyone else is refused by the database, not by us. */
+export async function deleteArticle(id: string): Promise<{ ok: boolean; error?: string }> {
+  if (id.startsWith("local-")) {
+    deleteLocalArticle(id);
+    return { ok: true };
+  }
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) {
+    deleteLocalArticle(id);
+    return { ok: true };
+  }
+  const { error } = await supabase.from("articles").delete().eq("id", id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
 export function deleteLocalArticle(id: string) {
   writeLocal(loadLocalArticles().filter((a) => a.id !== id));
 }

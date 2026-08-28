@@ -8,6 +8,7 @@ import {
   publishedArticleSlugs,
 } from "@/lib/repo";
 import { ContentBody } from "@/components/content/ContentBody";
+import { AuthorTools } from "@/components/article/AuthorTools";
 import { Discussion } from "@/components/article/Discussion";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
 import { ArticleCard } from "@/components/article/ArticleCard";
@@ -78,6 +79,7 @@ export default async function ArticlePage({
                 {t}
               </ChipLink>
             ))}
+            <AuthorTools articleId={article.id} authorId={article.authorId} />
           </div>
 
           <h1 className="t-h1 mt-6 text-balance">{article.title}</h1>

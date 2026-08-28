@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { Article, User } from "@/lib/types";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Chip, ChipButton } from "@/components/ui/Chip";
 import { ButtonLink } from "@/components/ui/Button";
-import { deleteLocalArticle, loadLocalArticles } from "@/lib/studio";
+import { deleteArticle, loadLocalArticles } from "@/lib/studio";
 import { formatDate } from "@/lib/utils";
 
 type Tab = "all" | "published" | "draft";
@@ -22,9 +23,27 @@ export function StudioDashboard({
   members: User[];
 }) {
   const { user, mode, isAdmin } = useAuth();
+  const router = useRouter();
   const [local, setLocal] = useState<Article[]>([]);
   const [tab, setTab] = useState<Tab>("all");
   const [mine, setMine] = useState(false);
+  // Deleting is not undoable, so the button asks once before it does it.
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [gone, setGone] = useState<string[]>([]);
+  const [failed, setFailed] = useState<string | null>(null);
+
+  async function remove(id: string) {
+    setFailed(null);
+    const res = await deleteArticle(id);
+    setConfirming(null);
+    if (!res.ok) {
+      setFailed(res.error ?? "삭제하지 못했습니다.");
+      return;
+    }
+    setGone((list) => [...list, id]);
+    setLocal(loadLocalArticles());
+    router.refresh();
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- local drafts are only readable after hydration
@@ -39,6 +58,7 @@ export function StudioDashboard({
   }, [local, serverArticles]);
 
   const rows = all.filter((a) => {
+    if (gone.includes(a.id)) return false;
     if (tab !== "all" && a.status !== tab) return false;
     if (mine && user && a.authorId !== user.id) return false;
     return true;
@@ -94,6 +114,8 @@ export function StudioDashboard({
         </p>
       )}
 
+      {failed && <p className="t-caption mt-4 text-accent">{failed}</p>}
+
       <div className="mt-8 border-t border-line">
         {rows.map((a) => {
           const author = members.find((m) => m.id === a.authorId);
@@ -143,18 +165,33 @@ export function StudioDashboard({
                     Edit
                   </Link>
                 )}
-                {isLocal && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      deleteLocalArticle(a.id);
-                      setLocal(loadLocalArticles());
-                    }}
-                    className="t-label text-ink-faint transition-colors duration-[var(--duration-base)] hover:text-accent"
-                  >
-                    Delete
-                  </button>
-                )}
+                {canEdit &&
+                  (confirming === a.id ? (
+                    <span className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => remove(a.id)}
+                        className="t-label text-accent underline underline-offset-4"
+                      >
+                        정말 삭제
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(null)}
+                        className="t-label text-ink-faint underline underline-offset-4"
+                      >
+                        취소
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirming(a.id)}
+                      className="t-label text-ink-faint transition-colors duration-[var(--duration-base)] hover:text-accent"
+                    >
+                      Delete
+                    </button>
+                  ))}
               </div>
             </div>
           );
