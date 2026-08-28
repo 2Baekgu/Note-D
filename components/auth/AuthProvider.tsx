@@ -39,6 +39,10 @@ interface AuthValue {
 const AuthContext = createContext<AuthValue | null>(null);
 const DEMO_KEY = "notesd:demo-user";
 
+/** What a new profile starts with, so no field on a member page is empty. */
+const DEFAULT_TITLE = "UX/UI Designer";
+const defaultBio = (name: string) => `안녕하세요, 저는 ${name}입니다. 잘 부탁드립니다.`;
+
 type AuthUser = { id: string; email?: string; user_metadata?: Record<string, unknown> };
 type SupabaseClient = NonNullable<ReturnType<typeof getSupabaseBrowserClient>>;
 
@@ -154,7 +158,7 @@ async function resolveUser(
 
   const { data } = await supabase
     .from("profiles")
-    .select("id, name, handle, email, profile_image, role")
+    .select("id, name, handle, email, profile_image, role, title, bio")
     .eq("id", fallback.id)
     .maybeSingle();
 
@@ -168,15 +172,21 @@ async function resolveUser(
     email: string;
     profile_image: string | null;
     role: string;
+    title: string | null;
+    bio: string | null;
   };
-  // Google hands us a picture, but the rest of the site reads `profiles` —
-  // article cards, the members list. Copy it across once, and never over a
-  // picture the person chose here.
-  if (!row.profile_image && fallback.image) {
-    void supabase
-      .from("profiles")
-      .update({ profile_image: fallback.image })
-      .eq("id", fallback.id);
+  // Whatever a fresh profile is missing, fill in once. Google hands us a
+  // picture; the title and bio just need to not be blank, since a member page
+  // with three empty fields reads as broken. Only ever fills, never replaces:
+  // a profile with any of this already set is left alone.
+  const seed: Record<string, string> = {};
+  if (!row.profile_image && fallback.image) seed.profile_image = fallback.image;
+  if (!row.title?.trim() && !row.bio?.trim()) {
+    seed.title = DEFAULT_TITLE;
+    seed.bio = defaultBio(row.name || fallback.name);
+  }
+  if (Object.keys(seed).length) {
+    void supabase.from("profiles").update(seed).eq("id", fallback.id);
   }
 
   return {

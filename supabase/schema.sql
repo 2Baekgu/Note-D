@@ -71,10 +71,17 @@ create trigger articles_touch_updated_at
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 declare
-  base      text;
-  candidate text;
-  n         int := 1;
+  base         text;
+  candidate    text;
+  display_name text;
+  n            int := 1;
 begin
+  display_name := coalesce(
+    nullif(new.raw_user_meta_data->>'full_name', ''),
+    nullif(new.raw_user_meta_data->>'name', ''),
+    split_part(new.email, '@', 1)
+  );
+
   base := regexp_replace(
     lower(coalesce(
       nullif(new.raw_user_meta_data->>'handle', ''),
@@ -93,17 +100,16 @@ begin
     candidate := base || '-' || n;
   end loop;
 
-  insert into public.profiles (id, name, handle, email, profile_image)
+  insert into public.profiles (id, name, handle, email, profile_image, title, bio)
   values (
     new.id,
-    coalesce(
-      nullif(new.raw_user_meta_data->>'full_name', ''),
-      nullif(new.raw_user_meta_data->>'name', ''),
-      split_part(new.email, '@', 1)
-    ),
+    display_name,
     candidate,
     new.email,
-    new.raw_user_meta_data->>'avatar_url'
+    new.raw_user_meta_data->>'avatar_url',
+    -- Something rather than nothing: an all-blank member page reads as broken.
+    'UX/UI Designer',
+    '안녕하세요, 저는 ' || display_name || '입니다. 잘 부탁드립니다.'
   )
   on conflict (id) do nothing;
   return new;

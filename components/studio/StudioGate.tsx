@@ -39,8 +39,8 @@ export function StudioGate({
         <p className="t-h1">승인을 기다리는 중입니다</p>
         <p className="t-body mx-auto mt-4 max-w-[42ch] text-ink-muted">
           {user.name}님, 반갑습니다. 지금은 게스트라서 읽기와 댓글까지 가능합니다.
-          글을 쓰고 싶다면 운영자에게 알려주세요 — 멤버로 바꿔드리면 이 화면이 바로
-          Studio로 열립니다.
+          글을 쓰고 싶다면 운영자가 승인할 때까지 기다려주세요. 멤버로 전환되면 해당
+          화면이 바로 개인 Studio로 열립니다.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <ButtonLink href="/articles">아티클 읽기 →</ButtonLink>

@@ -94,6 +94,14 @@ export const listMembers = cache(async function listMembers(): Promise<User[]> {
   return sampleMembers;
 });
 
+/** The roster as the site shows it. Signing up makes you a guest, and a
+ *  guest is a reader — they only join the list once they can publish. The
+ *  Studio and the admin screens still read `listMembers`, which is everyone. */
+export async function listPublicMembers(): Promise<User[]> {
+  const all = await listMembers();
+  return all.filter((m) => m.role !== "guest");
+}
+
 export async function getMemberByHandle(handle: string): Promise<User | null> {
   const all = await listMembers();
   return (

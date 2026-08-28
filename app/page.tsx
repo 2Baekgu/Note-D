@@ -2,7 +2,7 @@ import {
   authorCounts,
   topicCounts,
   listArticles,
-  listMembers,
+  listPublicMembers,
 } from "@/lib/repo";
 import { site } from "@/lib/site";
 import { StudyIntro } from "@/components/home/StudyIntro";
@@ -23,7 +23,7 @@ const HOME_ARTICLE_COUNT = 12;
 export default async function HomePage() {
   const [all, members, counts, byAuthor] = await Promise.all([
     listArticles(),
-    listMembers(),
+    listPublicMembers(),
     topicCounts(),
     authorCounts(),
   ]);

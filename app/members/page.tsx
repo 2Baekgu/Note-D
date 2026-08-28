@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { authorCounts, listMembers } from "@/lib/repo";
+import { authorCounts, listPublicMembers } from "@/lib/repo";
 import { Avatar } from "@/components/ui/Avatar";
 import { Reveal } from "@/components/ui/Reveal";
 import { ButtonLink } from "@/components/ui/Button";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function MembersPage() {
-  const [members, counts] = await Promise.all([listMembers(), authorCounts()]);
+  const [members, counts] = await Promise.all([listPublicMembers(), authorCounts()]);
 
   return (
     <PageFrame>
