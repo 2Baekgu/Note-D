@@ -98,6 +98,9 @@ export function StudioDashboard({
         {rows.map((a) => {
           const author = members.find((m) => m.id === a.authorId);
           const isLocal = a.id.startsWith("local-");
+          // Matches the RLS policy: your own, or anything if you are an admin.
+          // A local draft has no author yet and belongs to whoever wrote it.
+          const canEdit = isAdmin || isLocal || a.authorId === user?.id;
           return (
             <div
               key={a.id}
@@ -135,9 +138,11 @@ export function StudioDashboard({
                     View
                   </Link>
                 )}
-                <Link href={`/studio/${a.id}`} className="t-label link-underline">
-                  Edit
-                </Link>
+                {canEdit && (
+                  <Link href={`/studio/${a.id}`} className="t-label link-underline">
+                    Edit
+                  </Link>
+                )}
                 {isLocal && (
                   <button
                     type="button"

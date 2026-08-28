@@ -18,7 +18,7 @@ import { readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
 import { cn, formatDate, slugify } from "@/lib/utils";
 
 export function ArticleEditor({ initial }: { initial?: Article }) {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const router = useRouter();
 
   const [article, setArticle] = useState<Article>(() => initial ?? emptyArticle(""));
@@ -105,6 +105,31 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
         <ButtonLink href="/login?next=/studio" className="mt-8">
           Sign in →
         </ButtonLink>
+      </div>
+    );
+  }
+
+  // Someone else's article. The database refuses the write anyway, but an
+  // editor that opens and then fails on save is worse than one that does not
+  // open — so the URL is not a way around the missing Edit link.
+  const someoneElses =
+    Boolean(initial?.authorId) && initial?.authorId !== user.id && !isAdmin;
+
+  if (someoneElses) {
+    return (
+      <div className="surface-dashed px-6 py-24 text-center">
+        <p className="t-h1">다른 사람의 글입니다</p>
+        <p className="t-body mx-auto mt-3 max-w-[40ch] text-ink-muted">
+          {author.name}님이 쓴 글이라 수정할 수 없습니다. 읽는 것은 누구나 할 수 있어요.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {initial?.status === "published" && (
+            <ButtonLink href={`/articles/${initial.slug}`}>글 보러 가기 →</ButtonLink>
+          )}
+          <ButtonLink href="/studio" variant="secondary">
+            ← Studio
+          </ButtonLink>
+        </div>
       </div>
     );
   }
