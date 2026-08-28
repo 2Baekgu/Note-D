@@ -24,14 +24,10 @@ import { cn } from "@/lib/utils";
 export function RichEditor({
   value,
   onChange,
-  header,
   meta,
 }: {
   value: string;
   onChange: (next: string) => void;
-  /** Title and subtitle, drawn inside the sheet on the same measure as the
-   *  body — otherwise they sit on a different left edge to the words. */
-  header?: React.ReactNode;
   /** Small text for the toolbar's right side, e.g. the length. */
   meta?: React.ReactNode;
 }) {
@@ -112,12 +108,7 @@ export function RichEditor({
     <div>
       <Toolbar editor={editor} uploading={uploading} onPick={insertImages} meta={meta} />
 
-      {/* One sheet. Title, subtitle and body share its measure, so everything
-          you type lines up on the same left edge. */}
       <div className="surface mt-3 min-h-[34rem] px-6 py-12 sm:px-14 sm:py-16">
-        {header && (
-          <div className="mx-auto mb-12 max-w-[var(--measure)]">{header}</div>
-        )}
         <EditorContent editor={editor} />
       </div>
 
