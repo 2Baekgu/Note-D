@@ -7,6 +7,7 @@ import { sampleComments } from "@/lib/data/comments";
 import { toPlainText } from "@/lib/content/parse";
 import { topicSlug } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseStaticClient } from "@/lib/supabase/static";
 
 /* ────────────────────────────────────────────────────────────
    The site reads through this module only. It serves seeded
@@ -93,6 +94,34 @@ export async function getMemberByHandle(handle: string): Promise<User | null> {
   return (
     all.find((m) => m.handle.toLowerCase() === handle.toLowerCase()) ?? null
   );
+}
+
+/* ── Build-time params ───────────────────────────────────────
+   `generateStaticParams` cannot use the request-bound client, so these two
+   go through the cookie-free one. Everything else still reads through
+   listArticles / listMembers. */
+
+export async function publishedArticleSlugs(): Promise<string[]> {
+  const supabase = getSupabaseStaticClient();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select("slug")
+      .eq("status", "published");
+    if (!error && data?.length) return (data as { slug: unknown }[]).map((r) => s(r.slug));
+  }
+  return sampleArticles
+    .filter((a) => a.status === "published")
+    .map((a) => a.slug);
+}
+
+export async function memberHandles(): Promise<string[]> {
+  const supabase = getSupabaseStaticClient();
+  if (supabase) {
+    const { data, error } = await supabase.from("profiles").select("handle");
+    if (!error && data?.length) return (data as { handle: unknown }[]).map((r) => s(r.handle));
+  }
+  return sampleMembers.map((m) => m.handle);
 }
 
 /* ── Articles ────────────────────────────────────────────── */

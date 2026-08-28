@@ -4,8 +4,8 @@ import type { Metadata } from "next";
 import {
   getArticleBySlug,
   getRelatedArticles,
-  listArticles,
   listComments,
+  publishedArticleSlugs,
 } from "@/lib/repo";
 import { ContentBody } from "@/components/content/ContentBody";
 import { CoverMedia } from "@/components/article/CoverArt";
@@ -24,8 +24,8 @@ import { topicSlug, formatDate } from "@/lib/utils";
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  const articles = await listArticles();
-  return articles.map((a) => ({ slug: a.slug }));
+  const slugs = await publishedArticleSlugs();
+  return slugs.map((slug: string) => ({ slug }));
 }
 
 export async function generateMetadata({

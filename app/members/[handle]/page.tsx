@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getMemberByHandle, listArticles, listMembers } from "@/lib/repo";
+import { getMemberByHandle, listArticles, memberHandles } from "@/lib/repo";
 import { ArticleMasonry } from "@/components/article/ArticleMasonry";
 import { Avatar } from "@/components/ui/Avatar";
 import { ChipLink } from "@/components/ui/Chip";
@@ -10,8 +10,8 @@ import { GridRule } from "@/components/site/GridRule";
 import { topicSlug, formatDate } from "@/lib/utils";
 
 export async function generateStaticParams() {
-  const members = await listMembers();
-  return members.map((m) => ({ handle: m.handle }));
+  const handles = await memberHandles();
+  return handles.map((handle) => ({ handle }));
 }
 
 export async function generateMetadata({
