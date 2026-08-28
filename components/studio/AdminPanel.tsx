@@ -163,7 +163,7 @@ export function AdminPanel({
             return (
               <div
                 key={a.id}
-                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-line py-4 sm:grid-cols-[minmax(0,1fr)_8rem_7rem_4rem] sm:gap-6"
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-b border-line py-4 sm:grid-cols-[minmax(0,1fr)_7rem_6.5rem_11rem] sm:gap-6"
               >
                 <div className="min-w-0">
                   <p className="t-body truncate">{a.title || "제목 없음"}</p>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { listArticles } from "@/lib/repo";
+import { listArticles, listMembers } from "@/lib/repo";
 import { StudioDashboard } from "@/components/studio/StudioDashboard";
 import { StudioGate } from "@/components/studio/StudioGate";
 import { PageFrame } from "@/components/site/PageFrame";
@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function StudioPage() {
-  const articles = await listArticles({ includeDrafts: true });
+  const [articles, members] = await Promise.all([
+    listArticles({ includeDrafts: true }),
+    listMembers(),
+  ]);
 
   return (
     <PageFrame>
@@ -32,7 +35,10 @@ export default async function StudioPage() {
 
       <div className="shell section-pad">
         <StudioGate>
-          <StudioDashboard serverArticles={articles.map(({ author, ...rest }) => rest)} />
+          <StudioDashboard
+            serverArticles={articles.map(({ author, ...rest }) => rest)}
+            members={members}
+          />
         </StudioGate>
       </div>
     </PageFrame>

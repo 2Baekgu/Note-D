@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Article } from "@/lib/types";
+import type { Article, User } from "@/lib/types";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { members } from "@/lib/data/members";
 import { Avatar } from "@/components/ui/Avatar";
 import { Chip, ChipButton } from "@/components/ui/Chip";
 import { ButtonLink } from "@/components/ui/Button";
@@ -13,7 +12,15 @@ import { formatDate } from "@/lib/utils";
 
 type Tab = "all" | "published" | "draft";
 
-export function StudioDashboard({ serverArticles }: { serverArticles: Article[] }) {
+export function StudioDashboard({
+  serverArticles,
+  members,
+}: {
+  serverArticles: Article[];
+  /** The real roster. Author ids are database uuids, so looking them up in
+   *  the sample roster found nothing and every row showed a "?". */
+  members: User[];
+}) {
   const { user, mode, isAdmin } = useAuth();
   const [local, setLocal] = useState<Article[]>([]);
   const [tab, setTab] = useState<Tab>("all");
@@ -112,8 +119,10 @@ export function StudioDashboard({ serverArticles }: { serverArticles: Article[] 
               </div>
 
               <div className="hidden items-center gap-2 sm:flex">
-                <Avatar name={author?.name ?? "?"} src={author?.profileImage} size="sm" />
-                <span className="t-caption truncate text-ink-muted">{author?.name}</span>
+                <Avatar name={author?.name ?? "—"} src={author?.profileImage} size="sm" />
+                <span className="t-caption truncate text-ink-muted">
+                  {author?.name ?? "—"}
+                </span>
               </div>
 
               <span className="t-caption hidden text-ink-faint sm:block">
