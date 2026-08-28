@@ -154,3 +154,68 @@ export async function uploadImage(
 
 /** Kept for the cover field, which only ever uploads one file. */
 export const uploadCover = (file: File) => uploadImage(file, "covers");
+
+/* ── Avatars ──────────────────────────────────────────────── */
+
+/** Square, small, and encoded inline. A face at 192px is a few kilobytes, so
+ *  it can live in `profiles.profile_image` directly. */
+async function shrinkToSquare(file: File, size = 192): Promise<string> {
+  const bitmap = await createImageBitmap(file);
+  const side = Math.min(bitmap.width, bitmap.height);
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("이 브라우저에서는 사진을 처리할 수 없습니다.");
+  ctx.drawImage(
+    bitmap,
+    (bitmap.width - side) / 2,
+    (bitmap.height - side) / 2,
+    side,
+    side,
+    0,
+    0,
+    size,
+    size,
+  );
+  bitmap.close();
+  return canvas.toDataURL("image/jpeg", 0.82);
+}
+
+/** A profile picture, however it can be stored.
+ *
+ *  Storage is the better home — the article list would otherwise carry every
+ *  author's bytes — so try it first. But uploading is gated on being able to
+ *  publish, and choosing your own face is not publishing, so a guest falls
+ *  back to a shrunken inline copy rather than being told no. */
+export async function uploadAvatar(file: File): Promise<{ url?: string; error?: string }> {
+  if (!file.type.startsWith("image/")) {
+    return { error: "이미지 파일을 선택해주세요." };
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: `사진이 너무 큽니다 (${(file.size / 1024 / 1024).toFixed(1)}MB).` };
+  }
+
+  let inline: string;
+  try {
+    inline = await shrinkToSquare(file);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "사진을 처리하지 못했습니다." };
+  }
+
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return { url: inline };
+
+  const path = `avatars/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const blob = await (await fetch(inline)).blob();
+  const { error } = await supabase.storage.from("media").upload(path, blob, {
+    cacheControl: "3600",
+    contentType: "image/jpeg",
+    upsert: false,
+  });
+  if (error) return { url: inline };
+
+  const { data } = supabase.storage.from("media").getPublicUrl(path);
+  return { url: data.publicUrl };
+}

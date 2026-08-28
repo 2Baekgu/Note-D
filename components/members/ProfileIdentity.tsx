@@ -8,7 +8,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { ChipButton } from "@/components/ui/Chip";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { uploadImage } from "@/lib/studio";
+import { uploadAvatar } from "@/lib/studio";
 
 /** Name, role and bio — and, when it is your own page, a way to change them.
  *
@@ -31,7 +31,7 @@ export function ProfileIdentity({ member }: { member: User }) {
     if (!file) return;
     setBusy(true);
     setError(null);
-    const res = await uploadImage(file, "avatars");
+    const res = await uploadAvatar(file);
     setBusy(false);
     if (res.url) setImage(res.url);
     else setError(res.error ?? "업로드에 실패했습니다.");
