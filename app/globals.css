@@ -1072,6 +1072,14 @@ select.field {
    change the other.
    ═══════════════════════════════════════════════════════════ */
 
+/* The one column every writing surface in the editor sits in — the title
+   and subtitle sheet as well as the body. Sharing it is what keeps the three
+   placeholders on the same left edge. */
+.editor-column {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+
 .tiptap {
   outline: none;
   max-width: var(--measure);

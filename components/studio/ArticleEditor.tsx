@@ -191,32 +191,37 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
         <div className="min-w-0">
           {mode === "write" ? (
             <>
-              {/* Above the sheet, on the page's own width — the same edges
-                  the toolbar and the sheet use, so nothing is inset. */}
-              <label htmlFor="title" className="t-label text-ink-faint">
-                Title
-              </label>
-              <input
-                id="title"
-                value={article.title}
-                onChange={(e) => patch({ title: e.target.value })}
-                placeholder="무엇에 대해 쓰고 있나요?"
-                className="t-h1 serif-heads mt-2 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
-              />
+              {/* Title and subtitle sit in a sheet of their own, on the same
+                  padding and the same measure the body uses, so all three
+                  placeholders start on one left edge. */}
+              <div className="surface px-6 py-10 sm:px-14 sm:py-12">
+                <div className="editor-column">
+                  <label htmlFor="title" className="t-label text-ink-faint">
+                    Title
+                  </label>
+                  <input
+                    id="title"
+                    value={article.title}
+                    onChange={(e) => patch({ title: e.target.value })}
+                    placeholder="무엇에 대해 쓰고 있나요?"
+                    className="t-h1 serif-heads mt-2 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+                  />
 
-              <label htmlFor="subtitle" className="t-label mt-8 block text-ink-faint">
-                Subtitle
-              </label>
-              <textarea
-                id="subtitle"
-                value={article.subtitle}
-                onChange={(e) => patch({ subtitle: e.target.value })}
-                rows={2}
-                placeholder="한두 문장으로 이 글을 요약해주세요."
-                className="field mt-2 w-full resize-y"
-              />
+                  <label htmlFor="subtitle" className="t-label mt-10 block text-ink-faint">
+                    Subtitle
+                  </label>
+                  <textarea
+                    id="subtitle"
+                    value={article.subtitle}
+                    onChange={(e) => patch({ subtitle: e.target.value })}
+                    rows={2}
+                    placeholder="한두 문장으로 이 글을 요약해주세요."
+                    className="t-body-lg mt-2 w-full resize-y border-0 bg-transparent p-0 text-ink-muted outline-none placeholder:text-ink-faint"
+                  />
+                </div>
+              </div>
 
-              <div className="mt-10">
+              <div className="mt-6">
                 <RichEditor
                   value={article.content}
                   onChange={(content) => patch({ content })}
