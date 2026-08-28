@@ -79,7 +79,6 @@ export default async function ArticlePage({
                 {t}
               </ChipLink>
             ))}
-            <AuthorTools articleId={article.id} authorId={article.authorId} />
           </div>
 
           <h1 className="t-h1 mt-6 text-balance">{article.title}</h1>
@@ -106,6 +105,10 @@ export default async function ArticlePage({
             <Divider vertical className="h-6" />
             <span className="t-caption text-ink-muted">
               읽는 데 약 {readingTime(article.content)}분
+            </span>
+            {/* An action, so it sits apart from the byline's facts. */}
+            <span className="ml-auto">
+              <AuthorTools articleId={article.id} authorId={article.authorId} />
             </span>
           </div>
         </header>
