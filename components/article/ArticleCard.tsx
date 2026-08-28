@@ -4,7 +4,7 @@ import { CoverMedia } from "./CoverArt";
 import { Avatar } from "@/components/ui/Avatar";
 import { Chip } from "@/components/ui/Chip";
 import { cn, formatDate } from "@/lib/utils";
-import { readingTime } from "@/lib/content/parse";
+import { readingTime } from "@/lib/content/doc";
 
 export type CardRatio = "portrait" | "tall" | "square" | "wide";
 

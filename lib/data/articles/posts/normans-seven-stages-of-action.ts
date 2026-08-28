@@ -16,90 +16,617 @@ export const normansSevenStagesOfAction: Article = {
   references: [
     { label: "원문 보기", source: "Doodle Day (Tistory)", url: "https://dooday.tistory.com/14" },
   ],
-  content: `## 도널드 노먼의 인간 행위 모형 (Donald Norman's Seven Stages of Action)
-
-도널드 노먼의 인간 행위 모형(7단계)은 **사람이 특정 목표를 달성하기 위해 행동하는 과정**을 설명하는 이론적 모델이다. 이 모델은 사용자가 목표를 설정하고 이를 수행하는 과정을 심리적 단계로 구분하여 설명한다. 이는 HCI(Human-Computer Interaction) 및 UX 디자인에서 사용자 경험을 개선하는 데 중요한 개념이다.
-
-![도널드 노먼의 7단계 인간 행위 모형 (Donald Norman's Seven Stages of Action)](/images/normans-seven-stages-of-action/02.png)
-
-이 모델은 인간이 행동을 수행하는 과정을 7단계로 나누며, 이를 통해 행동이 발생하는 과정과 그에 대한 피드백이 어떻게 이루어지는지를 설명한다. 노먼은 인간의 행동을 두 가지 주요 틀로 나누었다.
-
-- **실행의 간격**(Gulf of Execution): 사용자가 목표를 실제 행동으로 전환하는 과정에서 발생하는 차이
-- **평가의 간격**(Gulf of Evaluation): 사용자가 행동 결과를 평가할 때 발생하는 차이
-
-**디자이너는 이 2가지 간격을 줄여주는 역할**을 하는 것이라 할 수 있다. 이 간격들이 있다면 사용자의 불만족으로 이어져 새 제품이나 서비스를 개발하는 출발점이 되기도 한다.
-
-## 도널드 노먼의 인간 행위 7단계
-
-이 모델은 크게 목표 설정 → 수행 단계 → 평가 단계로 나뉘며, 총 7단계로 구성된다.
-
-**① 목표(Goal) 설정**
-
-- 사용자가 원하는 최종 목표를 설정하는 단계
-- 예: "오늘 저녁에 피자를 주문해야겠다."
-
-**② 계획(Plan)**
-
-- 목표를 달성하기 위한 구체적인 계획을 세움
-- 예: "어떤 피자 브랜드를 선택할지 고민해야겠다."
-
-**③ 명령 지정(Specify)**
-
-- 계획을 구체적인 명령으로 변환
-- 예: "배달 앱을 열고, 원하는 피자 브랜드를 선택한 후, 메뉴에서 피자를 고르자."
-
-**④ 실행(Perform)**
-
-- 계획한 행동을 실제로 수행
-- 예: "배달 앱을 실행하고, 페퍼로니 피자를 선택한 후, 주문 버튼을 누름."
-
-**⑤ 감지(Perceive)**
-
-- 행동이 실행된 결과를 감지
-- 예: "주문 완료 화면이 표시되고, 알림이 왔는지 확인함."
-
-**⑥ 해석(Interpret)**
-
-- 감지한 정보를 해석하여 기대한 결과와 비교
-- 예: "주문 내역을 확인해 보니, 선택한 피자가 맞고, 배달 예상 시간이 표시됨."
-
-**⑦ 비교(Compare)**
-
-- 목표와 실제 결과를 비교하여 차이가 있는지 평가
-- 예: "배달이 시간 내에 왔는지, 주문한 피자가 정확한지 확인하고 만족하는지 판단."
-
-## 노먼의 3가지 인지 처리 수준
-
-도널드 노먼의 7단계 인간 행위 모형과 함께 자주 언급되는 개념이** 본능적(Visceral), 행동적(Behavioral), 숙고적(Reflective)** 수준이다. 이 개념은 인간이 제품이나 인터페이스를 사용할 때 어떻게 반응하는지를 설명하는 3가지 인지 처리 수준으로, 감정과 의사결정이 어떻게 작용하는지를 분석하는 데 활용된다.
-
-**1. 본능적 수준 (Visceral Level) - 잠재의식적 반응**
-
-가장 즉각적이고 직관적인 감정적 반응이 발생하는 단계
-의식적 사고 없이 감각(시각, 청각, 촉각 등)과 반사적인 경험을 기반으로 반응
-사용자 경험(UX)에서 첫인상, 색상, 모양, 소리, 질감 등 감각적 디자인 요소가 영향을 미침
-**📌 예시**
-스마트폰을 처음 봤을 때 고급스럽고 매력적인 디자인이라 "와, 예쁘다!"라고 반응하는 것
-앱의 애니메이션이 부드러워서 직관적으로 좋다고 느낌
-
-**2. 행동적 수준 (Behavioral Level) - 학습된 패턴과 습관적 반응**
-
-반복적인 경험을 통해 학습된 행동과 직관적인 사용 경험이 작용
-반자동적이며, 깊이 생각하지 않아도 자연스럽게 수행하는 행동
-UX 디자인에서 사용자가 익숙한 UI/UX 패턴을 제공하는 것이 중요
-📌 예시
-자주 사용하는 앱에서 버튼을 누를 때 위치를 보지 않고도 손이 자동으로 가는 것
-자동차를 운전할 때 특정 행동(방향지시등 켜기 등)이 자동적으로 나오는 것
-스마트폰에서 "뒤로 가기" 버튼을 무의식적으로 누르는 것
-
-**3. 숙고적 수준 (Reflective Level) - 의식적인 사고와 판단**
-
-논리적 사고, 성찰, 장기적인 만족감과 관련된 수준
-사용자가 제품이나 서비스를 사용한 후 경험을 돌아보고 평가하는 과정
-브랜드 이미지, 철학, 가치관이 영향을 미침
-📌 예시
-아이폰을 쓰면서 "이 브랜드 철학이 좋다"라고 느끼고 계속 아이폰을 사용하기로 결정하는 것
-전자책 리더기(예: Kindle)를 구매하고 난 뒤, "이걸 사용하니 독서 습관이 좋아졌어"라고 평가하는 것
-한 서비스가 불편했지만, 고객 서비스가 좋아서 브랜드에 대한 긍정적인 이미지를 가지게 되는 것
-
-즉, 디자인은 단순히 기능적인 측면을 넘어서 **사용자의 감정, 행동 패턴, 브랜드 충성도까지 고려**해야 한다.`,
+  content: JSON.stringify({
+    "type": "doc",
+    "content": [
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "도널드 노먼의 인간 행위 모형 (Donald Norman's Seven Stages of Action)"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "도널드 노먼의 인간 행위 모형(7단계)은 "
+          },
+          {
+            "type": "text",
+            "text": "사람이 특정 목표를 달성하기 위해 행동하는 과정",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "을 설명하는 이론적 모델이다. 이 모델은 사용자가 목표를 설정하고 이를 수행하는 과정을 심리적 단계로 구분하여 설명한다. 이는 HCI(Human-Computer Interaction) 및 UX 디자인에서 사용자 경험을 개선하는 데 중요한 개념이다."
+          }
+        ]
+      },
+      {
+        "type": "image",
+        "attrs": {
+          "src": "/images/normans-seven-stages-of-action/02.png",
+          "alt": "도널드 노먼의 7단계 인간 행위 모형 (Donald Norman's Seven Stages of Action)",
+          "title": null
+        }
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "이 모델은 인간이 행동을 수행하는 과정을 7단계로 나누며, 이를 통해 행동이 발생하는 과정과 그에 대한 피드백이 어떻게 이루어지는지를 설명한다. 노먼은 인간의 행동을 두 가지 주요 틀로 나누었다."
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "실행의 간격",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": "(Gulf of Execution): 사용자가 목표를 실제 행동으로 전환하는 과정에서 발생하는 차이"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "평가의 간격",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": "(Gulf of Evaluation): 사용자가 행동 결과를 평가할 때 발생하는 차이"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "디자이너는 이 2가지 간격을 줄여주는 역할",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "을 하는 것이라 할 수 있다. 이 간격들이 있다면 사용자의 불만족으로 이어져 새 제품이나 서비스를 개발하는 출발점이 되기도 한다."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "도널드 노먼의 인간 행위 7단계"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "이 모델은 크게 목표 설정 → 수행 단계 → 평가 단계로 나뉘며, 총 7단계로 구성된다."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "① 목표(Goal) 설정",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "사용자가 원하는 최종 목표를 설정하는 단계"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"오늘 저녁에 피자를 주문해야겠다.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "② 계획(Plan)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "목표를 달성하기 위한 구체적인 계획을 세움"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"어떤 피자 브랜드를 선택할지 고민해야겠다.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "③ 명령 지정(Specify)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "계획을 구체적인 명령으로 변환"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"배달 앱을 열고, 원하는 피자 브랜드를 선택한 후, 메뉴에서 피자를 고르자.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "④ 실행(Perform)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "계획한 행동을 실제로 수행"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"배달 앱을 실행하고, 페퍼로니 피자를 선택한 후, 주문 버튼을 누름.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "⑤ 감지(Perceive)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "행동이 실행된 결과를 감지"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"주문 완료 화면이 표시되고, 알림이 왔는지 확인함.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "⑥ 해석(Interpret)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "감지한 정보를 해석하여 기대한 결과와 비교"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"주문 내역을 확인해 보니, 선택한 피자가 맞고, 배달 예상 시간이 표시됨.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "⑦ 비교(Compare)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "목표와 실제 결과를 비교하여 차이가 있는지 평가"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "예: \"배달이 시간 내에 왔는지, 주문한 피자가 정확한지 확인하고 만족하는지 판단.\""
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "노먼의 3가지 인지 처리 수준"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "도널드 노먼의 7단계 인간 행위 모형과 함께 자주 언급되는 개념이"
+          },
+          {
+            "type": "text",
+            "text": " 본능적(Visceral), 행동적(Behavioral), 숙고적(Reflective)",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": " 수준이다. 이 개념은 인간이 제품이나 인터페이스를 사용할 때 어떻게 반응하는지를 설명하는 3가지 인지 처리 수준으로, 감정과 의사결정이 어떻게 작용하는지를 분석하는 데 활용된다."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "1. 본능적 수준 (Visceral Level) - 잠재의식적 반응",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "가장 즉각적이고 직관적인 감정적 반응이 발생하는 단계 의식적 사고 없이 감각(시각, 청각, 촉각 등)과 반사적인 경험을 기반으로 반응 사용자 경험(UX)에서 첫인상, 색상, 모양, 소리, 질감 등 감각적 디자인 요소가 영향을 미침 "
+          },
+          {
+            "type": "text",
+            "text": "📌 예시",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": " 스마트폰을 처음 봤을 때 고급스럽고 매력적인 디자인이라 \"와, 예쁘다!\"라고 반응하는 것 앱의 애니메이션이 부드러워서 직관적으로 좋다고 느낌"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "2. 행동적 수준 (Behavioral Level) - 학습된 패턴과 습관적 반응",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "반복적인 경험을 통해 학습된 행동과 직관적인 사용 경험이 작용 반자동적이며, 깊이 생각하지 않아도 자연스럽게 수행하는 행동 UX 디자인에서 사용자가 익숙한 UI/UX 패턴을 제공하는 것이 중요 📌 예시 자주 사용하는 앱에서 버튼을 누를 때 위치를 보지 않고도 손이 자동으로 가는 것 자동차를 운전할 때 특정 행동(방향지시등 켜기 등)이 자동적으로 나오는 것 스마트폰에서 \"뒤로 가기\" 버튼을 무의식적으로 누르는 것"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "3. 숙고적 수준 (Reflective Level) - 의식적인 사고와 판단",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "논리적 사고, 성찰, 장기적인 만족감과 관련된 수준 사용자가 제품이나 서비스를 사용한 후 경험을 돌아보고 평가하는 과정 브랜드 이미지, 철학, 가치관이 영향을 미침 📌 예시 아이폰을 쓰면서 \"이 브랜드 철학이 좋다\"라고 느끼고 계속 아이폰을 사용하기로 결정하는 것 전자책 리더기(예: Kindle)를 구매하고 난 뒤, \"이걸 사용하니 독서 습관이 좋아졌어\"라고 평가하는 것 한 서비스가 불편했지만, 고객 서비스가 좋아서 브랜드에 대한 긍정적인 이미지를 가지게 되는 것"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "즉, 디자인은 단순히 기능적인 측면을 넘어서 "
+          },
+          {
+            "type": "text",
+            "text": "사용자의 감정, 행동 패턴, 브랜드 충성도까지 고려",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "해야 한다."
+          }
+        ]
+      }
+    ]
+  }),
 };

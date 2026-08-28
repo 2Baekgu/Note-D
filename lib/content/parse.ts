@@ -147,9 +147,10 @@ export function parseContent(source: string): Block[] {
   return blocks;
 }
 
-/** Plain text of a document — used for search indexing and excerpts. */
-export function toPlainText(source: string): string {
-  return parseContent(source)
+/** Plain text of already-parsed blocks. `lib/content/doc.ts` wraps this with
+ *  the format detection; nothing should call it with raw source. */
+export function blocksToPlainText(blocks: Block[]): string {
+  return blocks
     .map((b) => {
       switch (b.type) {
         case "heading":
@@ -170,8 +171,7 @@ export function toPlainText(source: string): string {
 }
 
 /** Korean reads at roughly 350 chars/min; English at ~230 words/min. */
-export function readingTime(source: string): number {
-  const text = toPlainText(source);
+export function readingTimeOf(text: string): number {
   const korean = (text.match(/[가-힣]/g) || []).length;
   const words = text.replace(/[가-힣]/g, "").split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.round(korean / 350 + words / 230));

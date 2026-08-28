@@ -6,7 +6,7 @@ import type { Article, ArticleWithAuthor, Comment, User } from "@/lib/types";
 import { sampleArticles } from "@/lib/data/articles";
 import { members as sampleMembers } from "@/lib/data/members";
 import { sampleComments } from "@/lib/data/comments";
-import { toPlainText } from "@/lib/content/parse";
+import { toPlainText } from "@/lib/content/doc";
 import { topicSlug } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseStaticClient } from "@/lib/supabase/static";

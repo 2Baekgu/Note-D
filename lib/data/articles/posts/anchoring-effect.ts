@@ -16,88 +16,947 @@ export const anchoringEffect: Article = {
   references: [
     { label: "원문 보기", source: "Notion", url: "https://scented-ant-8c9.notion.site/Anchoring-Effect-1ba962f1c7f7809788f3c4ded09159cd" },
   ],
-  content: `![닻내림 효과 (Anchoring Effect)](/images/anchoring-effect/02.png)
-
-- *앵커링 효과(Anchoring Effect)는 사람들이 어떤 결정을 내리거나 판단을 내릴 때 초기 제시된 정보(앵커, Anchor)에 지나치게 의존하는 심리적 편향입니다. 초기 정보가 이후의 판단 과정에서 기준점(앵커)이 되어 다른 정보를 평가하거나 결정을 내리는 데 큰 영향을 미칩니다.
-
-## 주요 특징
-
-1. **초기 정보의 영향력**
-
-사람들이 제시된 첫 번째 정보(숫자, 범위, 의견 등)를 바탕으로 이후 판단을 조정하지만, 조정이 충분하지 않아서 **초기 정보**가 강하게 작용합니다.
-
-1. **인지적 편향**
-
-앵커는 논리적 근거보다는 직관적으로 영향을 미치는 경우가 많습니다. 이는 특히 정보가 부족하거나 명확한 판단 기준이 없을 때 더 강하게 작용합니다.
-
-## 예시
-
-1. **가격 협상**
-- 집을 살 때 판매자가 제시한 초기 가격이 5억 원이라면, 구매자는 이를 기준으로 협상을 진행하며 낮은 가격을 제안하더라도 앵커에서 크게 벗어나지 못합니다.
-2. **심리 실험**
-- 어떤 숫자가 적힌 룰렛을 돌린 후 참가자들에게 "아프리카에 몇 개의 국가가 있을까요?"라는 질문을 했을 때, 룰렛의 숫자가 높게 나오면 더 높은 수치를, 낮게 나오면 더 낮은 수치를 답한 연구가 있습니다.
-3. **마케팅 및 판매 전략**
-- 한 제품이 "원래 가격은 10만 원이지만 지금은 5만 원입니다"라고 표시되면, 소비자는 10만 원이라는 앵커에 영향을 받아 할인된 가격을 더 가치 있다고 느낍니다.
-
-## 심리적 배경
-
-앵커링 효과는 사람들이 **정보 처리에 에너지를 절약하려는 경향**에서 발생합니다. 복잡한 판단을 해야 할 때 첫 번째 정보가 "출발점" 역할을 하며, 이를 기준으로 추가 정보를 처리하거나 결정을 내립니다.
-
-## 극복 방법
-
-1. **앵커 인식**
-
-초기 정보가 무의식적으로 영향을 미치고 있음을 인지하고, 객관적인 기준을 세우려 노력해야 합니다.
-
-1. **대안 정보 탐색**
-
-앵커 외의 정보나 데이터를 의도적으로 수집해 균형 있는 판단을 시도합니다.
-
-1. **시간 확보**
-
-급하게 결정을 내리지 않고 충분한 시간을 들여 앵커에서 벗어나도록 노력합니다.
-
-## 활용 방안
-
-앵커링 효과는 심리학, 경제학, 마케팅 등 다양한 분야에서 활용됩니다. 예를 들어 협상에서 유리한 조건을 끌어내기 위해 높은 초기 제안을 하거나, 제품의 "비교 가격"을 제시해 소비자가 더 높은 가치를 느끼게 만드는 전략으로 사용됩니다.
-
-앵커링 효과는 우리의 일상적인 판단과 의사결정에서 중요한 역할을 하므로 이를 이해하고 적절히 활용하거나 방어하는 것이 유익합니다.
-
-## 대표적인 출처 및 연구
-
-1. **Tversky, Amos & Kahneman, Daniel (1974)**
-- 논문 제목: *Judgment under Uncertainty: Heuristics and Biases*
-- 이 논문은 앵커링 효과를 처음으로 체계적으로 정의하고, 사람들이 초기 정보에 어떻게 의존하는지 설명한 고전적인 연구입니다.
-- 참고: Science, Vol. 185, No. 4157, pp. 1124-1131.
-2. **Ariely, Dan (2008)**
-- 책 제목: *Predictably Irrational*
-- 이 책은 인간의 비합리적인 행동을 탐구하며 앵커링 효과를 일상적인 예시와 함께 설명합니다.
-3. **Kahneman, Daniel (2011)**
-- 책 제목: *Thinking, Fast and Slow*
-- 앵커링을 포함한 여러 인지적 편향에 대해 심층적으로 다룹니다.
-4. **Behavioral Economics and Marketing Research**
-- 앵커링 효과는 마케팅 및 소비자 행동 연구에서 널리 응용됩니다. 예를 들어, *Journal of Consumer Research*와 같은 학술지에서 관련 연구를 찾을 수 있습니다.
-
-위 자료들은 학술적 신뢰도가 높고, 앵커링 효과를 더 깊이 이해하는 데 도움이 될 것입니다. 구체적인 내용을 확인하고 싶으시면 논문이나 도서를 검색하거나, 구체적인 논문 제목을 기반으로 학술 데이터베이스(예: Google Scholar, PubMed)에서 찾아보실 수 있습니다.
-
-예:
-
-## 대표적인 연구 사례
-
-1. **Tversky와 Kahneman의 연구 (1974)**:
-이들은 참가자들에게 무작위로 생성된 숫자를 제시한 후, 아프리카 국가의 수와 같은 질문을 하였습니다. 그 결과, 제시된 숫자가 높을수록 참가자들의 추정치도 높아지는 경향을 보였습니다. 이는 초기 정보(앵커)가 판단에 직접적인 영향을 미친다는 것을 보여줍니다.
-2. **온라인 뉴스에서의 앵커링 효과 연구**:
-한 연구에서는 온라인 뉴스 기사에서 숫자가 어떻게 독자의 감정적 반응과 뉴스 평가에 영향을 미치는지 탐구하였습니다. 이 연구는 숫자가 독자의 감정적 반응과 뉴스 평가에 앵커로 작용할 수 있음을 시사합니다.
-
-[DCS Journal](https://journal.dcs.or.kr/_PR/view/?aidx=31064&bidx=2748&utm_source=chatgpt.com)
-
-## 실생활 적용 사례
-
-1. **가격 협상**:
-중고차 판매 시, 판매자가 처음에 높은 가격을 제시하면, 구매자는 그 가격을 기준으로 협상을 진행하게 됩니다. 이러한 초기 제시 가격이 최종 합의 가격에 영향을 미치는 현상은 앵커링 효과의 대표적인 예입니다.
-
-[룰루랄라 스토리](https://rulluralla-story.tistory.com/entry/%EC%95%B5%EC%BB%A4%EB%A7%81-%ED%9A%A8%EA%B3%BCAnchoring-effect%EB%9E%80-%EC%8B%A4%EC%A0%9C-%EC%82%AC%EB%A1%80%EC%99%80-%EA%B7%B9%EB%B3%B5-%EB%B0%A9%EC%95%88?utm_source=chatgpt.com)
-
-1. **소매업의 할인 전략**:
-제품의 원래 가격을 강조한 후 할인된 가격을 제시하면, 소비자들은 원래 가격을 앵커로 인식하여 할인된 가격이 더 매력적으로 느껴집니다. 이러한 마케팅 전략은 앵커링 효과를 활용한 것입니다.`,
+  content: JSON.stringify({
+    "type": "doc",
+    "content": [
+      {
+        "type": "image",
+        "attrs": {
+          "src": "/images/anchoring-effect/02.png",
+          "alt": "닻내림 효과 (Anchoring Effect)",
+          "title": null
+        }
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "*앵커링 효과(Anchoring Effect)는 사람들이 어떤 결정을 내리거나 판단을 내릴 때 초기 제시된 정보(앵커, Anchor)에 지나치게 의존하는 심리적 편향입니다. 초기 정보가 이후의 판단 과정에서 기준점(앵커)이 되어 다른 정보를 평가하거나 결정을 내리는 데 큰 영향을 미칩니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "주요 특징"
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "초기 정보의 영향력",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "사람들이 제시된 첫 번째 정보(숫자, 범위, 의견 등)를 바탕으로 이후 판단을 조정하지만, 조정이 충분하지 않아서 "
+          },
+          {
+            "type": "text",
+            "text": "초기 정보",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "가 강하게 작용합니다."
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "인지적 편향",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "앵커는 논리적 근거보다는 직관적으로 영향을 미치는 경우가 많습니다. 이는 특히 정보가 부족하거나 명확한 판단 기준이 없을 때 더 강하게 작용합니다."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "예시"
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "가격 협상",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "집을 살 때 판매자가 제시한 초기 가격이 5억 원이라면, 구매자는 이를 기준으로 협상을 진행하며 낮은 가격을 제안하더라도 앵커에서 크게 벗어나지 못합니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "심리 실험",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "어떤 숫자가 적힌 룰렛을 돌린 후 참가자들에게 \"아프리카에 몇 개의 국가가 있을까요?\"라는 질문을 했을 때, 룰렛의 숫자가 높게 나오면 더 높은 수치를, 낮게 나오면 더 낮은 수치를 답한 연구가 있습니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "마케팅 및 판매 전략",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "한 제품이 \"원래 가격은 10만 원이지만 지금은 5만 원입니다\"라고 표시되면, 소비자는 10만 원이라는 앵커에 영향을 받아 할인된 가격을 더 가치 있다고 느낍니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "심리적 배경"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "앵커링 효과는 사람들이 "
+          },
+          {
+            "type": "text",
+            "text": "정보 처리에 에너지를 절약하려는 경향",
+            "marks": [
+              {
+                "type": "bold"
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "text": "에서 발생합니다. 복잡한 판단을 해야 할 때 첫 번째 정보가 \"출발점\" 역할을 하며, 이를 기준으로 추가 정보를 처리하거나 결정을 내립니다."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "극복 방법"
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "앵커 인식",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "초기 정보가 무의식적으로 영향을 미치고 있음을 인지하고, 객관적인 기준을 세우려 노력해야 합니다."
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "대안 정보 탐색",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "앵커 외의 정보나 데이터를 의도적으로 수집해 균형 있는 판단을 시도합니다."
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "시간 확보",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "급하게 결정을 내리지 않고 충분한 시간을 들여 앵커에서 벗어나도록 노력합니다."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "활용 방안"
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "앵커링 효과는 심리학, 경제학, 마케팅 등 다양한 분야에서 활용됩니다. 예를 들어 협상에서 유리한 조건을 끌어내기 위해 높은 초기 제안을 하거나, 제품의 \"비교 가격\"을 제시해 소비자가 더 높은 가치를 느끼게 만드는 전략으로 사용됩니다."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "앵커링 효과는 우리의 일상적인 판단과 의사결정에서 중요한 역할을 하므로 이를 이해하고 적절히 활용하거나 방어하는 것이 유익합니다."
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "대표적인 출처 및 연구"
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tversky, Amos & Kahneman, Daniel (1974)",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "논문 제목: "
+                  },
+                  {
+                    "type": "text",
+                    "text": "Judgment under Uncertainty: Heuristics and Biases",
+                    "marks": [
+                      {
+                        "type": "italic"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "이 논문은 앵커링 효과를 처음으로 체계적으로 정의하고, 사람들이 초기 정보에 어떻게 의존하는지 설명한 고전적인 연구입니다."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "참고: Science, Vol. 185, No. 4157, pp. 1124-1131."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Ariely, Dan (2008)",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "책 제목: "
+                  },
+                  {
+                    "type": "text",
+                    "text": "Predictably Irrational",
+                    "marks": [
+                      {
+                        "type": "italic"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "이 책은 인간의 비합리적인 행동을 탐구하며 앵커링 효과를 일상적인 예시와 함께 설명합니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Kahneman, Daniel (2011)",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "책 제목: "
+                  },
+                  {
+                    "type": "text",
+                    "text": "Thinking, Fast and Slow",
+                    "marks": [
+                      {
+                        "type": "italic"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "앵커링을 포함한 여러 인지적 편향에 대해 심층적으로 다룹니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Behavioral Economics and Marketing Research",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "bulletList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "앵커링 효과는 마케팅 및 소비자 행동 연구에서 널리 응용됩니다. 예를 들어, "
+                  },
+                  {
+                    "type": "text",
+                    "text": "Journal of Consumer Research",
+                    "marks": [
+                      {
+                        "type": "italic"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": "와 같은 학술지에서 관련 연구를 찾을 수 있습니다."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "위 자료들은 학술적 신뢰도가 높고, 앵커링 효과를 더 깊이 이해하는 데 도움이 될 것입니다. 구체적인 내용을 확인하고 싶으시면 논문이나 도서를 검색하거나, 구체적인 논문 제목을 기반으로 학술 데이터베이스(예: Google Scholar, PubMed)에서 찾아보실 수 있습니다."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "예:"
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "대표적인 연구 사례"
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tversky와 Kahneman의 연구 (1974)",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": ":"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "이들은 참가자들에게 무작위로 생성된 숫자를 제시한 후, 아프리카 국가의 수와 같은 질문을 하였습니다. 그 결과, 제시된 숫자가 높을수록 참가자들의 추정치도 높아지는 경향을 보였습니다. 이는 초기 정보(앵커)가 판단에 직접적인 영향을 미친다는 것을 보여줍니다."
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "온라인 뉴스에서의 앵커링 효과 연구",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": ":"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "한 연구에서는 온라인 뉴스 기사에서 숫자가 어떻게 독자의 감정적 반응과 뉴스 평가에 영향을 미치는지 탐구하였습니다. 이 연구는 숫자가 독자의 감정적 반응과 뉴스 평가에 앵커로 작용할 수 있음을 시사합니다."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "DCS Journal",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://journal.dcs.or.kr/_PR/view/?aidx=31064&bidx=2748&utm_source=chatgpt.com"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "heading",
+        "attrs": {
+          "level": 2
+        },
+        "content": [
+          {
+            "type": "text",
+            "text": "실생활 적용 사례"
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "가격 협상",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": ":"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "중고차 판매 시, 판매자가 처음에 높은 가격을 제시하면, 구매자는 그 가격을 기준으로 협상을 진행하게 됩니다. 이러한 초기 제시 가격이 최종 합의 가격에 영향을 미치는 현상은 앵커링 효과의 대표적인 예입니다."
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "룰루랄라 스토리",
+            "marks": [
+              {
+                "type": "link",
+                "attrs": {
+                  "href": "https://rulluralla-story.tistory.com/entry/%EC%95%B5%EC%BB%A4%EB%A7%81-%ED%9A%A8%EA%B3%BCAnchoring-effect%EB%9E%80-%EC%8B%A4%EC%A0%9C-%EC%82%AC%EB%A1%80%EC%99%80-%EA%B7%B9%EB%B3%B5-%EB%B0%A9%EC%95%88?utm_source=chatgpt.com"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "orderedList",
+        "content": [
+          {
+            "type": "listItem",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "소매업의 할인 전략",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "text",
+                    "text": ":"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "paragraph",
+        "content": [
+          {
+            "type": "text",
+            "text": "제품의 원래 가격을 강조한 후 할인된 가격을 제시하면, 소비자들은 원래 가격을 앵커로 인식하여 할인된 가격이 더 매력적으로 느껴집니다. 이러한 마케팅 전략은 앵커링 효과를 활용한 것입니다."
+          }
+        ]
+      }
+    ]
+  }),
 };

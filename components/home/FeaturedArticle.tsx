@@ -6,7 +6,7 @@ import { Chip } from "@/components/ui/Chip";
 import { ArrowGlyph, ButtonLink } from "@/components/ui/Button";
 import { Divider } from "@/components/ui/Divider";
 import { formatDate } from "@/lib/utils";
-import { readingTime } from "@/lib/content/parse";
+import { readingTime } from "@/lib/content/doc";
 
 export function FeaturedArticle({ article }: { article: ArticleWithAuthor }) {
   return (

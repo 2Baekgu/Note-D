@@ -8,7 +8,7 @@ import { ArticleRow } from "./ArticleCard";
 import { ChipButton } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { useStuck } from "@/components/ui/useStuck";
-import { toPlainText } from "@/lib/content/parse";
+import { toPlainText } from "@/lib/content/doc";
 import { topicSlug, cn } from "@/lib/utils";
 
 type Sort = "newest" | "oldest";

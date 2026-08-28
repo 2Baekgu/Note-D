@@ -15,7 +15,7 @@ import { ArticleCard } from "@/components/article/ArticleCard";
 import { Avatar } from "@/components/ui/Avatar";
 import { ChipLink } from "@/components/ui/Chip";
 import { Divider } from "@/components/ui/Divider";
-import { readingTime } from "@/lib/content/parse";
+import { readingTime } from "@/lib/content/doc";
 import { PageFrame } from "@/components/site/PageFrame";
 import { imageSize } from "@/lib/data/image-sizes";
 import { GridRule } from "@/components/site/GridRule";

@@ -1,0 +1,262 @@
+"use client";
+
+import { useState } from "react";
+import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Highlight from "@tiptap/extension-highlight";
+import Placeholder from "@tiptap/extension-placeholder";
+import { blocksToDoc, isDoc, type DocNode } from "@/lib/content/doc";
+import { parseContent } from "@/lib/content/parse";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { ChipButton } from "@/components/ui/Chip";
+import { uploadImage } from "@/lib/studio";
+import { cn } from "@/lib/utils";
+
+/** The article editor, on ProseMirror by way of TipTap — the same engine
+ *  Notion-style editors are built on. It owns selection, undo, IME and paste,
+ *  which is the whole reason to use it rather than keep hand-rolling.
+ *
+ *  Documents are stored as TipTap JSON. Anything written before the switch is
+ *  read through the old parser and converted on the way in, so an article
+ *  opens the same whichever format it happens to be in. */
+export function RichEditor({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const { mode } = useAuth();
+  const [uploading, setUploading] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+
+  // Seeded once; TipTap owns the document from here on.
+  const [initial] = useState<DocNode>(() =>
+    isDoc(value) ? (JSON.parse(value.trim()) as DocNode) : blocksToDoc(parseContent(value)),
+  );
+
+  const editor = useEditor({
+    // Next renders this on the server first; TipTap must wait for the client.
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+        link: { openOnClick: false, HTMLAttributes: { rel: "noreferrer noopener" } },
+      }),
+      Image.configure({ HTMLAttributes: { class: "rounded-md" } }),
+      Highlight,
+      Placeholder.configure({
+        placeholder: ({ node }) =>
+          node.type.name === "heading" ? "제목" : "글을 쓰거나 이미지를 끌어다 놓으세요",
+      }),
+    ],
+    content: initial,
+    onUpdate: ({ editor: e }) => onChange(JSON.stringify(e.getJSON())),
+    editorProps: {
+      attributes: { class: "tiptap" },
+      handlePaste: (_view, event) => {
+        const files = imagesFrom(event.clipboardData);
+        if (!files.length) return false;
+        event.preventDefault();
+        void insertImages(files);
+        return true;
+      },
+      handleDrop: (_view, event) => {
+        const files = imagesFrom((event as DragEvent).dataTransfer);
+        if (!files.length) return false;
+        event.preventDefault();
+        void insertImages(files);
+        return true;
+      },
+    },
+  });
+
+  function imagesFrom(data: DataTransfer | null) {
+    return Array.from(data?.files ?? []).filter((f) => f.type.startsWith("image/"));
+  }
+
+  async function insertImages(files: File[]) {
+    if (!editor) return;
+    setError(null);
+    setUploading((n) => n + files.length);
+
+    for (const file of files) {
+      const res = await uploadImage(file, "body");
+      setUploading((n) => n - 1);
+      if (res.url) {
+        editor
+          .chain()
+          .focus()
+          .setImage({ src: res.url, alt: file.name.replace(/\.[^.]+$/, "") })
+          .run();
+      } else {
+        setError(res.error ?? "업로드에 실패했습니다.");
+      }
+    }
+  }
+
+  if (!editor) {
+    return <div className="surface mt-3 min-h-[30rem] px-6 py-10 sm:px-14" />;
+  }
+
+  return (
+    <div>
+      <Toolbar editor={editor} uploading={uploading} onPick={insertImages} />
+
+      <div className="surface mt-3 min-h-[30rem] px-6 py-10 sm:px-14 sm:py-14">
+        <EditorContent editor={editor} />
+      </div>
+
+      <BubbleMenu editor={editor} className="surface flex items-center gap-1 px-1.5 py-1 shadow-float">
+        <Mark editor={editor} name="bold" onClick={() => editor.chain().focus().toggleBold().run()}>
+          <strong>B</strong>
+        </Mark>
+        <Mark editor={editor} name="italic" onClick={() => editor.chain().focus().toggleItalic().run()}>
+          <em>I</em>
+        </Mark>
+        <Mark editor={editor} name="highlight" onClick={() => editor.chain().focus().toggleHighlight().run()}>
+          형광
+        </Mark>
+        <Mark editor={editor} name="code" onClick={() => editor.chain().focus().toggleCode().run()}>
+          코드
+        </Mark>
+        <Mark
+          editor={editor}
+          name="link"
+          onClick={() => {
+            if (editor.isActive("link")) {
+              editor.chain().focus().unsetLink().run();
+              return;
+            }
+            const url = window.prompt("링크 주소");
+            if (url) editor.chain().focus().setLink({ href: url }).run();
+          }}
+        >
+          링크
+        </Mark>
+      </BubbleMenu>
+
+      <p className="t-caption mt-2 text-ink-faint">
+        이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣습니다. <code>## </code> <code>- </code>{" "}
+        <code>&gt; </code>처럼 치면 바로 그 블록이 되고, 글자를 선택하면 서식 버튼이 뜹니다.
+        {mode === "demo" && " 데모 모드에서는 이미지가 글 안에 직접 담겨 용량이 커집니다."}
+      </p>
+
+      {error && <p className="t-caption mt-2 text-accent">{error}</p>}
+    </div>
+  );
+}
+
+function Mark({
+  editor,
+  name,
+  onClick,
+  children,
+}: {
+  editor: Editor;
+  name: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <ChipButton
+      size="sm"
+      tone={editor.isActive(name) ? "solid" : "ghost"}
+      onMouseDown={(e) => e.preventDefault()}
+      onClick={onClick}
+    >
+      {children}
+    </ChipButton>
+  );
+}
+
+function Toolbar({
+  editor,
+  uploading,
+  onPick,
+}: {
+  editor: Editor;
+  uploading: number;
+  onPick: (files: File[]) => void;
+}) {
+  const items: { label: string; active: string; attrs?: Record<string, unknown>; run: () => void }[] =
+    [
+      { label: "본문", active: "paragraph", run: () => editor.chain().focus().setParagraph().run() },
+      {
+        label: "제목",
+        active: "heading",
+        attrs: { level: 2 },
+        run: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
+      },
+      {
+        label: "소제목",
+        active: "heading",
+        attrs: { level: 3 },
+        run: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      },
+      { label: "인용", active: "blockquote", run: () => editor.chain().focus().toggleBlockquote().run() },
+      { label: "목록", active: "bulletList", run: () => editor.chain().focus().toggleBulletList().run() },
+      { label: "번호", active: "orderedList", run: () => editor.chain().focus().toggleOrderedList().run() },
+      { label: "구분선", active: "horizontalRule", run: () => editor.chain().focus().setHorizontalRule().run() },
+    ];
+
+  return (
+    <div className="scroll-x flex items-center gap-1.5 pb-1">
+      {items.map((item) => (
+        <ChipButton
+          key={item.label}
+          size="sm"
+          tone={editor.isActive(item.active, item.attrs) ? "solid" : "ghost"}
+          onClick={item.run}
+        >
+          {item.label}
+        </ChipButton>
+      ))}
+
+      <span className="mx-1 h-4 w-px shrink-0 bg-line" aria-hidden="true" />
+
+      <label className={cn("chip chip-outline chip-sm shrink-0 cursor-pointer")}>
+        + 이미지
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          onChange={(e) => {
+            onPick(Array.from(e.target.files ?? []));
+            e.target.value = "";
+          }}
+        />
+      </label>
+
+      {uploading > 0 && (
+        <span className="t-caption ml-1 shrink-0 text-ink-faint">
+          이미지 {uploading}개 올리는 중…
+        </span>
+      )}
+
+      <span className="ml-auto flex shrink-0 items-center gap-1">
+        <ChipButton
+          size="sm"
+          tone="ghost"
+          disabled={!editor.can().undo()}
+          onClick={() => editor.chain().focus().undo().run()}
+          title="실행 취소"
+        >
+          ↺
+        </ChipButton>
+        <ChipButton
+          size="sm"
+          tone="ghost"
+          disabled={!editor.can().redo()}
+          onClick={() => editor.chain().focus().redo().run()}
+          title="다시 실행"
+        >
+          ↻
+        </ChipButton>
+      </span>
+    </div>
+  );
+}

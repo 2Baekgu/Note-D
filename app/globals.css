@@ -1057,51 +1057,106 @@ select.field {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   EDITOR
+   EDITOR  (TipTap / ProseMirror)
    ═══════════════════════════════════════════════════════════ */
 
-/* contenteditable has no placeholder of its own. */
-.rt:empty::before,
-.rt[data-empty="true"]::before {
-  content: attr(data-placeholder);
-  color: var(--ink-faint);
-  pointer-events: none;
-}
-
-.rt {
+.tiptap {
   outline: none;
-  min-height: 1.4em;
-  white-space: pre-wrap;
   word-break: keep-all;
   overflow-wrap: break-word;
 }
 
-.rt code {
+.tiptap > * + * {
+  margin-top: 1rem;
+}
+
+.tiptap p {
+  font-size: var(--text-body-lg);
+  line-height: 1.9;
+}
+
+.tiptap h2,
+.tiptap h3 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  margin-top: 2.5rem;
+}
+
+.tiptap h2 {
+  font-size: var(--text-h1);
+}
+
+.tiptap h3 {
+  font-size: var(--text-h2);
+}
+
+.tiptap blockquote {
+  border-left: 2px solid var(--ink);
+  padding-left: 1rem;
+  font-style: italic;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding-left: 1.25rem;
+  font-size: var(--text-body-lg);
+  line-height: 1.9;
+}
+
+.tiptap ul {
+  list-style: disc;
+}
+
+.tiptap ol {
+  list-style: decimal;
+}
+
+.tiptap li::marker {
+  color: var(--ink-faint);
+}
+
+.tiptap img {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+}
+
+.tiptap img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.tiptap hr {
+  border: 0;
+  border-top: var(--border-width) solid var(--line);
+  margin-block: 2rem;
+}
+
+.tiptap code {
   font-size: 0.92em;
   background: rgba(22, 21, 15, 0.06);
   border-radius: 4px;
   padding: 0.1em 0.35em;
 }
 
-.rt mark {
+.tiptap mark {
   background: var(--accent-soft);
   color: var(--ink);
   padding: 0 0.15em;
 }
 
-.rt a {
+.tiptap a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-/* The row a block sits in — the handle only shows when you are near it. */
-.blk-handle {
-  opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease);
+/* Placeholder — TipTap tags the empty node it is sitting on. */
+.tiptap p.is-editor-empty:first-child::before,
+.tiptap .is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--ink-faint);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
-
-.blk:hover .blk-handle,
-.blk:focus-within .blk-handle {
-  opacity: 1;
-}
-

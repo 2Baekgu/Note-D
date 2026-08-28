@@ -12,9 +12,9 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Chip, ChipButton } from "@/components/ui/Chip";
 import { useStuck } from "@/components/ui/useStuck";
-import { BlockEditor } from "./BlockEditor";
+import { RichEditor } from "./RichEditor";
 import { emptyArticle, persistArticle, uploadCover } from "@/lib/studio";
-import { readingTime } from "@/lib/content/parse";
+import { readingTime, toPlainText } from "@/lib/content/doc";
 import { cn, formatDate, slugify } from "@/lib/utils";
 
 const CHEATSHEET = [
@@ -187,10 +187,10 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                   Content
                 </label>
                 <span className="t-caption text-ink-faint">
-                  {article.content.length.toLocaleString()}자 · 약 {readingTime(article.content)}분
+                  {toPlainText(article.content).length.toLocaleString()}자 · 약 {readingTime(article.content)}분
                 </span>
               </div>
-              <BlockEditor
+              <RichEditor
                 value={article.content}
                 onChange={(content) => patch({ content })}
               />

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { parseContent, youtubeId, type Block } from "@/lib/content/parse";
+import { youtubeId, type Block } from "@/lib/content/parse";
+import { toBlocks } from "@/lib/content/doc";
 import { CoverArt } from "@/components/article/CoverArt";
 import { imageSizes } from "@/lib/data/image-sizes";
 import { cn } from "@/lib/utils";
@@ -173,7 +174,7 @@ function BlockView({ block, index, seed }: { block: Block; index: number; seed: 
 }
 
 export function ContentBody({ content, seed }: { content: string; seed: string }) {
-  const blocks = parseContent(content);
+  const blocks = toBlocks(content);
   return (
     <div className="prose-body [&>*:first-child]:mt-0">
       {blocks.map((block, i) => (
