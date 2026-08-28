@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 
 /** A contribution graph on the study's own unit. GitHub counts a day and
  *  takes its height from the seven weekdays; a week has no such axis, so a
- *  year in weeks is one long line. One year at a time, folded at the half —
- *  twenty-six weeks a row, two rows — keeps the cells the size of a
- *  contribution square rather than a tile; the card gets its height from
- *  padding instead. Cells flex, so the grid fills the width it is given. */
+ *  year in weeks is one long line. Each year folds at the quarter — thirteen
+ *  weeks a row, four rows — and two years sit side by side, which fills the
+ *  column across twenty-six columns while keeping the cells the size of a
+ *  contribution square rather than a tile. ‹ › slides the pair when there
+ *  are more years than fit. */
 
 type Cell = {
   key: string;
@@ -26,9 +27,10 @@ const LEVELS = [
   "var(--streak-4)",
 ];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const PER_ROW = 26; // half a year
-const ROWS = 2;
-const ROW_LABEL = ["Jan", "Jul"];
+const PER_ROW = 13; // a quarter
+const ROWS = 4;
+const ROW_LABEL = ["Jan", "Apr", "Jul", "Oct"];
+const SIDE_BY_SIDE = 2; // years shown at once
 
 const level = (n: number) => (n === 0 ? 0 : Math.min(n, 4));
 
@@ -95,11 +97,15 @@ export function PostingStreak({
     return out;
   }, [posts]);
 
-  // Opens on the most recent year, the way a profile should.
-  const [index, setIndex] = useState(() => Math.max(0, years.length - 1));
+  // Opens on the most recent years, the way a profile should.
+  const [index, setIndex] = useState(() => Math.max(0, years.length - SIDE_BY_SIDE));
 
   if (!posts.length) return null;
-  const shown = years[Math.min(index, years.length - 1)];
+  const start = Math.min(index, Math.max(0, years.length - SIDE_BY_SIDE));
+  const shown = years.slice(start, start + SIDE_BY_SIDE);
+  const span =
+    shown.length > 1 ? `${shown[0].year}–${shown[shown.length - 1].year}` : `${shown[0].year}`;
+  const total = shown.reduce((n, y) => n + y.posts, 0);
 
   // Mouse and keyboard both land here; only the element matters.
   function show(e: { currentTarget: HTMLElement }, cell: Cell) {
@@ -114,22 +120,22 @@ export function PostingStreak({
   }
 
   const step = (by: -1 | 1) =>
-    setIndex((i) => Math.min(years.length - 1, Math.max(0, i + by)));
+    setIndex((i) => Math.min(Math.max(0, years.length - SIDE_BY_SIDE), Math.max(0, i + by)));
 
   const arrow =
     "flex h-5 w-5 items-center justify-center rounded-sm text-ink-faint transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.06)] hover:text-ink disabled:pointer-events-none disabled:opacity-30";
 
   return (
-    <div ref={boxRef} className="surface relative mt-10 px-6 py-7">
+    <div ref={boxRef} className="surface relative mt-10 px-6 py-4">
       <div className="flex items-baseline justify-between gap-4">
         <p className="t-label text-ink-faint">Posting streak</p>
         <p className="t-caption text-ink-muted">
-          {shown.posts} posts in {shown.year}
+          {total} posts in {span}
         </p>
       </div>
 
       {/* Year picker and key share a line, so the card stays short. */}
-      <div className="mt-5 flex items-center justify-between gap-4">
+      <div className="mt-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -140,12 +146,12 @@ export function PostingStreak({
           >
             ‹
           </button>
-          <span className="t-caption w-10 text-center tabular-nums">{shown.year}</span>
+          <span className="t-caption w-20 text-center tabular-nums">{span}</span>
           <button
             type="button"
             className={arrow}
             onClick={() => step(1)}
-            disabled={index >= years.length - 1}
+            disabled={start >= years.length - SIDE_BY_SIDE}
             aria-label="다음 해"
           >
             ›
@@ -165,32 +171,40 @@ export function PostingStreak({
         </div>
       </div>
 
-      <div className="mt-5 space-y-[6px]">
-        {shown.rows.map((row, r) => (
-          <div key={r} className="flex items-center gap-[5px]">
-            <span
-              className="w-6 shrink-0 text-right text-ink-faint"
-              style={{ fontSize: "0.625rem" }}
-            >
-              {ROW_LABEL[r]}
-            </span>
-            {row.map((cell) => (
-              <button
-                key={cell.key}
-                type="button"
-                onMouseOver={(e) => show(e, cell)}
-                onMouseOut={() => setHover(null)}
-                onFocus={(e) => show(e, cell)}
-                onBlur={() => setHover(null)}
-                aria-label={`${label(cell.monday)} week, ${cell.count} posts`}
-                className={cn(
-                  "aspect-square min-w-0 flex-1 rounded-[3px] transition-transform duration-[var(--duration-fast)]",
-                  !cell.inYear && "opacity-30",
-                  hover?.cell.key === cell.key && "scale-125",
-                )}
-                style={{ background: LEVELS[level(cell.count)] }}
-              />
-            ))}
+      <div className="mt-4 flex items-start gap-4">
+        <div className="flex shrink-0 flex-col justify-between self-stretch">
+          {ROW_LABEL.map((m) => (
+            <div key={m} className="text-right text-ink-faint" style={{ fontSize: "0.625rem" }}>
+              {m}
+            </div>
+          ))}
+        </div>
+
+        {shown.map((year) => (
+          <div key={year.year} className="min-w-0 flex-1">
+            <div className="space-y-[6px]">
+              {year.rows.map((row, r) => (
+                <div key={r} className="flex gap-[6px]">
+                  {row.map((cell) => (
+                    <button
+                      key={cell.key}
+                      type="button"
+                      onMouseOver={(e) => show(e, cell)}
+                      onMouseOut={() => setHover(null)}
+                      onFocus={(e) => show(e, cell)}
+                      onBlur={() => setHover(null)}
+                      aria-label={`${label(cell.monday)} week, ${cell.count} posts`}
+                      className={cn(
+                        "aspect-square min-w-0 flex-1 rounded-[3px] transition-transform duration-[var(--duration-fast)]",
+                        !cell.inYear && "opacity-30",
+                        hover?.cell.key === cell.key && "scale-125",
+                      )}
+                      style={{ background: LEVELS[level(cell.count)] }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
