@@ -17,20 +17,6 @@ import { emptyArticle, persistArticle } from "@/lib/studio";
 import { readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
 import { cn, formatDate, slugify } from "@/lib/utils";
 
-const CHEATSHEET = [
-  ["## 제목", "섹션 heading"],
-  ["### 소제목", "하위 heading"],
-  ["> 인용문", "인용 (다음 줄 `— 출처`)"],
-  ["- 항목", "불릿 리스트"],
-  ["1. 항목", "번호 리스트"],
-  ["!! 문장", "하이라이트 박스"],
-  ['![설명](url "캡션")', "이미지"],
-  ["@embed <youtube-url>", "영상 임베드"],
-  ["**굵게**  *기울임*  ==형광==", "인라인 서식"],
-  ["[텍스트](url)", "링크"],
-  ["---", "구분선"],
-];
-
 export function ArticleEditor({ initial }: { initial?: Article }) {
   const { user } = useAuth();
   const router = useRouter();
@@ -180,61 +166,38 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
         <div className="min-w-0">
           {mode === "write" ? (
             <>
-              <div className="article-column">
-                <label htmlFor="title" className="t-label text-ink-faint">
-                  Title
-                </label>
-                <input
-                  id="title"
-                  value={article.title}
-                  onChange={(e) => patch({ title: e.target.value })}
-                  placeholder="무엇에 대해 쓰고 있나요?"
-                  className="t-h1 serif-heads mt-3 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
-                />
-
-                <label htmlFor="subtitle" className="t-label mt-10 block text-ink-faint">
-                  Subtitle
-                </label>
-                <textarea
-                  id="subtitle"
-                  value={article.subtitle}
-                  onChange={(e) => patch({ subtitle: e.target.value })}
-                  rows={2}
-                  placeholder="한두 문장으로 이 글을 요약해주세요."
-                  className="field mt-3 resize-y"
-                />
-
-                <div className="mt-10 flex flex-wrap items-baseline justify-between gap-3">
-                  <label htmlFor="content" className="t-label text-ink-faint">
-                    Content
-                  </label>
-                  <span className="t-caption text-ink-faint">
-                    {toPlainText(article.content).length.toLocaleString()}자 · 약{" "}
-                    {readingTime(article.content)}분
-                  </span>
-                </div>
-              </div>
               <RichEditor
                 value={article.content}
                 onChange={(content) => patch({ content })}
+                meta={`${toPlainText(article.content).length.toLocaleString()}자 · 약 ${readingTime(article.content)}분`}
+                header={
+                  <>
+                    <label htmlFor="title" className="t-label text-ink-faint">
+                      Title
+                    </label>
+                    <input
+                      id="title"
+                      value={article.title}
+                      onChange={(e) => patch({ title: e.target.value })}
+                      placeholder="무엇에 대해 쓰고 있나요?"
+                      className="t-h1 serif-heads mt-2 w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+                    />
+
+                    <label htmlFor="subtitle" className="t-label mt-8 block text-ink-faint">
+                      Subtitle
+                    </label>
+                    <textarea
+                      id="subtitle"
+                      value={article.subtitle}
+                      onChange={(e) => patch({ subtitle: e.target.value })}
+                      rows={2}
+                      placeholder="한두 문장으로 이 글을 요약해주세요."
+                      className="field mt-2 resize-y"
+                    />
+                  </>
+                }
               />
 
-              <details className="surface mt-4 p-6">
-                <summary className="t-label cursor-pointer text-ink-muted">
-                  Formatting reference
-                </summary>
-                <dl className="mt-6 grid gap-x-8 sm:grid-cols-2">
-                  {CHEATSHEET.map(([syntax, meaning]) => (
-                    <div
-                      key={syntax}
-                      className="flex items-baseline justify-between gap-4 border-b border-line py-2"
-                    >
-                      <dt className="t-caption font-medium">{syntax}</dt>
-                      <dd className="t-caption shrink-0 text-ink-faint">{meaning}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </details>
 
               <p className="t-label mt-16 text-ink-faint">References</p>
               <div className="mt-3 space-y-3">
@@ -307,10 +270,10 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
               {/* ── Article details ─────────────────────────
                   Below the writing, not beside it — none of this needs to be
                   in view while you are actually writing. */}
-              <section className="article-column mt-20 border-t border-line pt-10">
+              <section className="mt-16 border-t border-line pt-10">
                 <p className="t-label text-ink-faint">Article details</p>
 
-                <div className="mt-8 grid gap-8 sm:grid-cols-2">
+                <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                   <Field label="Author">
                     <div className="flex items-center gap-3">
                       <Avatar name={author.name} src={author.profileImage} size="md" />

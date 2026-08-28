@@ -24,9 +24,16 @@ import { cn } from "@/lib/utils";
 export function RichEditor({
   value,
   onChange,
+  header,
+  meta,
 }: {
   value: string;
   onChange: (next: string) => void;
+  /** Title and subtitle, drawn inside the sheet on the same measure as the
+   *  body — otherwise they sit on a different left edge to the words. */
+  header?: React.ReactNode;
+  /** Small text for the toolbar's right side, e.g. the length. */
+  meta?: React.ReactNode;
 }) {
   const { mode } = useAuth();
   const [uploading, setUploading] = useState(0);
@@ -98,14 +105,19 @@ export function RichEditor({
   }
 
   if (!editor) {
-    return <div className="surface mt-3 min-h-[30rem] px-6 py-10 sm:px-14" />;
+    return <div className="surface min-h-[30rem] px-6 py-10 sm:px-14" />;
   }
 
   return (
     <div>
-      <Toolbar editor={editor} uploading={uploading} onPick={insertImages} />
+      <Toolbar editor={editor} uploading={uploading} onPick={insertImages} meta={meta} />
 
-      <div className="surface mt-3 min-h-[30rem] px-6 py-10 sm:px-14 sm:py-14">
+      {/* One sheet. Title, subtitle and body share its measure, so everything
+          you type lines up on the same left edge. */}
+      <div className="surface mt-3 min-h-[34rem] px-6 py-12 sm:px-14 sm:py-16">
+        {header && (
+          <div className="mx-auto mb-12 max-w-[var(--measure)]">{header}</div>
+        )}
         <EditorContent editor={editor} />
       </div>
 
@@ -208,10 +220,12 @@ function Toolbar({
   editor,
   uploading,
   onPick,
+  meta,
 }: {
   editor: Editor;
   uploading: number;
   onPick: (files: File[]) => void;
+  meta?: React.ReactNode;
 }) {
   const items: { label: string; active: string; attrs?: Record<string, unknown>; run: () => void }[] =
     [
@@ -269,7 +283,9 @@ function Toolbar({
         </span>
       )}
 
-      <span className="ml-auto flex shrink-0 items-center gap-1">
+      {meta && <span className="t-caption ml-auto shrink-0 text-ink-faint">{meta}</span>}
+
+      <span className={cn("flex shrink-0 items-center gap-1", !meta && "ml-auto")}>
         <ChipButton
           size="sm"
           tone="ghost"
