@@ -3,9 +3,11 @@
 import { useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-/** A contribution graph. The study's unit is a week rather than a day — one
- *  post a week is the whole commitment — so a cell is a week, a row is a
- *  year, and a second post in the same week deepens the colour. */
+/** A contribution graph on the study's own unit. GitHub counts a day and
+ *  takes its height from the seven weekdays; a week has no such axis, so a
+ *  year in weeks is one very long line. Folding the year into quarters —
+ *  thirteen weeks a row, four rows — gives it a block shape instead of a
+ *  ribbon, and leaves room for cells big enough to aim at. */
 
 type Cell = {
   key: string;
@@ -23,9 +25,9 @@ const LEVELS = [
   "var(--streak-4)",
 ];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-const PITCH = 12; // cell + gap
-const WEEKS = 53;
+const PER_ROW = 13; // a quarter
+const ROWS = 4;
+const ROW_LABEL = ["Jan", "Apr", "Jul", "Oct"];
 
 const level = (n: number) => (n === 0 ? 0 : Math.min(n, 4));
 
@@ -37,9 +39,7 @@ function mondayOf(date: Date): Date {
 }
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
-
-const label = (d: Date) =>
-  `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+const label = (d: Date) => `${MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 
 export function PostingStreak({
   posts,
@@ -69,11 +69,11 @@ export function PostingStreak({
     const first = found.length ? Math.min(...found) : now;
     const last = Math.max(now, ...(found.length ? found : [now]));
 
-    const rows: { year: number; cells: Cell[] }[] = [];
+    const out: { year: number; rows: Cell[][] }[] = [];
     for (let y = first; y <= last; y++) {
       const start = mondayOf(new Date(y, 0, 1));
       const cells: Cell[] = [];
-      for (let i = 0; i < WEEKS; i++) {
+      for (let i = 0; i < PER_ROW * ROWS; i++) {
         const monday = new Date(start);
         monday.setDate(monday.getDate() + i * 7);
         const slot = byWeek.get(iso(monday));
@@ -85,9 +85,11 @@ export function PostingStreak({
           inYear: monday.getFullYear() === y || i === 0,
         });
       }
-      rows.push({ year: y, cells });
+      const rows: Cell[][] = [];
+      for (let r = 0; r < ROWS; r++) rows.push(cells.slice(r * PER_ROW, (r + 1) * PER_ROW));
+      out.push({ year: y, rows });
     }
-    return rows;
+    return out;
   }, [posts]);
 
   if (!posts.length) return null;
@@ -105,67 +107,62 @@ export function PostingStreak({
   }
 
   return (
-    <div ref={boxRef} className="surface relative mt-10 p-5">
-      <p className="t-caption text-ink-muted">
-        {posts.length} posts
-      </p>
+    <div ref={boxRef} className="surface relative mt-10 w-fit max-w-full p-6">
+      <div className="flex items-baseline justify-between gap-4">
+        <p className="t-label text-ink-faint">Posting streak</p>
+        <p className="t-caption text-ink-muted">{posts.length} posts</p>
+      </div>
 
-      <div className="scroll-x mt-4">
-        <div style={{ width: WEEKS * PITCH + 30 }}>
-          {/* Month ruler */}
-          <div className="relative ml-[30px] h-4">
-            {MONTHS.map((m, i) => (
-              <span
-                key={m}
-                className="absolute top-0 text-ink-faint"
-                style={{ left: Math.round((i * WEEKS) / 12) * PITCH, fontSize: "0.6875rem" }}
-              >
-                {m}
-              </span>
-            ))}
-          </div>
+      <div className="scroll-x mt-5 space-y-5">
+        {years.map((year) => (
+          <div key={year.year}>
+            <p className="mb-1.5 pl-8 text-ink-faint" style={{ fontSize: "0.625rem" }}>
+              {year.year}
+            </p>
 
-          {years.map((row) => (
-            <div key={row.year} className="flex items-center">
-              <span
-                className="w-[30px] shrink-0 text-ink-faint"
-                style={{ fontSize: "0.625rem" }}
-              >
-                {String(row.year).slice(2)}
-              </span>
-              <div className="flex gap-[3px] py-[1.5px]">
-                {row.cells.map((cell) => (
-                  <button
-                    key={cell.key}
-                    type="button"
-                    onMouseOver={(e) => show(e, cell)}
-                    onMouseOut={() => setHover(null)}
-                    onFocus={(e) => show(e, cell)}
-                    onBlur={() => setHover(null)}
-                    aria-label={`${label(cell.monday)} week, ${cell.count} posts`}
-                    className={cn(
-                      "h-[9px] w-[9px] shrink-0 rounded-[2px]",
-                      !cell.inYear && "opacity-30",
-                    )}
-                    style={{ background: LEVELS[level(cell.count)] }}
-                  />
-                ))}
-              </div>
+            <div className="space-y-[5px]">
+              {year.rows.map((row, r) => (
+                <div key={r} className="flex items-center gap-[5px]">
+                  <span
+                    className="w-6 shrink-0 text-right text-ink-faint"
+                    style={{ fontSize: "0.625rem" }}
+                  >
+                    {ROW_LABEL[r]}
+                  </span>
+                  {row.map((cell) => (
+                    <button
+                      key={cell.key}
+                      type="button"
+                      onMouseOver={(e) => show(e, cell)}
+                      onMouseOut={() => setHover(null)}
+                      onFocus={(e) => show(e, cell)}
+                      onBlur={() => setHover(null)}
+                      aria-label={`${label(cell.monday)} week, ${cell.count} posts`}
+                      className={cn(
+                        "h-[20px] w-[20px] shrink-0 rounded-[4px] transition-transform duration-[var(--duration-fast)]",
+                        !cell.inYear && "opacity-30",
+                        hover?.cell.key === cell.key && "scale-110",
+                      )}
+                      style={{ background: LEVELS[level(cell.count)] }}
+                    />
+                  ))}
+                </div>
+              ))}
             </div>
-          ))}
-
-          <div className="mt-3 flex items-center justify-end gap-1">
-            <span className="text-ink-faint" style={{ fontSize: "0.6875rem" }}>
-              Less
-            </span>
-            {LEVELS.map((c) => (
-              <span key={c} className="h-[9px] w-[9px] rounded-[2px]" style={{ background: c }} />
-            ))}
-            <span className="text-ink-faint" style={{ fontSize: "0.6875rem" }}>
-              More
-            </span>
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div className="mt-5 flex items-center justify-end gap-1">
+        <span className="text-ink-faint" style={{ fontSize: "0.6875rem" }}>
+          Less
+        </span>
+        {LEVELS.map((c) => (
+          <span key={c} className="h-[12px] w-[12px] rounded-[3px]" style={{ background: c }} />
+        ))}
+        <span className="text-ink-faint" style={{ fontSize: "0.6875rem" }}>
+          More
+        </span>
       </div>
 
       {hover && (
@@ -176,7 +173,9 @@ export function PostingStreak({
         >
           <p style={{ fontSize: "0.6875rem", lineHeight: 1.5 }}>
             <strong>
-              {hover.cell.count === 0 ? "No posts" : `${hover.cell.count} post${hover.cell.count > 1 ? "s" : ""}`}
+              {hover.cell.count === 0
+                ? "No posts"
+                : `${hover.cell.count} post${hover.cell.count > 1 ? "s" : ""}`}
             </strong>
             {` · week of ${label(hover.cell.monday)}`}
           </p>
