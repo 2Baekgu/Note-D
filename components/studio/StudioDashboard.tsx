@@ -70,11 +70,11 @@ export function StudioDashboard({ serverArticles }: { serverArticles: Article[] 
           </ChipButton>
         </div>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2">
           {isAdmin && (
-            <Link href="/studio/admin" className="t-label link-underline text-ink-muted">
-              Admin
-            </Link>
+            <ButtonLink href="/studio/admin" variant="secondary">
+              멤버 관리
+            </ButtonLink>
           )}
           <ButtonLink href="/studio/new">+ New article</ButtonLink>
         </div>

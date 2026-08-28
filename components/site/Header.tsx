@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { site } from "@/lib/site";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { Avatar } from "@/components/ui/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
 import { BlueprintFrame } from "./BlueprintFrame";
+import { AccountMenu } from "./AccountMenu";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const pathname = usePathname();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -58,14 +58,7 @@ export function Header() {
               <ButtonLink href="/studio" size="sm">
                 Studio
               </ButtonLink>
-              <button
-                type="button"
-                onClick={signOut}
-                className="flex items-center"
-                title={`${user.name} — 로그아웃`}
-              >
-                <Avatar name={user.name} src={user.image} size="md" />
-              </button>
+              <AccountMenu />
             </div>
           ) : (
             <ButtonLink href="/login" variant="secondary" size="sm">
@@ -129,11 +122,20 @@ export function Header() {
 
         <div className="mt-8">
           {user ? (
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <ButtonLink href="/studio" onClick={close}>
                 Studio
               </ButtonLink>
-              <button type="button" onClick={signOut} className="t-label text-ink-muted">
+              {isAdmin && (
+                <Link href="/studio/admin" onClick={close} className="t-label link-underline">
+                  멤버 관리
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={signOut}
+                className="t-label ml-auto text-ink-muted"
+              >
                 Sign out — {user.name}
               </button>
             </div>
