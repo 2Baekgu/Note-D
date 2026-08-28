@@ -20,6 +20,14 @@ export const pokaYoke: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/poka-yoke/01.png",
+          "alt": "포카요케(Poka-Yoke) : 사용자의 실수를 방지하는 설계",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

@@ -20,6 +20,14 @@ export const progressiveDisclosure: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/progressive-disclosure/01.png",
+          "alt": "단계적 공개 (Progressive Disclosure)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

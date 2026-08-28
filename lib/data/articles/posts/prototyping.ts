@@ -20,6 +20,14 @@ export const prototyping: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/prototyping/01.png",
+          "alt": "프로토타이핑 (Prototyping) : 아이디어를 검증 가능한 경험으로 만드는 방법",
+          "title": null
+        }
+      },
+      {
         "type": "paragraph",
         "content": [
           {

@@ -21,6 +21,14 @@ export const holisticVsAnalyticCognition: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/holistic-vs-analytic-cognition/01.png",
+          "alt": "문화와 사고 체계 (Holistic vs Analytic Cognition) : 동과서의 차이",
+          "title": null
+        }
+      },
+      {
         "type": "paragraph",
         "content": [
           {

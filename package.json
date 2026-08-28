@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node --env-file-if-exists=.env.local scripts/seed.mjs",
-    "sync-avatars": "node --env-file-if-exists=.env.local scripts/sync-avatars.mjs"
+    "sync-avatars": "node --env-file-if-exists=.env.local scripts/sync-avatars.mjs",
+    "cover-into-body": "node --env-file-if-exists=.env.local scripts/cover-into-body-db.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

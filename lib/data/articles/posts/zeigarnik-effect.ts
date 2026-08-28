@@ -20,6 +20,14 @@ export const zeigarnikEffect: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/zeigarnik-effect/01.png",
+          "alt": "자이가르니크 효과(Zeigarnik Effect)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 3

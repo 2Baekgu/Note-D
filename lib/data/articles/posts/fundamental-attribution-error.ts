@@ -20,6 +20,14 @@ export const fundamentalAttributionError: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/fundamental-attribution-error/01.png",
+          "alt": "기본 귀인 오류 (Fundamental Attribution Error) : 왜 사용자를 탓하면 안 되는가",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

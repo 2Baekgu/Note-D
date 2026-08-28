@@ -20,6 +20,14 @@ export const ikeaEffect: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/ikea-effect/01.jpg",
+          "alt": "이케아 효과 (IKEA effect)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

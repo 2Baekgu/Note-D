@@ -20,6 +20,14 @@ export const vonRestorffEffect: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/von-restorff-effect/01.png",
+          "alt": "폰 레스토프 효과 (Von Restorff Effect)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

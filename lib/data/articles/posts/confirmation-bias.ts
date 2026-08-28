@@ -20,6 +20,14 @@ export const confirmationBias: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/confirmation-bias/01.png",
+          "alt": "확증 편향 (Confirmation bias)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

@@ -358,6 +358,7 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                     <CoverPicker
                       images={bodyImages}
                       value={article.coverImage}
+                      original={initial?.coverImage ?? null}
                       onPick={(src) => patch({ coverImage: src })}
                     />
                   </Field>
@@ -437,15 +438,19 @@ function Preview({ article, authorName }: { article: Article; authorName: string
 function CoverPicker({
   images,
   value,
+  original,
   onPick,
 }: {
   images: string[];
   value: string | null;
+  /** The cover the article was opened with. */
+  original: string | null;
   onPick: (src: string | null) => void;
 }) {
-  // An article imported with its own cover has one that appears nowhere in
-  // the body; keep it on offer so the current choice is always visible.
-  const options = value && !images.includes(value) ? [value, ...images] : images;
+  // Whatever the article opened with stays on offer, along with the current
+  // pick — otherwise choosing a different cover made the old one vanish from
+  // the list and there was no way back to it.
+  const options = [...new Set([...(original ? [original] : []), ...(value ? [value] : []), ...images])];
 
   if (!options.length) {
     return (

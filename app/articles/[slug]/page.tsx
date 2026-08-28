@@ -8,7 +8,6 @@ import {
   publishedArticleSlugs,
 } from "@/lib/repo";
 import { ContentBody } from "@/components/content/ContentBody";
-import { CoverMedia } from "@/components/article/CoverArt";
 import { Discussion } from "@/components/article/Discussion";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
 import { ArticleCard } from "@/components/article/ArticleCard";
@@ -17,7 +16,6 @@ import { ChipLink } from "@/components/ui/Chip";
 import { Divider } from "@/components/ui/Divider";
 import { readingTime } from "@/lib/content/doc";
 import { PageFrame } from "@/components/site/PageFrame";
-import { imageSize } from "@/lib/data/image-sizes";
 import { GridRule } from "@/components/site/GridRule";
 import { topicSlug, formatDate } from "@/lib/utils";
 
@@ -55,7 +53,6 @@ export default async function ArticlePage({
   // The cover follows the same rule as every other figure: real proportion,
   // never upscaled past the source. A height cap made each article's cover a
   // different width, so the opening never lined up with the title.
-  const coverSize = article.coverImage ? imageSize(article.coverImage) : null;
 
   const [comments, related] = await Promise.all([
     listComments(article.id),
@@ -106,30 +103,10 @@ export default async function ArticlePage({
           </div>
         </header>
 
-        {/* ── Cover ────────────────────────────────────── */}
-        <div className="article-shell mt-12">
-          {coverSize && article.coverImage ? (
-            <div className="media mx-auto" style={{ maxWidth: `${coverSize[0]}px` }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={article.coverImage}
-                alt={article.title}
-                width={coverSize[0]}
-                height={coverSize[1]}
-                className="block h-auto w-full"
-              />
-            </div>
-          ) : (
-            <div className="media aspect-[16/10] sm:aspect-[21/9]">
-              <CoverMedia
-                src={article.coverImage}
-                alt={article.title}
-                seed={article.slug}
-                topic={article.topics[0]}
-              />
-            </div>
-          )}
-        </div>
+        {/* No cover here. It is the card thumbnail and nothing else — drawing
+            it above the body put the picture in twice once you could pick one
+            from the article, and gave articles with no pictures a generated
+            one they never asked for. The body is exactly what was written. */}
 
         {/* ── Body ─────────────────────────────────────── */}
         <div className="article-shell mt-16">

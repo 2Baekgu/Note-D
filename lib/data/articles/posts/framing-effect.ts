@@ -20,6 +20,14 @@ export const framingEffect: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/framing-effect/01.png",
+          "alt": "프레이밍 효과 (Framing Effect)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

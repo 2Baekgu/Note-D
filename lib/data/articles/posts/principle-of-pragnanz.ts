@@ -20,6 +20,14 @@ export const principleOfPragnanz: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/principle-of-pragnanz/01.png",
+          "alt": "프래그난츠의 법칙 (Principle of Pragnanz)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

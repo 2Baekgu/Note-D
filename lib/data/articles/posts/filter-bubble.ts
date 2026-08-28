@@ -20,6 +20,14 @@ export const filterBubble: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/filter-bubble/01.png",
+          "alt": "필터 버블 (Filter Bubble)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

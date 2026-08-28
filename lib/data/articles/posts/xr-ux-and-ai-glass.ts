@@ -20,6 +20,14 @@ export const xrUxAndAiGlass: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/xr-ux-and-ai-glass/01.jpg",
+          "alt": "XR UX 패러다임의 전환과 AI Glass ‘최소 간섭 UX’",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

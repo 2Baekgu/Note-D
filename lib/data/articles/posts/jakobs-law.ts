@@ -22,6 +22,14 @@ export const jakobsLaw: Article = {
       {
         "type": "image",
         "attrs": {
+          "src": "/images/jakobs-law/01.png",
+          "alt": "야코브의 법칙 (Jakob’s Law)",
+          "title": null
+        }
+      },
+      {
+        "type": "image",
+        "attrs": {
           "src": "/images/jakobs-law/02.png",
           "alt": "야코브의 법칙 (Jakob’s Law)",
           "title": null

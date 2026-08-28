@@ -20,6 +20,14 @@ export const normansSevenStagesOfAction: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/normans-seven-stages-of-action/01.png",
+          "alt": "도널드 노먼의 7단계 인간 행위 모형 (Donald Norman's Seven Stages of Action)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

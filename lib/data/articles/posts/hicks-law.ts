@@ -20,6 +20,14 @@ export const hicksLaw: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/hicks-law/01.png",
+          "alt": "힉의 법칙 (Hick’s Law)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 3

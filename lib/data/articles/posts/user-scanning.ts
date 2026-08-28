@@ -20,6 +20,14 @@ export const userScanning: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/user-scanning/01.png",
+          "alt": "사용자 스캐닝(User Scanning) : 사용자는 ‘읽지 않고 훑는다’",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

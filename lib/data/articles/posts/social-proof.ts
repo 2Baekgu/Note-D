@@ -20,6 +20,14 @@ export const socialProof: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/social-proof/01.png",
+          "alt": "사회적 증거 (Social Proof)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

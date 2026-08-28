@@ -22,6 +22,14 @@ export const anchoringEffect: Article = {
       {
         "type": "image",
         "attrs": {
+          "src": "/images/anchoring-effect/01.png",
+          "alt": "닻내림 효과 (Anchoring Effect)",
+          "title": null
+        }
+      },
+      {
+        "type": "image",
+        "attrs": {
           "src": "/images/anchoring-effect/02.png",
           "alt": "닻내림 효과 (Anchoring Effect)",
           "title": null

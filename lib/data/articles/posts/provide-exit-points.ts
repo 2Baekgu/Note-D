@@ -20,6 +20,14 @@ export const provideExitPoints: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/provide-exit-points/01.png",
+          "alt": "종료 지점 (Provide Exit Points)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

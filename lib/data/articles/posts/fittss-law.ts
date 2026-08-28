@@ -20,6 +20,14 @@ export const fittssLaw: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/fittss-law/01.png",
+          "alt": "피츠의 법칙 (Fitts’s Law)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

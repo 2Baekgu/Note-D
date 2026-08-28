@@ -20,6 +20,14 @@ export const streisandEffect: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/streisand-effect/01.png",
+          "alt": "스트라이샌드 효과 (Streisand Effect) : 숨길수록 더 퍼진다",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

@@ -20,6 +20,14 @@ export const millersLaw: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/millers-law/01.png",
+          "alt": "밀러의 법칙 (Miller's Law)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

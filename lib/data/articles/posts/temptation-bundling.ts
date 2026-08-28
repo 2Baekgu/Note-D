@@ -20,6 +20,14 @@ export const temptationBundling: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/temptation-bundling/01.png",
+          "alt": "유혹 번들링 효과 (Temptation Bundling Effect) : 하기 싫은 일도 하게 만드는 유혹 전략",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

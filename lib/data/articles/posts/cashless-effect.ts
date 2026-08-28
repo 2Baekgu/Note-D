@@ -20,6 +20,14 @@ export const cashlessEffect: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/cashless-effect/01.png",
+          "alt": "무현금 효과 (Cashless Effect)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

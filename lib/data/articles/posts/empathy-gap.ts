@@ -20,6 +20,14 @@ export const empathyGap: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/empathy-gap/01.png",
+          "alt": "공감 격차 (Empathy Gap)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

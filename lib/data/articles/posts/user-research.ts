@@ -20,6 +20,14 @@ export const userResearch: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/user-research/01.png",
+          "alt": "사용자 리서치(User Research) : 사용자를 이해하는 첫걸음",
+          "title": null
+        }
+      },
+      {
         "type": "paragraph",
         "content": [
           {

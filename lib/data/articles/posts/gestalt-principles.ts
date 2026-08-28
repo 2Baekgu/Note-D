@@ -20,6 +20,14 @@ export const gestaltPrinciples: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/gestalt-principles/01.png",
+          "alt": "게슈탈트 원리 (Gestalt Theory)",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2

@@ -20,6 +20,14 @@ export const bounceRateVsExitRate: Article = {
     "type": "doc",
     "content": [
       {
+        "type": "image",
+        "attrs": {
+          "src": "/images/bounce-rate-vs-exit-rate/01.png",
+          "alt": "이탈률 vs 종료율 : 사용자가 떠나는 순간을 해석하는 법",
+          "title": null
+        }
+      },
+      {
         "type": "heading",
         "attrs": {
           "level": 2
