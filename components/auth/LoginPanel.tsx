@@ -19,7 +19,7 @@ export function LoginPanel() {
 
   if (user) {
     return (
-      <div className="surface p-8 sm:p-12">
+      <div className="surface flex flex-col justify-center p-8 sm:p-12">
         <p className="t-label text-ink-faint">Signed in as</p>
         <div className="mt-6 flex items-center gap-4">
           <Avatar name={user.name} src={user.image} size="lg" />
@@ -54,7 +54,7 @@ export function LoginPanel() {
   }
 
   return (
-    <div className="surface p-8 sm:p-12">
+    <div className="surface flex flex-col justify-center p-8 sm:p-12">
       <Button
         className="w-full"
         disabled={busy}

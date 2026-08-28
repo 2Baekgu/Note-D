@@ -17,7 +17,7 @@ const ACCESS = [
 export default function LoginPage() {
   return (
     <PageFrame>
-      <div className="shell section-pad grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+      <div className="shell section-pad grid gap-12 lg:grid-cols-2 lg:gap-16">
         <div>
           <p className="t-label text-accent">Join the study</p>
           <h1 className="t-display mt-6">
