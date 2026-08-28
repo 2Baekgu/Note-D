@@ -56,6 +56,18 @@ export interface Article {
   sample?: boolean;
 }
 
+/** Something a reader hit and wanted fixed. The body is a TipTap document,
+ *  same as an article, so a screenshot can sit inside the sentence about it. */
+export interface BugReport {
+  id: string;
+  reporterId: string | null;
+  reporterName: string;
+  reporterEmail: string;
+  content: string;
+  status: "open" | "resolved";
+  createdAt: string;
+}
+
 export interface Comment {
   id: string;
   articleId: string;

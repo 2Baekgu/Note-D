@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -8,12 +9,21 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Chip } from "@/components/ui/Chip";
 import { cn } from "@/lib/utils";
 
+/** The report box carries the whole editor with it. Loading it here would
+ *  put TipTap in the bundle of every page that draws a header, so it waits
+ *  until somebody actually opens it. */
+const BugReportDialog = dynamic(
+  () => import("@/components/site/BugReportDialog").then((m) => m.BugReportDialog),
+  { ssr: false },
+);
+
 /** The avatar used to sign you out on a single click, which is a hard action
  *  to undo and easy to hit by accident. It opens this instead — and it is
  *  also where the admin screens are reachable from. */
 export function AccountMenu() {
   const { user, isAdmin, canPublish, signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const [reporting, setReporting] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -81,6 +91,19 @@ export function AccountMenu() {
               내 프로필
             </Link>
 
+            <button
+              type="button"
+              onClick={() => {
+                close();
+                setReporting(true);
+              }}
+              className={cn(itemClass, "w-full")}
+              role="menuitem"
+            >
+              버그 리포트
+              <span className="t-label text-ink-faint">Report</span>
+            </button>
+
             {/* No Studio entry: the header's own button is right beside this. */}
             {!canPublish && (
               <p className="t-caption px-4 py-2.5 text-ink-faint">
@@ -92,10 +115,10 @@ export function AccountMenu() {
               <Link
                 href="/studio/admin"
                 onClick={close}
-                className={cn(itemClass, pathname === "/studio/admin" && "text-accent")}
+                className={cn(itemClass, pathname.startsWith("/studio/admin") && "text-accent")}
                 role="menuitem"
               >
-                멤버 관리
+                관리자 페이지
                 <span className="t-label text-ink-faint">Admin</span>
               </Link>
             )}
@@ -116,6 +139,8 @@ export function AccountMenu() {
           </div>
         </div>
       )}
+
+      {reporting && <BugReportDialog onClose={() => setReporting(false)} />}
     </div>
   );
 }

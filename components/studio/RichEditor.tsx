@@ -26,6 +26,10 @@ export function RichEditor({
   onChange,
   meta,
   header,
+  tools = "full",
+  compact = false,
+  placeholder,
+  folder = "body",
 }: {
   value: string;
   onChange: (next: string) => void;
@@ -34,6 +38,15 @@ export function RichEditor({
   /** Sits inside the sheet above the body, on the body's own column —
    *  the title, in practice. */
   header?: React.ReactNode;
+  /** `"image"` keeps the picture button and drops the block styles — for a
+   *  box where the writing matters and the formatting does not. */
+  tools?: "full" | "image";
+  /** A shorter sheet, for a box inside a dialog. */
+  compact?: boolean;
+  placeholder?: string;
+  /** Where uploads land. Bug-report screenshots go somewhere a guest is
+   *  allowed to write, which the article folders are not. */
+  folder?: "body" | "bug-reports";
 }) {
   const { mode } = useAuth();
   const [uploading, setUploading] = useState(0);
@@ -56,7 +69,9 @@ export function RichEditor({
       Highlight,
       Placeholder.configure({
         placeholder: ({ node }) =>
-          node.type.name === "heading" ? "제목" : "글을 쓰거나 이미지를 끌어다 놓으세요",
+          node.type.name === "heading"
+            ? "제목"
+            : (placeholder ?? "글을 쓰거나 이미지를 끌어다 놓으세요"),
       }),
     ],
     content: initial,
@@ -90,7 +105,7 @@ export function RichEditor({
     setUploading((n) => n + files.length);
 
     for (const file of files) {
-      const res = await uploadImage(file, "body");
+      const res = await uploadImage(file, folder);
       setUploading((n) => n - 1);
       if (res.url) {
         editor
@@ -105,14 +120,34 @@ export function RichEditor({
   }
 
   if (!editor) {
-    return <div className="surface min-h-[30rem] px-6 py-10 sm:px-14" />;
+    return (
+      <div
+        className={cn(
+          "surface",
+          compact ? "min-h-[12rem] px-5 py-5" : "min-h-[30rem] px-6 py-10 sm:px-14",
+        )}
+      />
+    );
   }
 
   return (
     <div>
-      <Toolbar editor={editor} uploading={uploading} onPick={insertImages} meta={meta} />
+      <Toolbar
+        editor={editor}
+        uploading={uploading}
+        onPick={insertImages}
+        meta={meta}
+        tools={tools}
+      />
 
-      <div className="surface mt-3 min-h-[34rem] px-6 py-12 sm:px-14 sm:py-16">
+      <div
+        className={cn(
+          "surface mt-3",
+          compact
+            ? "min-h-[12rem] px-5 py-5"
+            : "min-h-[34rem] px-6 py-12 sm:px-14 sm:py-16",
+        )}
+      >
         {header && (
           <div className="editor-column mb-10 border-b border-line pb-8">{header}</div>
         )}
@@ -181,8 +216,14 @@ export function RichEditor({
       </BubbleMenu>
 
       <p className="t-caption mt-2 text-ink-faint">
-        이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣습니다. <code>## </code> <code>- </code>{" "}
-        <code>&gt; </code>처럼 치면 바로 그 블록이 되고, 글자를 선택하면 서식 버튼이 뜹니다.
+        {tools === "image" ? (
+          "이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣을 수 있습니다."
+        ) : (
+          <>
+            이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣습니다. <code>## </code> <code>- </code>{" "}
+            <code>&gt; </code>처럼 치면 바로 그 블록이 되고, 글자를 선택하면 서식 버튼이 뜹니다.
+          </>
+        )}
         {mode === "demo" && " 데모 모드에서는 이미지가 글 안에 직접 담겨 용량이 커집니다."}
       </p>
 
@@ -219,14 +260,16 @@ function Toolbar({
   uploading,
   onPick,
   meta,
+  tools,
 }: {
   editor: Editor;
   uploading: number;
   onPick: (files: File[]) => void;
   meta?: React.ReactNode;
+  tools: "full" | "image";
 }) {
   const items: { label: string; active: string; attrs?: Record<string, unknown>; run: () => void }[] =
-    [
+    tools === "image" ? [] : [
       { label: "본문", active: "paragraph", run: () => editor.chain().focus().setParagraph().run() },
       {
         label: "제목",
@@ -259,7 +302,9 @@ function Toolbar({
         </ChipButton>
       ))}
 
-      <span className="mx-1 h-4 w-px shrink-0 bg-line" aria-hidden="true" />
+      {items.length > 0 && (
+        <span className="mx-1 h-4 w-px shrink-0 bg-line" aria-hidden="true" />
+      )}
 
       <label className={cn("chip chip-outline chip-sm shrink-0 cursor-pointer")}>
         + 이미지

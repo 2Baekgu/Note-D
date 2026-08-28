@@ -160,7 +160,7 @@ export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
  *  `folder` separates covers from the images dropped into a body. */
 export async function uploadImage(
   file: File,
-  folder: "covers" | "body" | "avatars" = "covers",
+  folder: "covers" | "body" | "avatars" | "bug-reports" = "covers",
 ): Promise<{ url?: string; error?: string }> {
   if (!file.type.startsWith("image/")) {
     return { error: `${file.name}은(는) 이미지 파일이 아닙니다.` };

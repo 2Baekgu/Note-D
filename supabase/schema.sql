@@ -54,6 +54,21 @@ create table if not exists public.comments (
 create index if not exists comments_article_idx
   on public.comments (article_id, created_at);
 
+-- ── bug reports ─────────────────────────────────────────────
+--  Anyone signed in may file one, and a guest is exactly the person most
+--  likely to walk into something broken. Only the reporter and an admin
+--  can read it back.
+create table if not exists public.bug_reports (
+  id          uuid primary key default gen_random_uuid(),
+  reporter_id uuid references public.profiles(id) on delete set null,
+  content     text not null,
+  status      text not null default 'open' check (status in ('open','resolved')),
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists bug_reports_status_created_idx
+  on public.bug_reports (status, created_at desc);
+
 -- ── updated_at trigger ──────────────────────────────────────
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
@@ -160,9 +175,10 @@ create trigger profiles_guard_role
   for each row execute function public.guard_profile_role();
 
 -- ── Row Level Security ──────────────────────────────────────
-alter table public.profiles   enable row level security;
-alter table public.articles   enable row level security;
-alter table public.comments   enable row level security;
+alter table public.profiles    enable row level security;
+alter table public.articles    enable row level security;
+alter table public.comments    enable row level security;
+alter table public.bug_reports enable row level security;
 
 -- Anyone may read profiles, categories and published articles.
 drop policy if exists "profiles are public" on public.profiles;
@@ -215,6 +231,23 @@ drop policy if exists "authors manage their comments" on public.comments;
 create policy "authors manage their comments" on public.comments
   for delete using (auth.uid() = author_id or public.is_admin());
 
+-- Bug reports: file your own, read your own; an admin reads and closes all.
+drop policy if exists "anyone signed in files a report" on public.bug_reports;
+create policy "anyone signed in files a report" on public.bug_reports
+  for insert with check (auth.uid() = reporter_id);
+
+drop policy if exists "reporters and admins read reports" on public.bug_reports;
+create policy "reporters and admins read reports" on public.bug_reports
+  for select using (auth.uid() = reporter_id or public.is_admin());
+
+drop policy if exists "admins resolve reports" on public.bug_reports;
+create policy "admins resolve reports" on public.bug_reports
+  for update using (public.is_admin()) with check (public.is_admin());
+
+drop policy if exists "admins delete reports" on public.bug_reports;
+create policy "admins delete reports" on public.bug_reports
+  for delete using (public.is_admin());
+
 -- ── Storage bucket for cover images ─────────────────────────
 insert into storage.buckets (id, name, public)
 values ('media', 'media', true)
@@ -224,9 +257,14 @@ drop policy if exists "media is public" on storage.objects;
 create policy "media is public" on storage.objects
   for select using (bucket_id = 'media');
 
+-- Publishing rights gate the article folders. A screenshot attached to a bug
+-- report is the one thing a guest must still be able to upload.
 drop policy if exists "members upload media" on storage.objects;
 create policy "members upload media" on storage.objects
-  for insert to authenticated with check (bucket_id = 'media' and public.can_publish());
+  for insert to authenticated with check (
+    bucket_id = 'media'
+    and (public.can_publish() or (storage.foldername(name))[1] = 'bug-reports')
+  );
 
 -- ── first admin ─────────────────────────────────────────────
 --  Sign in with Google once, then run this with that address so the

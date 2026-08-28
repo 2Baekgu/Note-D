@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import type { Article, ArticleWithAuthor, Comment, User } from "@/lib/types";
+import type { Article, ArticleWithAuthor, BugReport, Comment, User } from "@/lib/types";
 import { sampleArticles } from "@/lib/data/articles";
 import { members as sampleMembers } from "@/lib/data/members";
 import { sampleComments } from "@/lib/data/comments";
@@ -299,4 +299,31 @@ export async function listComments(articleId: string): Promise<Comment[]> {
   return sampleComments
     .filter((c) => c.articleId === articleId)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+/** Bug reports, newest first. RLS narrows this to the caller's own unless
+ *  they are an admin, so the admin screen gets everything and nobody else
+ *  can widen it by asking. */
+export async function listBugReports(): Promise<BugReport[]> {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("bug_reports")
+    .select("*, profiles(name, email)")
+    .order("created_at", { ascending: false });
+  if (error || !data) return [];
+
+  return data.map((row: ArticleRow) => {
+    const profile = (row.profiles ?? {}) as ArticleRow;
+    return {
+      id: s(row.id),
+      reporterId: (row.reporter_id as string | null) ?? null,
+      reporterName: s(profile.name, "탈퇴한 사용자"),
+      reporterEmail: s(profile.email),
+      content: s(row.content),
+      status: row.status === "resolved" ? "resolved" : "open",
+      createdAt: s(row.created_at),
+    };
+  });
 }
