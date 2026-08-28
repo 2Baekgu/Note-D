@@ -77,16 +77,40 @@ export interface SaveResult {
 }
 
 /** Writes to Supabase when configured, otherwise to this browser. */
+/** `slug` is unique, and an upsert keyed on it would quietly write over
+ *  someone else's article when two titles reduce to the same thing — which
+ *  a placeholder title like "제목" makes likely. Take the next free one. */
+async function freeSlug(
+  supabase: NonNullable<ReturnType<typeof getSupabaseBrowserClient>>,
+  base: string,
+  id: string | undefined,
+): Promise<string> {
+  const stem = base || "untitled";
+  for (let n = 1; n < 50; n++) {
+    const candidate = n === 1 ? stem : `${stem}-${n}`;
+    const { data } = await supabase
+      .from("articles")
+      .select("id")
+      .eq("slug", candidate)
+      .maybeSingle();
+    if (!data || (id && (data as { id: string }).id === id)) return candidate;
+  }
+  return `${stem}-${Date.now().toString(36)}`;
+}
+
 export async function persistArticle(article: Article): Promise<SaveResult> {
   const clean = normalize(article);
   const supabase = getSupabaseBrowserClient();
 
   if (supabase) {
+    const id = clean.id.startsWith("local-") ? undefined : clean.id;
+    const slug = await freeSlug(supabase, clean.slug, id);
+
     const { error } = await supabase.from("articles").upsert(
       {
-        id: clean.id.startsWith("local-") ? undefined : clean.id,
+        id,
         title: clean.title,
-        slug: clean.slug,
+        slug,
         subtitle: clean.subtitle,
         content: clean.content,
         cover_image: clean.coverImage,

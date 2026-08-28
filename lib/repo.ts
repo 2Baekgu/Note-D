@@ -105,7 +105,7 @@ export async function listPublicMembers(): Promise<User[]> {
 export async function getMemberByHandle(handle: string): Promise<User | null> {
   const all = await listMembers();
   return (
-    all.find((m) => m.handle.toLowerCase() === handle.toLowerCase()) ?? null
+    all.find((m) => sameSlug(m.handle.toLowerCase(), handle.toLowerCase())) ?? null
   );
 }
 
@@ -202,12 +202,31 @@ export async function listArticles(
   return q.limit ? result.slice(0, q.limit) : result;
 }
 
+/** A route param arrives as the raw path segment, so a slug with any
+ *  non-ASCII in it — a Korean title, say — comes back percent-encoded and
+ *  never matches what is stored. Korean also has two normal forms, and the
+ *  one a browser sends is not always the one the editor saved. */
+function sameSlug(a: string, b: string): boolean {
+  const forms = (v: string) => {
+    let decoded = v;
+    try {
+      decoded = decodeURIComponent(v);
+    } catch {
+      /* a stray % is not an escape; compare it as written */
+    }
+    return new Set([v, decoded, decoded.normalize("NFC"), decoded.normalize("NFD")]);
+  };
+  const left = forms(a);
+  for (const form of forms(b)) if (left.has(form)) return true;
+  return false;
+}
+
 export async function getArticleBySlug(
   slug: string,
   includeDrafts = false,
 ): Promise<ArticleWithAuthor | null> {
   const all = await listArticles({ includeDrafts });
-  return all.find((a) => a.slug === slug) ?? null;
+  return all.find((a) => sameSlug(a.slug, slug)) ?? null;
 }
 
 export async function getFeaturedArticle(): Promise<ArticleWithAuthor | null> {
