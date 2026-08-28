@@ -41,7 +41,7 @@ export function Header() {
 
       <div className="shell relative flex h-[var(--header-h)] items-center justify-between gap-6">
         <Link href="/" aria-label={site.name}>
-          <Wordmark className="text-[1.45rem]" />
+          <Wordmark className="h-[26px]" />
         </Link>
 
         <div className="hidden items-center gap-4 md:flex">

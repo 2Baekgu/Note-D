@@ -26,7 +26,7 @@ export function Footer() {
       <div className="frame-row">
         <div className="grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
           <div className="frame-cell py-12">
-            <p><Wordmark className="t-display" /></p>
+            <Wordmark className="h-[46px]" />
             <p className="t-body mt-4 max-w-[30ch] text-ink-muted">{site.tagline}</p>
             <p className="t-label mt-8 text-ink-faint">
               Since {site.since} · {site.kind}
