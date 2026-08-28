@@ -12,7 +12,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Chip, ChipButton } from "@/components/ui/Chip";
 import { useStuck } from "@/components/ui/useStuck";
-import { ContentComposer } from "./ContentComposer";
+import { BlockEditor } from "./BlockEditor";
 import { emptyArticle, persistArticle, uploadCover } from "@/lib/studio";
 import { readingTime } from "@/lib/content/parse";
 import { cn, formatDate, slugify } from "@/lib/utils";
@@ -190,12 +190,9 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                   {article.content.length.toLocaleString()}자 · 약 {readingTime(article.content)}분
                 </span>
               </div>
-              <ContentComposer
+              <BlockEditor
                 value={article.content}
-                onChange={(update) =>
-                  setArticle((a) => ({ ...a, content: update(a.content) }))
-                }
-                placeholder={"## 첫 번째 섹션\n\n여기에 본문을 씁니다.\n\n이미지는 끌어다 놓으세요.\n\n> 인용하고 싶은 문장\n> — 출처"}
+                onChange={(content) => patch({ content })}
               />
 
               <details className="surface mt-4 p-6">
