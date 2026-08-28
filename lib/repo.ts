@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { Article, ArticleWithAuthor, Comment, User } from "@/lib/types";
 import { sampleArticles } from "@/lib/data/articles";
 import { members as sampleMembers } from "@/lib/data/members";
@@ -77,7 +79,10 @@ function join(articles: Article[], users: User[]): ArticleWithAuthor[] {
 
 /* ── Members ─────────────────────────────────────────────── */
 
-export async function listMembers(): Promise<User[]> {
+/** Memoised per request. A single page can ask for the roster three or four
+ *  times over — the author of the article, the related cards, the header —
+ *  and each one was its own round trip to the database. */
+export const listMembers = cache(async function listMembers(): Promise<User[]> {
   const supabase = await getSupabaseServerClient();
   if (supabase) {
     const { data, error } = await supabase
@@ -87,7 +92,7 @@ export async function listMembers(): Promise<User[]> {
     if (!error && data?.length) return data.map(rowToUser);
   }
   return sampleMembers;
-}
+});
 
 export async function getMemberByHandle(handle: string): Promise<User | null> {
   const all = await listMembers();
@@ -126,7 +131,12 @@ export async function memberHandles(): Promise<string[]> {
 
 /* ── Articles ────────────────────────────────────────────── */
 
-async function rawArticles(includeDrafts = false): Promise<Article[]> {
+/** Memoised per request, like listMembers. An article page reaches this
+ *  through generateMetadata, the page body and the related list — three
+ *  identical fetches of the same 32 rows before this wrapper. */
+const rawArticles = cache(async function rawArticles(
+  includeDrafts = false,
+): Promise<Article[]> {
   const supabase = await getSupabaseServerClient();
   if (supabase) {
     let query = supabase.from("articles").select("*");
@@ -137,7 +147,7 @@ async function rawArticles(includeDrafts = false): Promise<Article[]> {
     if (!error && data?.length) return data.map(rowToArticle);
   }
   return sampleArticles.filter((a) => includeDrafts || a.status === "published");
-}
+});
 
 export interface ArticleQuery {
   topic?: string;
