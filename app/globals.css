@@ -158,10 +158,11 @@ body {
   font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  /* `clip`, never `hidden`: hidden forces the other axis to `auto`, which
-     turns body into a scroll container and silently kills every
-     `position: sticky` inside it — the header included. `clip` guards the
-     same accidental sideways scroll without creating a scrollport. */
+  /* `clip` rather than `hidden`: hidden forces the other axis to `auto`,
+     which makes an element a scroll container — a hazard for any
+     `position: sticky` inside it. `clip` guards the same accidental sideways
+     scroll without creating a scrollport. Nothing on the site actually
+     overflows sideways today; this is insurance. */
   overflow-x: clip;
   /* Korean breaks by word, not by syllable. Harmless for Latin. */
   word-break: keep-all;

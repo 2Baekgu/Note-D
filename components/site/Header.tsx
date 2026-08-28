@@ -28,7 +28,11 @@ export function Header() {
   const close = () => setOpen(false);
 
   return (
-    <header className="blueprint sticky top-0 z-50 border-b border-[var(--frame-line)] bg-paper">
+    /* No `blueprint` here: that class sets `position: relative`, and because
+       globals.css is unlayered while Tailwind's utilities are not, it beat
+       `sticky` and quietly stopped the header from pinning. `sticky` is its
+       own containing block, so the frame below positions against it anyway. */
+    <header className="sticky top-0 z-50 border-b border-[var(--frame-line)] bg-paper">
       {/* The frame starts at the very top of the page. The corner squares
           straddle the header rule, so they belong to the header — drawn from
           the page below, the header background would clip their upper half. */}
