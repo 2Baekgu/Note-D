@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 
 /** A contribution graph on the study's own unit. GitHub counts a day and
  *  takes its height from the seven weekdays; a week has no such axis, so a
- *  year in weeks is one very long line. Folding the year into quarters —
- *  thirteen weeks a row, four rows — gives it a block shape instead of a
- *  ribbon, and leaves room for cells big enough to aim at. */
+ *  year in weeks is one long line. One year at a time, folded at the half —
+ *  twenty-six weeks a row, two rows — fills the column without growing past
+ *  the card beside it. Cells flex, so the grid fits whatever width it gets. */
 
 type Cell = {
   key: string;
@@ -25,9 +25,9 @@ const LEVELS = [
   "var(--streak-4)",
 ];
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const PER_ROW = 13; // a quarter
-const ROWS = 4;
-const ROW_LABEL = ["Jan", "Apr", "Jul", "Oct"];
+const PER_ROW = 26; // half a year
+const ROWS = 2;
+const ROW_LABEL = ["Jan", "Jul"];
 
 const level = (n: number) => (n === 0 ? 0 : Math.min(n, 4));
 
@@ -69,14 +69,16 @@ export function PostingStreak({
     const first = found.length ? Math.min(...found) : now;
     const last = Math.max(now, ...(found.length ? found : [now]));
 
-    const out: { year: number; rows: Cell[][] }[] = [];
+    const out: { year: number; rows: Cell[][]; posts: number }[] = [];
     for (let y = first; y <= last; y++) {
       const start = mondayOf(new Date(y, 0, 1));
       const cells: Cell[] = [];
+      let count = 0;
       for (let i = 0; i < PER_ROW * ROWS; i++) {
         const monday = new Date(start);
         monday.setDate(monday.getDate() + i * 7);
         const slot = byWeek.get(iso(monday));
+        count += slot?.count ?? 0;
         cells.push({
           key: iso(monday),
           monday,
@@ -87,12 +89,16 @@ export function PostingStreak({
       }
       const rows: Cell[][] = [];
       for (let r = 0; r < ROWS; r++) rows.push(cells.slice(r * PER_ROW, (r + 1) * PER_ROW));
-      out.push({ year: y, rows });
+      out.push({ year: y, rows, posts: count });
     }
     return out;
   }, [posts]);
 
+  // Opens on the most recent year, the way a profile should.
+  const [index, setIndex] = useState(() => Math.max(0, years.length - 1));
+
   if (!posts.length) return null;
+  const shown = years[Math.min(index, years.length - 1)];
 
   // Mouse and keyboard both land here; only the element matters.
   function show(e: { currentTarget: HTMLElement }, cell: Cell) {
@@ -106,63 +112,86 @@ export function PostingStreak({
     });
   }
 
+  const step = (by: -1 | 1) =>
+    setIndex((i) => Math.min(years.length - 1, Math.max(0, i + by)));
+
+  const arrow =
+    "flex h-5 w-5 items-center justify-center rounded-sm text-ink-faint transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.06)] hover:text-ink disabled:pointer-events-none disabled:opacity-30";
+
   return (
-    <div ref={boxRef} className="surface relative mt-10 w-fit max-w-full p-6">
+    <div ref={boxRef} className="surface relative mt-10 px-5 py-4">
       <div className="flex items-baseline justify-between gap-4">
         <p className="t-label text-ink-faint">Posting streak</p>
-        <p className="t-caption text-ink-muted">{posts.length} posts</p>
+        <p className="t-caption text-ink-muted">
+          {shown.posts} posts in {shown.year}
+        </p>
       </div>
 
-      <div className="scroll-x mt-5 space-y-5">
-        {years.map((year) => (
-          <div key={year.year}>
-            <p className="mb-1.5 pl-8 text-ink-faint" style={{ fontSize: "0.625rem" }}>
-              {year.year}
-            </p>
+      {/* Year picker and key share a line, so the card stays short. */}
+      <div className="mt-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            className={arrow}
+            onClick={() => step(-1)}
+            disabled={index <= 0}
+            aria-label="이전 해"
+          >
+            ‹
+          </button>
+          <span className="t-caption w-10 text-center tabular-nums">{shown.year}</span>
+          <button
+            type="button"
+            className={arrow}
+            onClick={() => step(1)}
+            disabled={index >= years.length - 1}
+            aria-label="다음 해"
+          >
+            ›
+          </button>
+        </div>
 
-            <div className="space-y-[5px]">
-              {year.rows.map((row, r) => (
-                <div key={r} className="flex items-center gap-[5px]">
-                  <span
-                    className="w-6 shrink-0 text-right text-ink-faint"
-                    style={{ fontSize: "0.625rem" }}
-                  >
-                    {ROW_LABEL[r]}
-                  </span>
-                  {row.map((cell) => (
-                    <button
-                      key={cell.key}
-                      type="button"
-                      onMouseOver={(e) => show(e, cell)}
-                      onMouseOut={() => setHover(null)}
-                      onFocus={(e) => show(e, cell)}
-                      onBlur={() => setHover(null)}
-                      aria-label={`${label(cell.monday)} week, ${cell.count} posts`}
-                      className={cn(
-                        "h-[20px] w-[20px] shrink-0 rounded-[4px] transition-transform duration-[var(--duration-fast)]",
-                        !cell.inYear && "opacity-30",
-                        hover?.cell.key === cell.key && "scale-110",
-                      )}
-                      style={{ background: LEVELS[level(cell.count)] }}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
+        <div className="flex items-center gap-1">
+          <span className="text-ink-faint" style={{ fontSize: "0.625rem" }}>
+            Less
+          </span>
+          {LEVELS.map((c) => (
+            <span key={c} className="h-[10px] w-[10px] rounded-[2px]" style={{ background: c }} />
+          ))}
+          <span className="text-ink-faint" style={{ fontSize: "0.625rem" }}>
+            More
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-3 space-y-[5px]">
+        {shown.rows.map((row, r) => (
+          <div key={r} className="flex items-center gap-[5px]">
+            <span
+              className="w-6 shrink-0 text-right text-ink-faint"
+              style={{ fontSize: "0.625rem" }}
+            >
+              {ROW_LABEL[r]}
+            </span>
+            {row.map((cell) => (
+              <button
+                key={cell.key}
+                type="button"
+                onMouseOver={(e) => show(e, cell)}
+                onMouseOut={() => setHover(null)}
+                onFocus={(e) => show(e, cell)}
+                onBlur={() => setHover(null)}
+                aria-label={`${label(cell.monday)} week, ${cell.count} posts`}
+                className={cn(
+                  "aspect-square min-w-0 flex-1 rounded-[3px] transition-transform duration-[var(--duration-fast)]",
+                  !cell.inYear && "opacity-30",
+                  hover?.cell.key === cell.key && "scale-125",
+                )}
+                style={{ background: LEVELS[level(cell.count)] }}
+              />
+            ))}
           </div>
         ))}
-      </div>
-
-      <div className="mt-5 flex items-center justify-end gap-1">
-        <span className="text-ink-faint" style={{ fontSize: "0.6875rem" }}>
-          Less
-        </span>
-        {LEVELS.map((c) => (
-          <span key={c} className="h-[12px] w-[12px] rounded-[3px]" style={{ background: c }} />
-        ))}
-        <span className="text-ink-faint" style={{ fontSize: "0.6875rem" }}>
-          More
-        </span>
       </div>
 
       {hover && (
