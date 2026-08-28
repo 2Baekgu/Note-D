@@ -2,7 +2,7 @@ import type { Article, Reference } from "@/lib/types";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { slugify } from "@/lib/utils";
 
-const LOCAL_KEY = "notesd:articles";
+const LOCAL_KEY = "noted:articles";
 
 /* Local drafts keep the authoring flow usable before Supabase is connected.
    They live in this browser only — the Studio UI says so. */

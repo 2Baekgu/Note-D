@@ -1,6 +1,6 @@
 export const site = {
-  name: "Notes:D",
-  fullName: "Notes:D — Design Notes on UX/UI",
+  name: "Note:D",
+  fullName: "Note:D — Design Notes on UX/UI",
   tagline: "우리는 사람들이 무언가를 경험하는 방식을 공부합니다.",
   taglineEn: "An asynchronous journal on how people experience things.",
   description:

@@ -1,4 +1,4 @@
-# Notes:D — UX/UI Study Journal
+# Note:D — UX/UI Study Journal
 
 디자인을 읽고 쓰는 UX/UI 스터디의 온라인 매거진 겸 아카이브.
 멤버가 각자 공부한 것을 아티클로 발행하고, 편한 시간에 읽고, 댓글로 이야기하는 공간입니다.

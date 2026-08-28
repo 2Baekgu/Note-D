@@ -37,7 +37,7 @@ interface AuthValue {
 }
 
 const AuthContext = createContext<AuthValue | null>(null);
-const DEMO_KEY = "notesd:demo-user";
+const DEMO_KEY = "noted:demo-user";
 
 /** What a new profile starts with, so no field on a member page is empty. */
 const DEFAULT_TITLE = "UX/UI Designer";
