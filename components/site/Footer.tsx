@@ -2,6 +2,7 @@ import Link from "next/link";
 import { site } from "@/lib/site";
 import { topics } from "@/lib/data/topics";
 import { GridRule } from "./GridRule";
+import { Wordmark } from "./Wordmark";
 
 /** The page closes the way it opens: hairline cells inside the frame, with a
  *  square at every crossing. No inverted block. */
@@ -25,7 +26,7 @@ export function Footer() {
       <div className="frame-row">
         <div className="grid md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
           <div className="frame-cell py-12">
-            <p className="wordmark t-display">{site.name}</p>
+            <p><Wordmark className="t-display" /></p>
             <p className="t-body mt-4 max-w-[30ch] text-ink-muted">{site.tagline}</p>
             <p className="t-label mt-8 text-ink-faint">
               Since {site.since} · {site.kind}

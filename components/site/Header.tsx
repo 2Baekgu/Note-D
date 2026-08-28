@@ -7,6 +7,7 @@ import { site } from "@/lib/site";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ButtonLink } from "@/components/ui/Button";
 import { BlueprintFrame } from "./BlueprintFrame";
+import { Wordmark } from "./Wordmark";
 import { AccountMenu } from "./AccountMenu";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +41,7 @@ export function Header() {
 
       <div className="shell relative flex h-[var(--header-h)] items-center justify-between gap-6">
         <Link href="/" aria-label={site.name}>
-          <span className="wordmark text-[1.45rem]">{site.name}</span>
+          <Wordmark className="text-[1.45rem]" />
         </Link>
 
         <div className="hidden items-center gap-4 md:flex">
