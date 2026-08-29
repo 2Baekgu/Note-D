@@ -69,6 +69,29 @@ create table if not exists public.bug_reports (
 create index if not exists bug_reports_status_created_idx
   on public.bug_reports (status, created_at desc);
 
+-- ── daily sends ─────────────────────────────────────────────
+--  One article a day goes to the study's open chat. This is the record of
+--  what already went, which is what stops a repeat and what drives the
+--  "least recently sent" rotation once every article has had a turn.
+--
+--  `sent_on` is the Korean calendar day, written by the API rather than
+--  derived here: `at time zone` is STABLE, not IMMUTABLE, so a Seoul-day
+--  expression cannot be indexed. Unique on it, so two calls on one morning
+--  cannot both take a pick.
+--
+--  `message` holds the text that was sent, so a retry the same day returns
+--  exactly what went out the first time instead of paying for a new summary.
+create table if not exists public.daily_sends (
+  id         uuid primary key default gen_random_uuid(),
+  article_id uuid not null references public.articles(id) on delete cascade,
+  sent_at    timestamptz not null default now(),
+  sent_on    date not null unique,
+  message    text not null default ''
+);
+
+create index if not exists daily_sends_article_idx
+  on public.daily_sends (article_id, sent_at desc);
+
 -- ── updated_at trigger ──────────────────────────────────────
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
@@ -179,6 +202,7 @@ alter table public.profiles    enable row level security;
 alter table public.articles    enable row level security;
 alter table public.comments    enable row level security;
 alter table public.bug_reports enable row level security;
+alter table public.daily_sends  enable row level security;
 
 -- Anyone may read profiles, categories and published articles.
 drop policy if exists "profiles are public" on public.profiles;
@@ -247,6 +271,11 @@ create policy "admins resolve reports" on public.bug_reports
 drop policy if exists "admins delete reports" on public.bug_reports;
 create policy "admins delete reports" on public.bug_reports
   for delete using (public.is_admin());
+
+-- daily_sends carries no policy on purpose. RLS with no policy denies every
+-- anon and authenticated request, so the table is unreachable with the
+-- publishable key. /api/daily-pick reaches it with the service role and is
+-- itself gated by DAILY_PICK_TOKEN — that route is the only way in.
 
 -- ── Storage bucket for cover images ─────────────────────────
 insert into storage.buckets (id, name, public)
