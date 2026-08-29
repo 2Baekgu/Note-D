@@ -12,6 +12,7 @@ import { MembersStrip } from "@/components/home/MembersStrip";
 import { SectionHead } from "@/components/ui/SectionHead";
 import { Reveal } from "@/components/ui/Reveal";
 import { ButtonLink } from "@/components/ui/Button";
+import { OpenChatCard } from "@/components/site/OpenChatCard";
 import { PageFrame } from "@/components/site/PageFrame";
 import { GridRule } from "@/components/site/GridRule";
 import { formatDate } from "@/lib/utils";
@@ -93,6 +94,12 @@ export default async function HomePage() {
           <MembersStrip members={members} counts={byAuthor} />
         </div>
       </section>
+
+      <GridRule />
+
+      <Reveal as="section" className="shell section-pad">
+        <OpenChatCard />
+      </Reveal>
 
       <GridRule />
 

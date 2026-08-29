@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { site } from "@/lib/site";
 import { topics } from "@/lib/data/topics";
 import { HowItWorks } from "@/components/home/HowItWorks";
+import { OpenChatCard } from "@/components/site/OpenChatCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { Marquee } from "@/components/ui/Marquee";
 import { ChipLink } from "@/components/ui/Chip";
@@ -88,6 +89,12 @@ export default function AboutPage() {
           </p>
         </div>
         <HowItWorks />
+      </Reveal>
+
+      <GridRule />
+
+      <Reveal as="section" className="shell section-pad">
+        <OpenChatCard />
       </Reveal>
 
       {/* What */}
