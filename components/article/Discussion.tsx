@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Comment } from "@/lib/types";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Avatar } from "@/components/ui/Avatar";
@@ -17,6 +17,55 @@ import { relativeTime, cn } from "@/lib/utils";
 /** Enough to answer with, few enough to choose from without thinking. */
 const EMOJI = ["👍", "🙌", "🔥", "💡", "🤔", "😂", "👀", "❤️"];
 
+/** Follow the hash to the comment it names.
+ *
+ *  The browser aims once, on its way in, while the images above the thread
+ *  are still arriving — so it lands wherever the comment happened to be at
+ *  that moment, which is short of where it ends up. Aim again as the page
+ *  settles, and stop the moment the reader takes over. */
+function useHashLanding() {
+  useEffect(() => {
+    if (!window.location.hash) return;
+    let following = true;
+
+    const settle = () => {
+      if (!following) return;
+      const el = document.getElementById(
+        decodeURIComponent(window.location.hash.slice(1)),
+      );
+      // `auto`, not smooth: a correction should not read as a second journey.
+      el?.scrollIntoView({ block: "start", behavior: "auto" });
+    };
+    const release = () => {
+      following = false;
+    };
+    const follow = () => {
+      following = true;
+      settle();
+    };
+
+    settle();
+    const timers = [80, 300, 900, 1800].map((ms) =>
+      window.setTimeout(settle, ms),
+    );
+    window.addEventListener("load", settle);
+    window.addEventListener("hashchange", follow);
+    // The reader's own scroll wins; stop nudging them.
+    window.addEventListener("wheel", release, { passive: true });
+    window.addEventListener("touchstart", release, { passive: true });
+    window.addEventListener("keydown", release);
+
+    return () => {
+      timers.forEach(window.clearTimeout);
+      window.removeEventListener("load", settle);
+      window.removeEventListener("hashchange", follow);
+      window.removeEventListener("wheel", release);
+      window.removeEventListener("touchstart", release);
+      window.removeEventListener("keydown", release);
+    };
+  }, []);
+}
+
 export function Discussion({
   articleId,
   initialComments,
@@ -25,6 +74,7 @@ export function Discussion({
   initialComments: Comment[];
 }) {
   const { user, mode } = useAuth();
+  useHashLanding();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [error, setError] = useState<string | null>(null);
   /** Which comment has the reply box open under it. */
@@ -149,7 +199,10 @@ export function Discussion({
     <section className="section-gap" aria-labelledby="discussion">
       <div className="article-column">
         <div className="flex items-baseline justify-between gap-4 border-t border-line pt-4">
-          <h2 id="discussion" className="t-label text-accent">
+          <h2
+            id="discussion"
+            className="t-label scroll-mt-[calc(var(--header-h)+2rem)] text-accent"
+          >
             Discussion
           </h2>
           <span className="t-caption text-ink-faint">
@@ -252,7 +305,10 @@ function CommentRow({
   const signedIn = Boolean(currentUserId);
 
   return (
-    <div className="flex gap-3 sm:gap-4">
+    <div
+      id={`comment-${c.id}`}
+      className="flex scroll-mt-[calc(var(--header-h)+2rem)] gap-3 sm:gap-4"
+    >
       <Avatar
         name={c.authorName}
         src={c.authorImage}

@@ -66,6 +66,14 @@ export async function toggleReaction(
   return error ? { ok: false, error: error.message } : { ok: true };
 }
 
+/** Clearing one is the reader's own housekeeping, so it really is a delete. */
+export async function deleteNotification(id: string): Promise<Result> {
+  const supabase = getSupabaseBrowserClient();
+  if (!supabase) return { ok: true };
+  const { error } = await supabase.from("notifications").delete().eq("id", id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
 export async function markNotificationsRead(ids: string[]): Promise<void> {
   const supabase = getSupabaseBrowserClient();
   if (!supabase || !ids.length) return;

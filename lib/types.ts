@@ -83,6 +83,8 @@ export interface Notification {
   actorImage: string | null;
   articleTitle: string;
   articleSlug: string;
+  /** The comment to land on, so the link goes to the remark and not the page. */
+  commentId: string | null;
   emoji: string | null;
   readAt: string | null;
   createdAt: string;
