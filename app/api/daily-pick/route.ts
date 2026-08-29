@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { timingSafeEqual } from "node:crypto";
 import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { summarise } from "@/lib/summary";
+import { firstLine } from "@/lib/content/doc";
 import {
   articleUrl,
   buildMessage,
@@ -152,7 +153,10 @@ export async function GET(request: Request) {
   // message away — the model is told it, and trimmed to it if it overruns.
   const budget = introBudget(chosen);
   const summary = await summarise(chosen.title, chosen.content, budget);
-  const message = buildMessage(chosen, fitIntro(summary.text ?? chosen.subtitle, budget));
+  // Not every article carries a subtitle — one of the imported ones does not.
+  // Its opening line stands in, so a failed pitch still says something.
+  const fallback = chosen.subtitle.trim() || firstLine(chosen.content);
+  const message = buildMessage(chosen, fitIntro(summary.text ?? fallback, budget));
 
   const { error: insertError } = await supabase
     .from("daily_sends")

@@ -81,7 +81,9 @@ export function buildMessage(article: DailyArticle, intro: string): string {
     cleanIntro(intro, article.title),
     `🔗 ${articleUrl(article.slug)}`,
     `✍️ ${article.author}`,
-  ].join(BLOCK_GAP);
+    // An empty intro would otherwise open a hole of blank lines in the middle
+    // of the message. Better a short card than a broken one.
+  ].filter(Boolean).join(BLOCK_GAP);
 }
 
 /** How many characters the intro may use, once the heading, title, link and
