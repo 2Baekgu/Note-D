@@ -283,22 +283,49 @@ export async function authorCounts(): Promise<Record<string, number>> {
 export async function listComments(articleId: string): Promise<Comment[]> {
   const supabase = await getSupabaseServerClient();
   if (supabase) {
-    const { data, error } = await supabase
-      .from("comments")
-      .select("*, profiles(name, profile_image)")
-      .eq("article_id", articleId)
-      .order("created_at", { ascending: true });
+    const [{ data, error }, { data: reactionRows }, { data: auth }] = await Promise.all([
+      supabase
+        .from("comments")
+        .select("*, profiles(name, profile_image)")
+        .eq("article_id", articleId)
+        .order("created_at", { ascending: true }),
+      supabase.from("comment_reactions").select("comment_id, user_id, emoji"),
+      supabase.auth.getUser(),
+    ]);
+
     if (!error && data) {
+      const me = auth?.user?.id ?? null;
+      // emoji tallies, keyed by comment
+      const tally = new Map<string, Map<string, { count: number; mine: boolean }>>();
+      for (const r of (reactionRows ?? []) as {
+        comment_id: string;
+        user_id: string;
+        emoji: string;
+      }[]) {
+        const forComment = tally.get(r.comment_id) ?? new Map();
+        const seen = forComment.get(r.emoji) ?? { count: 0, mine: false };
+        seen.count += 1;
+        if (me && r.user_id === me) seen.mine = true;
+        forComment.set(r.emoji, seen);
+        tally.set(r.comment_id, forComment);
+      }
+
       return data.map((row: ArticleRow) => {
         const profile = (row.profiles ?? {}) as ArticleRow;
+        const id = s(row.id);
         return {
-          id: s(row.id),
+          id,
           articleId: s(row.article_id),
           authorId: s(row.author_id),
           authorName: s(profile.name, "Member"),
           authorImage: (profile.profile_image as string | null) ?? null,
           content: s(row.content),
           createdAt: s(row.created_at),
+          parentId: (row.parent_id as string | null) ?? null,
+          updatedAt: (row.updated_at as string | null) ?? null,
+          reactions: [...(tally.get(id) ?? new Map())]
+            .map(([emoji, v]) => ({ emoji, count: v.count, mine: v.mine }))
+            .sort((a, b) => b.count - a.count || a.emoji.localeCompare(b.emoji)),
         };
       });
     }

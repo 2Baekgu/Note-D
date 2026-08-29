@@ -9,6 +9,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { BlueprintFrame } from "./BlueprintFrame";
 import { Wordmark } from "./Wordmark";
 import { AccountMenu } from "./AccountMenu";
+import { NotificationBell } from "./NotificationBell";
 import { cn } from "@/lib/utils";
 
 export function Header() {
@@ -64,6 +65,7 @@ export function Header() {
                 Studio
               </ButtonLink>
               <AccountMenu />
+              <NotificationBell />
             </div>
           ) : (
             <ButtonLink href="/login" variant="secondary" size="sm">
@@ -72,35 +74,41 @@ export function Header() {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="t-label -mr-1 flex items-center gap-2 px-2 py-2 md:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-        >
-          {open ? "Close" : "Menu"}
-          <span className="flex h-3 w-4 flex-col justify-between" aria-hidden="true">
+        <div className="flex items-center md:hidden">
+          {user && <NotificationBell />}
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="t-label -mr-1 flex items-center gap-2 px-2 py-2"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+          >
+            {open ? "Close" : "Menu"}
             <span
-              className={cn(
-                "block h-px w-full bg-current transition-transform duration-[var(--duration-base)] ease-out-quint",
-                open && "translate-y-[5.5px] rotate-45",
-              )}
-            />
-            <span
-              className={cn(
-                "block h-px w-full bg-current transition-opacity duration-[var(--duration-fast)]",
-                open && "opacity-0",
-              )}
-            />
-            <span
-              className={cn(
-                "block h-px w-full bg-current transition-transform duration-[var(--duration-base)] ease-out-quint",
-                open && "-translate-y-[5.5px] -rotate-45",
-              )}
-            />
-          </span>
-        </button>
+              className="flex h-3 w-4 flex-col justify-between"
+              aria-hidden="true"
+            >
+              <span
+                className={cn(
+                  "block h-px w-full bg-current transition-transform duration-[var(--duration-base)] ease-out-quint",
+                  open && "translate-y-[5.5px] rotate-45",
+                )}
+              />
+              <span
+                className={cn(
+                  "block h-px w-full bg-current transition-opacity duration-[var(--duration-fast)]",
+                  open && "opacity-0",
+                )}
+              />
+              <span
+                className={cn(
+                  "block h-px w-full bg-current transition-transform duration-[var(--duration-base)] ease-out-quint",
+                  open && "-translate-y-[5.5px] -rotate-45",
+                )}
+              />
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -108,7 +116,9 @@ export function Header() {
         id="mobile-menu"
         className={cn(
           "fixed inset-x-0 bottom-0 top-[var(--header-h)] z-40 overflow-y-auto border-t border-line bg-paper px-[calc(var(--gutter)+var(--cell-pad))] pb-12 pt-8 shadow-float transition-all duration-[var(--duration-base)] ease-out-quint md:hidden",
-          open ? "pointer-events-auto opacity-100" : "pointer-events-none -translate-y-2 opacity-0",
+          open
+            ? "pointer-events-auto opacity-100"
+            : "pointer-events-none -translate-y-2 opacity-0",
         )}
       >
         <nav className="flex flex-col" aria-label="모바일 메뉴">
@@ -120,7 +130,9 @@ export function Header() {
               className="t-h1 flex items-baseline justify-between border-b border-line py-6"
             >
               {item.label}
-              <span className="t-label text-ink-faint">{String(i).padStart(2, "0")}</span>
+              <span className="t-label text-ink-faint">
+                {String(i).padStart(2, "0")}
+              </span>
             </Link>
           ))}
         </nav>
@@ -132,7 +144,11 @@ export function Header() {
                 Studio
               </ButtonLink>
               {isAdmin && (
-                <Link href="/studio/admin" onClick={close} className="t-label link-underline">
+                <Link
+                  href="/studio/admin"
+                  onClick={close}
+                  className="t-label link-underline"
+                >
                   멤버 관리
                 </Link>
               )}
@@ -151,7 +167,9 @@ export function Header() {
           )}
         </div>
 
-        <p className="t-body mt-12 max-w-[30ch] text-ink-muted">{site.tagline}</p>
+        <p className="t-body mt-12 max-w-[30ch] text-ink-muted">
+          {site.tagline}
+        </p>
       </div>
     </header>
   );

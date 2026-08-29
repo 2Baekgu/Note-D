@@ -68,6 +68,26 @@ export interface BugReport {
   createdAt: string;
 }
 
+export interface Reaction {
+  emoji: string;
+  count: number;
+  /** Whether the person reading has left this one. */
+  mine: boolean;
+}
+
+/** Something that happened on your writing while you were away. */
+export interface Notification {
+  id: string;
+  type: "comment" | "reply" | "reaction";
+  actorName: string;
+  actorImage: string | null;
+  articleTitle: string;
+  articleSlug: string;
+  emoji: string | null;
+  readAt: string | null;
+  createdAt: string;
+}
+
 export interface Comment {
   id: string;
   articleId: string;
@@ -76,6 +96,11 @@ export interface Comment {
   authorImage: string | null;
   content: string;
   createdAt: string;
+  /** The comment this answers, if it answers one. One level only. */
+  parentId: string | null;
+  /** Set once the comment has been edited, so the thread can say so. */
+  updatedAt: string | null;
+  reactions: Reaction[];
 }
 
 export interface ArticleWithAuthor extends Article {
