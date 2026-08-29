@@ -628,7 +628,11 @@ export function EditorToolbar({
                   }}
                   className="flex w-full items-center gap-3 px-3 py-2.5 transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.05)]"
                 >
-                  <span className="rule-sample w-24 shrink-0" data-variant={variant ?? undefined} />
+                  {/* A constant slot, so the narrower drawings centre in it and every
+                      label starts at the same place. */}
+                  <span className="flex w-24 shrink-0 justify-center">
+                    <span className="rule-sample" data-variant={variant ?? undefined} />
+                  </span>
                   <span className="t-caption text-left text-ink-muted">{label}</span>
                 </button>
               ))}
