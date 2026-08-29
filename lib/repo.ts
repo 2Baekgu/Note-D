@@ -286,12 +286,16 @@ export async function listComments(articleId: string): Promise<Comment[]> {
     const [{ data, error }, { data: reactionRows }, { data: auth }] = await Promise.all([
       supabase
         .from("comments")
-        .select("*, profiles(name, profile_image)")
+        // Spelled out: `comment_reactions` gives comments a second route to
+        // profiles, so a bare `profiles(...)` embed is ambiguous.
+        .select("*, profiles!comments_author_id_fkey(name, profile_image)")
         .eq("article_id", articleId)
         .order("created_at", { ascending: true }),
       supabase.from("comment_reactions").select("comment_id, user_id, emoji"),
       supabase.auth.getUser(),
     ]);
+
+    if (error) console.error("listComments", error.message);
 
     if (!error && data) {
       const me = auth?.user?.id ?? null;
