@@ -11,9 +11,9 @@ const ENDPOINT = "https://api.openai.com/v1/responses";
 const TIMEOUT_MS = 30_000;
 /** Enough of the article to summarise. Whole posts run long and the opening
  *  carries the argument; this keeps one call well under a cent. */
-const MAX_CHARS = 6_000;
+const MAX_ARTICLE_CHARS = 6_000;
 
-const SYSTEM = `너는 콘텐츠 큐레이터다.
+const SYSTEM_TEMPLATE = `너는 콘텐츠 큐레이터다.
 아래 아티클을 읽고, 카카오톡으로 지인에게 "이 글 한번 읽어봐"라고 추천하는 것처럼 소개문을 작성해라.
 목적은 아티클의 내용을 완벽하게 요약하는 것이 아니다.
 독자가 "무슨 글인지 알겠고, 한번 읽어보고 싶다"고 느끼게 만드는 것이 목적이다.
@@ -33,9 +33,10 @@ const SYSTEM = `너는 콘텐츠 큐레이터다.
 12. 이모지는 전체에서 1개 정도만, 정말 어울리는 자리에만 쓴다. 없어도 되면 안 써도 된다. 문장마다 붙이거나 문장을 이모지로 시작하지 않는다.
 
 ### 길이
-전체 소개문은 6~10문장으로 작성한다.
-길어진 만큼 정보를 더 욱여넣으라는 뜻이 아니다.
-같은 이야기를 호흡을 두고 편하게 풀어 쓰라는 뜻이다.
+소개문은 공백을 포함해 {{MAX_CHARS}}자를 넘지 않는다. 이건 반드시 지켜야 한다.
+그 안에서 6~10문장으로 쓴다. 문장 수와 글자 수가 부딪히면 글자 수를 우선한다.
+길이를 정보로 채우지 말고, 호흡을 두고 편하게 풀어 쓰는 데 쓴다.
+길어질 것 같으면 사례를 하나로 줄인다. 문장을 중간에 끊지는 않는다.
 
 ### 줄바꿈
 읽는 사람은 카카오톡에서 이 글을 본다. 한 덩어리로 몰아 쓰면 읽히지 않는다.
@@ -53,6 +54,30 @@ const SYSTEM = `너는 콘텐츠 큐레이터다.
 - "충격적인", "반드시 읽어야 할", "놀라운" 같은 과장된 표현 사용하지 않기
 - 문장마다 정보를 욱여넣지 않기
 - 사람이 직접 추천하는 듯한 자연스러운 한국어 사용
+
+### 중요한 문체 규칙
+아티클을 평가하거나 독자에게 읽기를 권유하는 편집자처럼 쓰지 않는다.
+다음과 같은 표현은 사용하지 않는다.
+- 흥미롭습니다
+- 인상적입니다
+- 재미있습니다
+- 주목할 만합니다
+- 의미 있는 사례입니다
+- 생각해볼 만합니다
+- 한번 읽어보실 만합니다
+- 추천합니다
+- 읽어보세요
+- 살펴보세요
+- 도움이 될 것입니다
+- ~에 대해 생각하게 합니다
+- ~라는 점에서 흥미롭습니다
+아티클의 내용을 직접 보여주는 방식으로 작성한다.
+"이 글은 좋은 글이다"라고 평가하지 말고,
+"이 글에서 이런 일이 벌어진다"라고 설명한다.
+독자에게 행동을 요구하거나 읽기를 권유하지 않는다.
+링크를 제공하는 것만으로 충분하다.
+문체는 '에디터의 추천글'보다
+'친구가 좋은 글을 발견해서 핵심 내용과 함께 툭 공유하는 메시지'에 가깝게 한다.
 
 ### 출력
 소개문 텍스트만 출력한다. 제목, URL, 작성자, 이모지 머리말(📚 등)은 절대 포함하지 마라. 그건 코드가 붙인다.
@@ -94,11 +119,15 @@ function readOutput(json: unknown): string {
   return parts.join("\n").trim();
 }
 
-export async function summarise(title: string, content: string): Promise<SummaryResult> {
+export async function summarise(
+  title: string,
+  content: string,
+  maxChars: number,
+): Promise<SummaryResult> {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return { text: null, error: "OPENAI_API_KEY is not set" };
 
-  const body = toPlainText(content).trim().slice(0, MAX_CHARS);
+  const body = toPlainText(content).trim().slice(0, MAX_ARTICLE_CHARS);
   if (!body) return { text: null, error: "article body is empty" };
 
   try {
@@ -111,7 +140,7 @@ export async function summarise(title: string, content: string): Promise<Summary
       },
       body: JSON.stringify({
         model: MODEL,
-        instructions: SYSTEM,
+        instructions: SYSTEM_TEMPLATE.replace("{{MAX_CHARS}}", String(maxChars)),
         // The title is here so the "do not repeat it" rule has something to
         // avoid, not so it can be quoted back — the code owns the title line.
         input: `### 아티클\n제목: ${title}\n\n"""\n${body}\n"""`,

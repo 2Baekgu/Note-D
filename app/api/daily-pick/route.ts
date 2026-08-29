@@ -5,6 +5,8 @@ import { summarise } from "@/lib/summary";
 import {
   articleUrl,
   buildMessage,
+  fitIntro,
+  introBudget,
   pickDaily,
   seoulDay,
   type DailyArticle,
@@ -145,9 +147,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "보낼 아티클을 찾지 못했습니다." }, { status: 404 });
   }
 
-  // A summary is nice to have; the message is not optional.
-  const summary = await summarise(chosen.title, chosen.content);
-  const message = buildMessage(chosen, summary.text ?? chosen.subtitle);
+  // A summary is nice to have; the message is not optional. The budget is
+  // what is left of the 500 characters KakaoTalk shows before it folds the
+  // message away — the model is told it, and trimmed to it if it overruns.
+  const budget = introBudget(chosen);
+  const summary = await summarise(chosen.title, chosen.content, budget);
+  const message = buildMessage(chosen, fitIntro(summary.text ?? chosen.subtitle, budget));
 
   const { error: insertError } = await supabase
     .from("daily_sends")
@@ -178,6 +183,7 @@ export async function GET(request: Request) {
     author: chosen.author,
     publishedAt: chosen.publishedAt,
     summarySource: summary.text ? "openai" : "subtitle",
+    messageChars: message.length,
     // Present only when the pitch fell back, so a silent degradation is
     // visible in the response rather than needing a log dive.
     ...(summary.error ? { summaryError: summary.error } : {}),

@@ -21,6 +21,11 @@ export const REST_DAYS = 30;
 /** A blank line between every block, so the message breathes on a phone. */
 const BLOCK_GAP = "\n\n";
 
+/** KakaoTalk folds anything longer behind a "장문" link, which nobody opens.
+ *  Counted in UTF-16 units, which is never fewer than the characters a reader
+ *  sees — erring short is the safe direction. */
+export const MAX_MESSAGE_CHARS = 500;
+
 
 /** The Korean calendar day, which is the day the 9am Shortcut belongs to. */
 export function seoulDay(now: Date): string {
@@ -77,6 +82,39 @@ export function buildMessage(article: DailyArticle, intro: string): string {
     `🔗 ${articleUrl(article.slug)}`,
     `✍️ ${article.author}`,
   ].join(BLOCK_GAP);
+}
+
+/** How many characters the intro may use, once the heading, title, link and
+ *  byline have taken theirs. An article with a Hangul slug spends far more on
+ *  the percent-encoded link, so this is per article, not a constant. */
+export function introBudget(article: DailyArticle): number {
+  return Math.max(0, MAX_MESSAGE_CHARS - buildMessage(article, "").length);
+}
+
+/** The model is told the budget and usually respects it. This is what happens
+ *  when it does not: drop whole paragraphs from the end, then sentences from
+ *  the last one, so what survives still ends on a full stop. */
+export function fitIntro(intro: string, budget: number): string {
+  if (intro.length <= budget) return intro;
+
+  const paragraphs = intro.split("\n\n");
+  while (paragraphs.length > 1 && paragraphs.join("\n\n").length > budget) {
+    paragraphs.pop();
+  }
+  if (paragraphs.join("\n\n").length <= budget) return paragraphs.join("\n\n");
+
+  const sentences = paragraphs[paragraphs.length - 1].split(/(?<=[.!?])\s+/);
+  while (sentences.length > 1) {
+    sentences.pop();
+    paragraphs[paragraphs.length - 1] = sentences.join(" ");
+    const text = paragraphs.join("\n\n");
+    if (text.length <= budget) return text;
+  }
+
+  // One sentence and still over: cut at the last space rather than mid-word.
+  const hard = paragraphs.join("\n\n").slice(0, budget);
+  const space = hard.lastIndexOf(" ");
+  return (space > budget * 0.6 ? hard.slice(0, space) : hard).trimEnd();
 }
 
 /** Among articles nobody has seen yet, the newest goes first. That is what
