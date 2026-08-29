@@ -21,8 +21,6 @@ export const REST_DAYS = 30;
 /** A blank line between every block, so the message breathes on a phone. */
 const BLOCK_GAP = "\n\n";
 
-/** At most this many paragraphs of summary. */
-const MAX_BLOCKS = 3;
 
 /** The Korean calendar day, which is the day the 9am Shortcut belongs to. */
 export function seoulDay(now: Date): string {
@@ -42,40 +40,31 @@ export function articleUrl(slug: string): string {
   return `${siteUrl()}/articles/${encodeURIComponent(slug)}`;
 }
 
-/** The model is asked for one sentence per line, but it does not always
- *  oblige — and it likes to end a line with two trailing spaces, a markdown
- *  line break that is only stray whitespace in a chat room.
+/** The intro is the model's only job, and it is asked to hand back nothing
+ *  but prose. It sometimes hands back more anyway — a title line it was told
+ *  not to repeat, or the 📚 heading it was told the code owns. Strip those,
+ *  so a stray line cannot end up doubled in the message.
  *
- *  Returns the summary as two or three blocks. A wall of text is the thing
- *  that stops the message being read on a phone. */
-function summaryBlocks(summary: string): string[] {
-  const lines = summary
+ *  Trailing spaces go too: the model ends lines with the two that mean a
+ *  markdown line break and mean nothing at all in a chat room. */
+function cleanIntro(intro: string, title: string): string {
+  const heading = /^[📚🔗✍️]/u;
+  const bareUrl = /^https?:\/\/\S+$/;
+
+  return intro
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean);
-
-  // It obliged: one thought per line already.
-  const parts =
-    lines.length > 1
-      ? lines
-      : // It did not: break the single line on sentence ends. The lookbehind
-        // keeps the punctuation with the sentence it closes.
-        (lines[0] ?? "").split(/(?<=[.!?])\s+/).filter(Boolean);
-
-  if (parts.length <= MAX_BLOCKS) return parts;
-
-  // More pieces than blocks: the tail joins the last one rather than being
-  // dropped or left to sprawl.
-  const head = parts.slice(0, MAX_BLOCKS - 1);
-  return [...head, parts.slice(MAX_BLOCKS - 1).join(" ")];
+    .filter(Boolean)
+    .filter((line) => line !== title && !heading.test(line) && !bareUrl.test(line))
+    .join("\n");
 }
 
-export function buildMessage(article: DailyArticle, summary: string): string {
+export function buildMessage(article: DailyArticle, intro: string): string {
   return [
     "📚 오늘의 아티클",
     article.title,
-    ...summaryBlocks(summary),
-    articleUrl(article.slug),
+    cleanIntro(intro, article.title),
+    `🔗 ${articleUrl(article.slug)}`,
     `✍️ ${article.author}`,
   ].join(BLOCK_GAP);
 }

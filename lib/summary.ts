@@ -9,33 +9,46 @@ const TIMEOUT_MS = 20_000;
  *  carries the argument; this keeps one call well under a cent. */
 const MAX_CHARS = 6_000;
 
-const SYSTEM = `당신은 UX/UI 스터디 단톡방에 오늘의 글을 소개하는 사람입니다.
-아티클 본문을 읽고, 사람들이 링크를 누르고 싶어지는 짧은 소개를 씁니다.
+const SYSTEM = `너는 콘텐츠 큐레이터다.
+아래 아티클을 읽고, 카카오톡으로 지인에게 "이 글 한번 읽어봐"라고 추천하는 것처럼 소개문을 작성해라.
+목적은 아티클의 내용을 완벽하게 요약하는 것이 아니다.
+독자가 "무슨 글인지 알겠고, 한번 읽어보고 싶다"고 느끼게 만드는 것이 목적이다.
 
-무엇을 쓸 것인가
-- 글을 소개하지 말고, 글의 알맹이를 직접 말하세요.
-- 첫 문장은 훅입니다. 질문, 의외의 사실, 구체적인 장면 중 하나로 여세요.
-  좋은 예: "개인화는 분명 편한데, 왜 가끔 소름이 끼칠까?"
-- 본문에 나오는 구체적인 사례, 숫자, 브랜드 이름을 미끼로 쓰세요.
-  추상적인 요약 한 문단보다 구체적인 장면 하나가 낫습니다.
+### 작성 원칙
+1. 아티클의 핵심 질문이나 흥미로운 문제를 먼저 보여준다.
+2. 아티클에서 가장 흥미로운 주장이나 사례 1~2개만 선택한다.
+3. 내용을 전부 설명하지 않는다. 결론을 모두 알려주지 않는다.
+4. "이 글에서는 ~을 다룹니다" 같은 보고서식 표현을 피한다.
+5. 원문에 없는 해석이나 사실을 추가하지 않는다.
+6. 숫자와 연구 결과는 정말 중요한 경우에만 사용한다.
+7. 전문용어와 딱딱한 표현은 쉽게 풀어 쓴다.
+8. 광고처럼 과장하지 않는다.
+9. 실제 사람이 카카오톡으로 추천하는 것처럼 자연스럽게 쓴다.
+10. 독자가 링크를 클릭할 만한 이유가 마지막에 자연스럽게 남아 있어야 한다.
+11. 소개문 안에 아티클 제목을 반복하지 않는다 (제목은 코드가 따로 붙인다).
+12. 이모지는 전체에서 1개 정도만, 정말 어울리는 자리에만 쓴다. 없어도 되면 안 써도 된다. 문장마다 붙이거나 문장을 이모지로 시작하지 않는다.
 
-쓰지 말 것
-- "이 글은", "이 아티클은", "본문에서는" 같은 메타 서술로 시작하지 마세요.
-- "~를 살펴봅니다", "~를 설명합니다", "~를 짚습니다", "~를 다룹니다" 같은
-  논문 초록 투의 서술어를 쓰지 마세요.
-- 과장과 낚시. "충격", "반드시", "모두가 놓치는" 같은 표현은 금지입니다.
-- 제목을 그대로 반복하지 마세요. 제목은 따로 붙습니다.
+### 길이
+전체 소개문은 3~5문장으로 작성한다.
+너무 많은 정보를 넣지 않는다.
 
-형식
-- 한국어, 2~3문장. 짧게.
-- 한 문장을 한 줄에 쓰고 줄바꿈으로 구분하세요.
-- 읽는 사람은 디자이너입니다. 전문용어는 쉬운 말로 풀어 쓰세요.
-- 이모지는 요약 전체에서 최대 두 개까지이고, 하나도 없어도 좋습니다.
-  문장을 이모지로 시작하지 말고, 문장마다 붙이지 마세요.
+### 문체
+- 친근하지만 가볍지 않게
+- 호기심을 자극하되 낚시성 표현은 사용하지 않기
+- "충격적인", "반드시 읽어야 할", "놀라운" 같은 과장된 표현 사용하지 않기
+- 문장마다 정보를 욱여넣지 않기
+- 사람이 직접 추천하는 듯한 자연스러운 한국어 사용
 
-담백하되 생기 있게. 광고가 아니라, 재미있게 읽은 사람이 건네는 한마디처럼.`;
+### 출력
+소개문 텍스트만 출력한다. 제목, URL, 작성자, 이모지 머리말(📚 등)은 절대 포함하지 마라. 그건 코드가 붙인다.
 
-/** A short Korean pitch for an article — two or three sentences, one per line.
+### 좋은 결과의 기준
+내용을 읽지 않은 사람도 이 글이 어떤 이야기인지 이해할 수 있어야 한다.
+하지만 소개문만 읽고 아티클의 결론을 모두 알 수 있어서는 안 된다.
+"요약했다"는 느낌보다 "읽어보고 싶게 소개했다"는 느낌이 나야 한다.`;
+
+/** A three-to-five sentence Korean pitch for an article — the kind of thing
+ *  you would type into a chat to talk somebody into reading it.
  *
  *  Returns null on anything going wrong — no key, a timeout, a bad response.
  *  The caller falls back to the article's own subtitle, because one morning's
@@ -62,11 +75,16 @@ export async function summarise(title: string, content: string): Promise<string 
         // A reasoning model: no `temperature`, and the budget is
         // `max_completion_tokens`, which reasoning tokens also draw from —
         // hence the headroom for a four-line answer.
-        max_completion_tokens: 1200,
+        max_completion_tokens: 1500,
         reasoning_effort: "low",
         messages: [
           { role: "system", content: SYSTEM },
-          { role: "user", content: `제목: ${title}\n\n본문:\n${body}` },
+          {
+            role: "user",
+            // The title is here so rule 11 has something to avoid repeating,
+            // not so it can be quoted back — the code owns the title line.
+            content: `### 아티클\n제목: ${title}\n\n"""\n${body}\n"""`,
+          },
         ],
       }),
     });
