@@ -18,6 +18,12 @@ const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
 /** How long an article rests before it may come round again. */
 export const REST_DAYS = 30;
 
+/** A blank line between every block, so the message breathes on a phone. */
+const BLOCK_GAP = "\n\n";
+
+/** At most this many paragraphs of summary. */
+const MAX_BLOCKS = 3;
+
 /** The Korean calendar day, which is the day the 9am Shortcut belongs to. */
 export function seoulDay(now: Date): string {
   return new Date(now.getTime() + SEOUL_OFFSET_MS).toISOString().slice(0, 10);
@@ -36,27 +42,42 @@ export function articleUrl(slug: string): string {
   return `${siteUrl()}/articles/${encodeURIComponent(slug)}`;
 }
 
-/** Models like to end a line with two spaces — a markdown line break that is
- *  just stray whitespace in a chat room. Tidy each line, drop blank ones. */
-function tidy(summary: string): string {
-  return summary
+/** The model is asked for one sentence per line, but it does not always
+ *  oblige — and it likes to end a line with two trailing spaces, a markdown
+ *  line break that is only stray whitespace in a chat room.
+ *
+ *  Returns the summary as two or three blocks. A wall of text is the thing
+ *  that stops the message being read on a phone. */
+function summaryBlocks(summary: string): string[] {
+  const lines = summary
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean)
-    .join("\n");
+    .filter(Boolean);
+
+  // It obliged: one thought per line already.
+  const parts =
+    lines.length > 1
+      ? lines
+      : // It did not: break the single line on sentence ends. The lookbehind
+        // keeps the punctuation with the sentence it closes.
+        (lines[0] ?? "").split(/(?<=[.!?])\s+/).filter(Boolean);
+
+  if (parts.length <= MAX_BLOCKS) return parts;
+
+  // More pieces than blocks: the tail joins the last one rather than being
+  // dropped or left to sprawl.
+  const head = parts.slice(0, MAX_BLOCKS - 1);
+  return [...head, parts.slice(MAX_BLOCKS - 1).join(" ")];
 }
 
 export function buildMessage(article: DailyArticle, summary: string): string {
   return [
     "📚 오늘의 아티클",
-    "",
     article.title,
-    "",
-    tidy(summary),
-    "",
+    ...summaryBlocks(summary),
     articleUrl(article.slug),
-    `— ${article.author}`,
-  ].join("\n");
+    `✍️ ${article.author}`,
+  ].join(BLOCK_GAP);
 }
 
 /** Among articles nobody has seen yet, the newest goes first. That is what
