@@ -1,10 +1,9 @@
 import Link from "next/link";
-import type { ArticleWithAuthor } from "@/lib/types";
+import type { ArticleListItem } from "@/lib/types";
 import { CoverMedia } from "./CoverArt";
 import { Avatar } from "@/components/ui/Avatar";
 import { Chip } from "@/components/ui/Chip";
 import { cn, formatDate } from "@/lib/utils";
-import { readingTime } from "@/lib/content/doc";
 
 export type CardRatio = "portrait" | "tall" | "square" | "wide";
 
@@ -25,7 +24,7 @@ export function ArticleCard({
   aspect,
   className,
 }: {
-  article: ArticleWithAuthor;
+  article: ArticleListItem;
   ratio?: CardRatio;
   /** Exact width/height, used by the balanced grid. Wins over `ratio`. */
   aspect?: number;
@@ -71,7 +70,7 @@ export function ArticleCard({
                 <span className="t-caption">{article.author.name}</span>
                 <span className="t-caption text-white/40">·</span>
                 {/* Labelled so it cannot be misread as "5 minutes ago". */}
-                <span className="t-caption">읽기 {readingTime(article.content)}분</span>
+                <span className="t-caption">읽기 {article.readingMinutes}분</span>
               </div>
             </div>
           </div>
@@ -87,7 +86,7 @@ export function ArticleRow({
   article,
   index,
 }: {
-  article: ArticleWithAuthor;
+  article: ArticleListItem;
   index: number;
 }) {
   return (

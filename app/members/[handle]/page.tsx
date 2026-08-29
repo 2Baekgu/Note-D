@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getMemberByHandle, listArticles, memberHandles } from "@/lib/repo";
+import { getMemberByHandle, listArticles, memberHandles, toListItem } from "@/lib/repo";
 import { ArticleMasonry } from "@/components/article/ArticleMasonry";
 import { ChipLink } from "@/components/ui/Chip";
 import { ProfileIdentity } from "@/components/members/ProfileIdentity";
@@ -113,7 +113,7 @@ export default async function MemberPage({
 
         <div className="mt-8">
           {articles.length > 0 ? (
-            <ArticleMasonry articles={articles} />
+            <ArticleMasonry articles={articles.map(toListItem)} />
           ) : (
             <p className="surface-dashed t-body px-6 py-24 text-center text-ink-muted">
               아직 발행한 글이 없습니다.

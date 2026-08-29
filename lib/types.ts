@@ -81,3 +81,12 @@ export interface Comment {
 export interface ArticleWithAuthor extends Article {
   author: User;
 }
+
+/** What a card renders, which is everything but the body. The body is by far
+ *  an article's heaviest field and no card shows it, so a list of fifty would
+ *  otherwise carry 375KB of prose nobody reads. `excerpt` keeps the browser's
+ *  instant search useful at a fraction of that. */
+export interface ArticleListItem extends Omit<ArticleWithAuthor, "content"> {
+  excerpt: string;
+  readingMinutes: number;
+}

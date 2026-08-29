@@ -1,4 +1,4 @@
-import type { ArticleWithAuthor } from "@/lib/types";
+import type { ArticleListItem } from "@/lib/types";
 import { ArticleCard, type CardRatio } from "./ArticleCard";
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils";
@@ -30,16 +30,16 @@ const CYCLE: CardRatio[] = [
 ];
 
 interface Cell {
-  article: ArticleWithAuthor;
+  article: ArticleListItem;
   aspect: number;
   /** Position in date order, used to keep narrower layouts chronological. */
   order: number;
 }
 
-function buildColumns(articles: ArticleWithAuthor[]): Cell[][] {
+function buildColumns(articles: ArticleListItem[]): Cell[][] {
   /* Dealt across the columns, so the top row holds the four newest and the
      set reads the way people actually read it: left to right, then down. */
-  const columns: ArticleWithAuthor[][] = Array.from({ length: COLUMNS }, () => []);
+  const columns: ArticleListItem[][] = Array.from({ length: COLUMNS }, () => []);
   articles.forEach((a, i) => columns[i % COLUMNS].push(a));
 
   const depth = Math.max(...columns.map((c) => c.length));
@@ -68,7 +68,7 @@ export function ArticleMasonry({
   articles,
   className,
 }: {
-  articles: ArticleWithAuthor[];
+  articles: ArticleListItem[];
   className?: string;
 }) {
   if (!articles.length) return null;

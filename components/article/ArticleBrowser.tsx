@@ -2,13 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ArticleWithAuthor, Topic } from "@/lib/types";
+import type { ArticleListItem, Topic } from "@/lib/types";
 import { ArticleMasonry } from "./ArticleMasonry";
 import { ArticleRow } from "./ArticleCard";
 import { ChipButton } from "@/components/ui/Chip";
 import { Button } from "@/components/ui/Button";
 import { useStuck } from "@/components/ui/useStuck";
-import { toPlainText } from "@/lib/content/doc";
 import { topicSlug, cn } from "@/lib/utils";
 
 type Sort = "newest" | "oldest";
@@ -18,7 +17,7 @@ export function ArticleBrowser({
   articles,
   topics,
 }: {
-  articles: ArticleWithAuthor[];
+  articles: ArticleListItem[];
   topics: Topic[];
 }) {
   const router = useRouter();
@@ -36,7 +35,7 @@ export function ArticleBrowser({
       new Map(
         articles.map((a) => [
           a.id,
-          [a.title, a.subtitle, a.topics.join(" "), a.author.name, toPlainText(a.content)]
+          [a.title, a.subtitle, a.topics.join(" "), a.author.name, a.excerpt]
             .join(" ")
             .toLowerCase(),
         ]),

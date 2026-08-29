@@ -5,8 +5,7 @@ import {
   getArticleBySlug,
   getRelatedArticles,
   listComments,
-  publishedArticleSlugs,
-} from "@/lib/repo";
+  publishedArticleSlugs, toListItem } from "@/lib/repo";
 import { ContentBody } from "@/components/content/ContentBody";
 import { AuthorTools } from "@/components/article/AuthorTools";
 import { Discussion } from "@/components/article/Discussion";
@@ -195,7 +194,7 @@ export default async function ArticlePage({
             </div>
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((a) => (
-                <ArticleCard key={a.id} article={a} />
+                <ArticleCard key={a.id} article={toListItem(a)} />
               ))}
             </div>
           </section>

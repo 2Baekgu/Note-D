@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { listArticles } from "@/lib/repo";
+import { listArticles, toListItem } from "@/lib/repo";
 import { topics } from "@/lib/data/topics";
 import { ArticleBrowser } from "@/components/article/ArticleBrowser";
 import { PageFrame } from "@/components/site/PageFrame";
@@ -32,7 +32,7 @@ export default async function ArticlesPage() {
 
       <div className="shell pt-12">
         <Suspense fallback={<p className="t-caption py-24 text-ink-faint">Loading archive…</p>}>
-          <ArticleBrowser articles={articles} topics={topics} />
+          <ArticleBrowser articles={articles.map(toListItem)} topics={topics} />
         </Suspense>
       </div>
     </PageFrame>

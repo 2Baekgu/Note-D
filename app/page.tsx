@@ -2,8 +2,7 @@ import {
   authorCounts,
   topicCounts,
   listArticles,
-  listPublicMembers,
-} from "@/lib/repo";
+  listPublicMembers, toListItem } from "@/lib/repo";
 import { site } from "@/lib/site";
 import { StudyIntro } from "@/components/home/StudyIntro";
 import { ArticleMasonry } from "@/components/article/ArticleMasonry";
@@ -57,7 +56,7 @@ export default async function HomePage() {
           action={{ label: "All articles", href: "/articles" }}
         />
         <div id="latest" className="mt-12">
-          <ArticleMasonry articles={latest} />
+          <ArticleMasonry articles={latest.map(toListItem)} />
         </div>
 
         <div className="mt-12 flex justify-center">

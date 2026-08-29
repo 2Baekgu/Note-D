@@ -2,11 +2,18 @@ import "server-only";
 
 import { cache } from "react";
 
-import type { Article, ArticleWithAuthor, BugReport, Comment, User } from "@/lib/types";
+import type {
+  Article,
+  ArticleListItem,
+  ArticleWithAuthor,
+  BugReport,
+  Comment,
+  User,
+} from "@/lib/types";
 import { sampleArticles } from "@/lib/data/articles";
 import { members as sampleMembers } from "@/lib/data/members";
 import { sampleComments } from "@/lib/data/comments";
-import { toPlainText } from "@/lib/content/doc";
+import { readingTime, toPlainText } from "@/lib/content/doc";
 import { topicSlug } from "@/lib/utils";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { getSupabaseStaticClient } from "@/lib/supabase/static";
@@ -326,4 +333,18 @@ export async function listBugReports(): Promise<BugReport[]> {
       createdAt: s(row.created_at),
     };
   });
+}
+
+/** Enough opening text for search to still find a phrase from the body. */
+const EXCERPT_CHARS = 300;
+
+/** Strips the body off an article for the card grids. Reading time is worked
+ *  out here, where the body still exists. */
+export function toListItem(article: ArticleWithAuthor): ArticleListItem {
+  const { content, ...rest } = article;
+  return {
+    ...rest,
+    excerpt: toPlainText(content).slice(0, EXCERPT_CHARS),
+    readingMinutes: readingTime(content),
+  };
 }
