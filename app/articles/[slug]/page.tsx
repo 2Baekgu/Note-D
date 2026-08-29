@@ -11,13 +11,11 @@ import { AuthorTools } from "@/components/article/AuthorTools";
 import { Discussion } from "@/components/article/Discussion";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
 import { ArticleCard } from "@/components/article/ArticleCard";
+import { ArticleHead } from "@/components/article/ArticleHead";
 import { Avatar } from "@/components/ui/Avatar";
-import { ChipLink } from "@/components/ui/Chip";
-import { Divider } from "@/components/ui/Divider";
 import { readingTime } from "@/lib/content/doc";
 import { PageFrame } from "@/components/site/PageFrame";
 import { GridRule } from "@/components/site/GridRule";
-import { topicSlug, formatDate } from "@/lib/utils";
 
 export const dynamicParams = true;
 
@@ -84,52 +82,21 @@ export default async function ArticlePage({
 
       <article className="shell section-pad">
         {/* ── Head ─────────────────────────────────────── */}
-        <header className="article-column">
-          {/* Every topic the piece sits under — the lead one first. */}
-          <div className="flex flex-wrap items-center gap-2">
-            {article.topics.map((t, i) => (
-              <ChipLink
-                key={t}
-                href={`/articles?topic=${topicSlug(t)}`}
-                tone={i === 0 ? "solid" : "outline"}
-                size="sm"
-              >
-                {t}
-              </ChipLink>
-            ))}
-          </div>
-
-          <h1 className="t-h1 mt-6 text-balance">{article.title}</h1>
-
-          <p className="t-body-lg mt-6 text-ink-muted">{article.subtitle}</p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 border-y border-line py-4">
-            {/* One line: name and role read together, then the rest of the
-                byline, rather than the name stacking over its own title. */}
-            <Link
-              href={`/members/${article.author.handle}`}
-              className="group flex items-center gap-3"
-            >
-              <Avatar name={article.author.name} src={article.author.profileImage} size="md" />
-              <span className="flex flex-wrap items-baseline gap-x-2">
-                <span className="t-body font-medium transition-colors duration-[var(--duration-base)] group-hover:text-accent">
-                  {article.author.name}
-                </span>
-                <span className="t-caption text-ink-faint">{article.author.title}</span>
-              </span>
-            </Link>
-            <Divider vertical className="h-6" />
-            <span className="t-caption text-ink-muted">{formatDate(article.publishedAt)}</span>
-            <Divider vertical className="h-6" />
-            <span className="t-caption text-ink-muted">
-              읽는 데 약 {readingTime(article.content)}분
-            </span>
-            {/* An action, so it sits apart from the byline's facts. */}
-            <span className="ml-auto">
-              <AuthorTools articleId={article.id} authorId={article.authorId} />
-            </span>
-          </div>
-        </header>
+        <ArticleHead
+          topics={article.topics}
+          title={article.title}
+          subtitle={article.subtitle}
+          author={{
+            name: article.author.name,
+            title: article.author.title,
+            profileImage: article.author.profileImage,
+            handle: article.author.handle,
+          }}
+          publishedAt={article.publishedAt}
+          readingMinutes={readingTime(article.content)}
+          action={<AuthorTools articleId={article.id} authorId={article.authorId} />}
+          linked
+        />
 
         {/* No cover here. It is the card thumbnail and nothing else — drawing
             it above the body put the picture in twice once you could pick one

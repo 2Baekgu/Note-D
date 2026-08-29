@@ -7,7 +7,7 @@ import { topics } from "@/lib/data/topics";
 import { members } from "@/lib/data/members";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ContentBody } from "@/components/content/ContentBody";
-import { CoverMedia } from "@/components/article/CoverArt";
+import { ArticleHead } from "@/components/article/ArticleHead";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Chip, ChipButton } from "@/components/ui/Chip";
@@ -15,7 +15,7 @@ import { useStuck } from "@/components/ui/useStuck";
 import { RichEditor } from "./RichEditor";
 import { emptyArticle, persistArticle } from "@/lib/studio";
 import { firstLine, readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
-import { cn, formatDate, slugify } from "@/lib/utils";
+import { cn, slugify } from "@/lib/utils";
 
 export function ArticleEditor({ initial }: { initial?: Article }) {
   const { user, isAdmin } = useAuth();
@@ -32,11 +32,16 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
   // `auth.uid() = author_id`, so this is never a choice — you publish as you.
   const authorId = article.authorId || user?.id || "";
   const author = useMemo(() => {
-    if (user && authorId === user.id) {
-      return { name: user.name, profileImage: user.image };
-    }
     const known = members.find((m) => m.id === authorId);
-    return { name: known?.name ?? "—", profileImage: known?.profileImage ?? null };
+    if (user && authorId === user.id) {
+      // The session carries no job title, so the roster fills that in.
+      return { name: user.name, profileImage: user.image, title: known?.title };
+    }
+    return {
+      name: known?.name ?? "—",
+      profileImage: known?.profileImage ?? null,
+      title: known?.title,
+    };
   }, [authorId, user]);
 
   const patch = (values: Partial<Article>) => setArticle((a) => ({ ...a, ...values }));
@@ -355,7 +360,7 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
               </section>
             </>
           ) : (
-            <Preview article={{ ...article, slug: computedSlug }} authorName={author.name} />
+            <Preview article={{ ...article, slug: computedSlug }} author={author} />
           )}
         </div>
 
@@ -373,47 +378,32 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Preview({ article, authorName }: { article: Article; authorName: string }) {
+function Preview({
+  article,
+  author,
+}: {
+  article: Article;
+  author: { name: string; title?: string; profileImage?: string | null };
+}) {
+  // Same padding as the write sheet, so switching tabs does not shift the
+  // column. `serif-heads` is what the real article page puts around this.
   return (
-    /* `serif-heads` is what the real article page puts around this — without
-       it the preview showed sans headings the published page never uses. */
-    <div className="surface serif-heads p-6 sm:p-12">
-      <p className="t-label mb-8 text-ink-faint">Preview</p>
+    <div className="surface serif-heads px-6 py-12 sm:px-14 sm:py-16">
+      <p className="t-label article-column mb-10 text-ink-faint">Preview</p>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {article.topics.map((t, i) => (
-          <Chip key={t} tone={i === 0 ? "solid" : "outline"} size="sm">
-            {t}
-          </Chip>
-        ))}
-        <span className="t-caption text-ink-muted">{formatDate(article.publishedAt)}</span>
-      </div>
+      <ArticleHead
+        topics={article.topics}
+        title={article.title || "제목 없음"}
+        // The same line saving would derive, so the preview is honest.
+        subtitle={article.subtitle.trim() || firstLine(article.content)}
+        author={author}
+        publishedAt={article.publishedAt}
+        readingMinutes={readingTime(article.content)}
+      />
 
-      <h1 className="t-h1 mt-6 text-balance">{article.title || "제목 없음"}</h1>
-      {/* The same line saving would derive, so the preview is honest. */}
-      {(article.subtitle.trim() || firstLine(article.content)) && (
-        <p className="t-body-lg mt-6 max-w-[50ch] text-ink-muted">
-          {article.subtitle.trim() || firstLine(article.content)}
-        </p>
-      )}
-
-      <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-line py-3">
-        <span className="t-body">{authorName}</span>
-        <span className="t-caption text-ink-faint">
-          읽는 데 약 {readingTime(article.content)}분
-        </span>
-      </div>
-
-      <div className="media mt-8 aspect-[21/9]">
-        <CoverMedia
-          src={article.coverImage}
-          alt=""
-          seed={article.slug || "preview"}
-          topic={article.topics[0]}
-        />
-      </div>
-
-      <div className="mt-12">
+      {/* No cover, because the article page has none: it is the card
+          thumbnail and nothing else. */}
+      <div className="article-shell mt-16">
         {article.content.trim() ? (
           <ContentBody content={article.content} seed={article.slug || "preview"} />
         ) : (
