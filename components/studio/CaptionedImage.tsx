@@ -1,19 +1,11 @@
 "use client";
 
-import Image from "@tiptap/extension-image";
-import {
-  NodeViewWrapper,
-  ReactNodeViewRenderer,
-  type NodeViewProps,
-} from "@tiptap/react";
+import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from "@tiptap/react";
+import { CaptionedImage as BaseImage } from "@/lib/content/nodes/captioned-image";
 
-/** TipTap's image is a bare `<img>`, so a caption written into `title` was
- *  invisible while writing and only appeared once published.
- *
- *  This draws the caption where the article draws it — centred, the width of
- *  the picture. The caption itself is not editable here on purpose: the
- *  bubble menu owns that. A second editable region inside a node view is
- *  exactly the kind of focus tangle that moving to TipTap was meant to end. */
+/** The editor's view of the shared image node. The caption is not editable
+ *  here on purpose: the bubble menu owns it. A second editable region inside
+ *  a node view is exactly the focus tangle that moving to TipTap ended. */
 function View({ node, selected }: NodeViewProps) {
   const src = String(node.attrs.src ?? "");
   const alt = String(node.attrs.alt ?? "");
@@ -28,7 +20,7 @@ function View({ node, selected }: NodeViewProps) {
   );
 }
 
-export const CaptionedImage = Image.extend({
+export const CaptionedImage = BaseImage.extend({
   addNodeView() {
     return ReactNodeViewRenderer(View);
   },

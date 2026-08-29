@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
-import StarterKit from "@tiptap/starter-kit";
-import Highlight from "@tiptap/extension-highlight";
 import { CaptionedImage } from "./CaptionedImage";
+import { baseExtensions } from "@/lib/content/extensions";
+import { EditorToolbar } from "./EditorToolbar";
 import { Bookmark } from "./BookmarkNode";
 import Placeholder from "@tiptap/extension-placeholder";
 import { blocksToDoc, isDoc, type DocNode } from "@/lib/content/doc";
@@ -107,13 +107,9 @@ export function RichEditor({
     // Next renders this on the server first; TipTap must wait for the client.
     immediatelyRender: false,
     extensions: [
-      StarterKit.configure({
-        heading: { levels: [2, 3] },
-        link: { openOnClick: false, HTMLAttributes: { rel: "noreferrer noopener" } },
-      }),
+      ...baseExtensions,
       CaptionedImage,
       Bookmark,
-      Highlight,
       Placeholder.configure({
         placeholder: ({ node }) =>
           node.type.name === "heading"
@@ -255,13 +251,16 @@ export function RichEditor({
 
   return (
     <div>
-      <Toolbar
-        editor={editor}
-        uploading={uploading}
-        onPick={insertImages}
-        meta={meta}
-        tools={tools}
-      />
+      {tools === "image" ? (
+        <ImageOnlyToolbar editor={editor} uploading={uploading} onPick={insertImages} meta={meta} />
+      ) : (
+        <EditorToolbar
+          editor={editor}
+          uploading={uploading}
+          onPickImage={insertImages}
+          meta={meta}
+        />
+      )}
 
       <div
         ref={sheetRef}
@@ -412,57 +411,22 @@ function Mark({
   );
 }
 
-function Toolbar({
+/** The strip the bug-report dialog gets: a picture button and nothing else,
+ *  because a report needs evidence, not formatting. */
+function ImageOnlyToolbar({
   editor,
   uploading,
   onPick,
   meta,
-  tools,
 }: {
   editor: Editor;
   uploading: number;
   onPick: (files: File[]) => void;
   meta?: React.ReactNode;
-  tools: "full" | "image";
 }) {
-  const items: { label: string; active: string; attrs?: Record<string, unknown>; run: () => void }[] =
-    tools === "image" ? [] : [
-      { label: "본문", active: "paragraph", run: () => editor.chain().focus().setParagraph().run() },
-      {
-        label: "제목",
-        active: "heading",
-        attrs: { level: 2 },
-        run: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
-      },
-      {
-        label: "소제목",
-        active: "heading",
-        attrs: { level: 3 },
-        run: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
-      },
-      { label: "인용", active: "blockquote", run: () => editor.chain().focus().toggleBlockquote().run() },
-      { label: "목록", active: "bulletList", run: () => editor.chain().focus().toggleBulletList().run() },
-      { label: "번호", active: "orderedList", run: () => editor.chain().focus().toggleOrderedList().run() },
-      { label: "구분선", active: "horizontalRule", run: () => editor.chain().focus().setHorizontalRule().run() },
-    ];
 
   return (
     <div className="scroll-x flex items-center gap-1.5 pb-1">
-      {items.map((item) => (
-        <ChipButton
-          key={item.label}
-          size="sm"
-          tone={editor.isActive(item.active, item.attrs) ? "solid" : "ghost"}
-          onClick={item.run}
-        >
-          {item.label}
-        </ChipButton>
-      ))}
-
-      {items.length > 0 && (
-        <span className="mx-1 h-4 w-px shrink-0 bg-line" aria-hidden="true" />
-      )}
-
       <label className={cn("chip chip-outline chip-sm shrink-0 cursor-pointer")}>
         + 이미지
         <input

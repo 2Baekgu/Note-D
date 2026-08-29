@@ -1,19 +1,8 @@
 "use client";
 
-import { Node, mergeAttributes } from "@tiptap/core";
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from "@tiptap/react";
+import { Bookmark as BaseBookmark } from "@/lib/content/nodes/bookmark";
 import { BookmarkCard } from "@/components/content/BookmarkCard";
-
-/** A link rendered as a card — thumbnail, title, description, domain — the
- *  way a chat app expands one. Stored as a node so the metadata is fetched
- *  once, when it is pasted, and never again at read time. */
-
-const str = (name: string) => ({
-  default: "",
-  parseHTML: (el: HTMLElement) => el.getAttribute(`data-${name}`) ?? "",
-  renderHTML: (attrs: Record<string, unknown>) =>
-    attrs[name] ? { [`data-${name}`]: String(attrs[name]) } : {},
-});
 
 function View({ node, selected }: NodeViewProps) {
   const attrs = node.attrs as Record<string, string>;
@@ -39,30 +28,7 @@ function View({ node, selected }: NodeViewProps) {
   );
 }
 
-export const Bookmark = Node.create({
-  name: "bookmark",
-  group: "block",
-  atom: true,
-  draggable: true,
-
-  addAttributes() {
-    return {
-      url: str("url"),
-      title: str("title"),
-      description: str("description"),
-      image: str("image"),
-      site: str("site"),
-    };
-  },
-
-  parseHTML() {
-    return [{ tag: "div[data-bookmark]" }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return ["div", mergeAttributes(HTMLAttributes, { "data-bookmark": "" })];
-  },
-
+export const Bookmark = BaseBookmark.extend({
   addNodeView() {
     return ReactNodeViewRenderer(View);
   },
