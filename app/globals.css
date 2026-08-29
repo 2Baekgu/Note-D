@@ -1120,7 +1120,7 @@ select.field {
   overflow: hidden;
   border: var(--border-width) solid var(--line);
   border-radius: var(--radius-md);
-  background: var(--surface);
+  background-color: #ffffff;
   text-decoration: none;
   color: inherit;
   transition: border-color var(--duration-base) var(--ease);
@@ -1137,10 +1137,12 @@ a.bookmark:hover,
      accent underline; without the type selector that rule wins and draws a
      red line across the whole card. */
   text-decoration: none;
-  background-color: transparent;
 }
 
 a.bookmark:hover {
+  /* Solid, not the accent wash `.prose-body a:hover` would put behind it —
+     the card sits on the page's grid and has to stay opaque. */
+  background-color: #ffffff;
   border-color: var(--ink);
 }
 
