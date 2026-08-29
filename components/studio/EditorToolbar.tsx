@@ -339,7 +339,8 @@ export function EditorToolbar({
 
   /** What the colour button should be showing right now. */
   const inkColor = (editor.getAttributes("textStyle").color as string) || "#16150f";
-  const markColor = (editor.getAttributes("highlight").color as string) || "#fdf3c8";
+  // Nothing highlighted yet reads as no colour, not as a pending yellow.
+  const markColor = (editor.getAttributes("highlight").color as string) || "#ffffff";
 
   return (
     <div className="editor-toolbar">
@@ -461,10 +462,12 @@ export function EditorToolbar({
           width="w-auto min-w-0"
           trigger={
             <span
-              className="flex h-[17px] w-[15px] items-center justify-center rounded-[2px] border border-current text-[0.72rem] font-semibold"
+              className="flex h-[16px] w-[16px] items-center justify-center rounded-[2px] border border-current text-[0.72rem] font-semibold leading-none"
               style={{ background: markColor }}
             >
-              T
+              {/* The glyph carries more side bearing on its right than its
+                  left, so centring the box leaves the letter looking off. */}
+              <span className="translate-x-[0.5px]">T</span>
             </span>
           }
         >
@@ -507,7 +510,9 @@ export function EditorToolbar({
         <Menu
           label="인용"
           width="w-44"
-          trigger={<span className="font-serif text-[0.8rem] font-semibold leading-none tracking-tight">66</span>}
+          trigger={
+            <span className="text-[0.9rem] font-medium leading-none tracking-[-0.06em]">66</span>
+          }
         >
           {(close) => (
             <>
@@ -639,7 +644,7 @@ export function EditorToolbar({
         {uploading > 0 && (
           <span className="t-caption ml-2 shrink-0 text-ink-faint">이미지 {uploading}개 올리는 중…</span>
         )}
-        {meta && <span className="t-caption ml-auto shrink-0 pl-3 text-ink-faint">{meta}</span>}
+        {meta && <span className="t-caption ml-auto shrink-0 pl-3 pr-2 text-ink-faint">{meta}</span>}
       </div>
     </div>
   );
