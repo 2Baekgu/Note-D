@@ -7,10 +7,11 @@ import { ContentBody } from "@/components/content/ContentBody";
 import { Chip } from "@/components/ui/Chip";
 import { ButtonLink } from "@/components/ui/Button";
 import { deleteBugReport, loadLocalReports, setReportStatus } from "@/lib/bugs";
+import { toPlainText } from "@/lib/content/doc";
 import { cn } from "@/lib/utils";
 
 const FILTERS = [
-  { id: "open", label: "열린 것" },
+  { id: "open", label: "수정요청" },
   { id: "resolved", label: "처리함" },
   { id: "all", label: "전체" },
 ] as const;
@@ -98,7 +99,7 @@ export function BugReportList({ reports }: { reports: BugReport[] }) {
           ))}
         </div>
         <p className="t-caption text-ink-muted">
-          열린 리포트 {openCount}개 · 전체 {rows.length}개
+          수정요청 {openCount}개 · 전체 {rows.length}개
         </p>
       </div>
 
@@ -107,65 +108,84 @@ export function BugReportList({ reports }: { reports: BugReport[] }) {
       {shown.length === 0 ? (
         <div className="surface-dashed mt-6 px-6 py-24 text-center">
           <p className="t-body text-ink-muted">
-            {filter === "open" ? "열려 있는 리포트가 없습니다." : "리포트가 없습니다."}
+            {filter === "open" ? "처리할 수정요청이 없습니다." : "리포트가 없습니다."}
           </p>
         </div>
       ) : (
-        <ul className="mt-6 space-y-4">
+        <ul className="mt-6 space-y-3">
           {shown.map((r) => (
-            <li key={r.id} className="surface p-6 sm:p-8">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                <span className="t-body font-medium">{r.reporterName}</span>
-                {r.reporterEmail && (
-                  <span className="t-caption text-ink-faint">{r.reporterEmail}</span>
-                )}
-                <span className="t-caption text-ink-muted">{when(r.createdAt)}</span>
-                <Chip tone={r.status === "open" ? "accent" : "outline"} size="sm">
-                  {r.status === "open" ? "OPEN" : "DONE"}
-                </Chip>
-              </div>
-
-              <div className="mt-5 border-t border-line pt-5">
-                <ContentBody content={r.content} seed={r.id} />
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-4">
-                <button
-                  type="button"
-                  disabled={pending === r.id}
-                  onClick={() => mark(r.id, r.status === "open" ? "resolved" : "open")}
-                  className="t-label link-underline text-ink-muted disabled:opacity-40"
-                >
-                  {r.status === "open" ? "처리함으로" : "다시 열기"}
-                </button>
-
-                {confirming === r.id ? (
-                  <span className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => remove(r.id)}
-                      className="t-label text-accent underline underline-offset-4"
-                    >
-                      정말 삭제
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setConfirming(null)}
-                      className="t-label text-ink-faint underline underline-offset-4"
-                    >
-                      취소
-                    </button>
-                  </span>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setConfirming(r.id)}
-                    className="t-label text-ink-faint underline underline-offset-4 transition-colors duration-[var(--duration-fast)] hover:text-accent"
+            <li key={r.id}>
+              {/* A drawer, so the list stays scannable and one report opens at
+                  a time. The excerpt is what makes the closed row useful. */}
+              <details className="surface group overflow-hidden">
+                <summary className="report-row flex cursor-pointer items-start gap-3 p-5 transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.02)] sm:p-6">
+                  <span
+                    aria-hidden="true"
+                    className="report-arrow t-body mt-0.5 shrink-0 text-ink-faint"
                   >
-                    삭제
-                  </button>
-                )}
-              </div>
+                    ›
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                      <span className="t-body font-medium">{r.reporterName}</span>
+                      <span className="t-caption text-ink-muted">{when(r.createdAt)}</span>
+                      <Chip tone={r.status === "open" ? "accent" : "outline"} size="sm">
+                        {r.status === "open" ? "TODO" : "DONE"}
+                      </Chip>
+                    </span>
+                    <span className="t-caption mt-1.5 block truncate text-ink-faint group-open:hidden">
+                      {toPlainText(r.content).trim() || "(내용 없음)"}
+                    </span>
+                  </span>
+                </summary>
+
+                <div className="border-t border-line px-5 pb-5 pt-5 sm:px-6 sm:pb-6">
+                  {r.reporterEmail && (
+                    <p className="t-caption text-ink-faint">{r.reporterEmail}</p>
+                  )}
+                  <div className="report-body mt-4">
+                    <ContentBody content={r.content} seed={r.id} />
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-line pt-4">
+                    <button
+                      type="button"
+                      disabled={pending === r.id}
+                      onClick={() => mark(r.id, r.status === "open" ? "resolved" : "open")}
+                      className="t-label link-underline text-ink-muted disabled:opacity-40"
+                    >
+                      {r.status === "open" ? "처리함으로" : "다시 열기"}
+                    </button>
+
+                    {confirming === r.id ? (
+                      <span className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => remove(r.id)}
+                          className="t-label text-accent underline underline-offset-4"
+                        >
+                          정말 삭제
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirming(null)}
+                          className="t-label text-ink-faint underline underline-offset-4"
+                        >
+                          취소
+                        </button>
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(r.id)}
+                        className="t-label text-ink-faint underline underline-offset-4 transition-colors duration-[var(--duration-fast)] hover:text-accent"
+                      >
+                        삭제
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </details>
             </li>
           ))}
         </ul>

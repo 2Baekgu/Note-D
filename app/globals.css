@@ -298,6 +298,49 @@ body {
   margin-inline: auto;
 }
 
+/* A bug report is read in a list, not on an article page. Keep the measure —
+   a line the width of the card is no easier to read — but drop the centring,
+   which is what put the text off the edge everything else lines up with. */
+.report-body .article-column {
+  margin-inline: 0;
+}
+
+/* A screenshot pasted into a report is evidence, not a cover: left with the
+   text, never blown up past its own size, and with the frame shrunk to it so
+   no grey plate shows beside it. */
+.report-body figure {
+  margin-inline: 0;
+  margin-block: 1.5rem;
+}
+.report-body .media {
+  width: fit-content;
+  max-width: 100%;
+}
+.report-body figure img {
+  width: auto;
+  max-width: 100%;
+}
+.report-body figcaption {
+  text-align: left;
+}
+
+/* The drawer arrow, and no default triangle. */
+.report-row::-webkit-details-marker {
+  display: none;
+}
+.report-row {
+  list-style: none;
+}
+
+/* Tailwind's group-open variant never generated a rule here, so the arrow is
+   turned from the open state directly. */
+.report-arrow {
+  transition: transform var(--duration-base) var(--ease-out-quint);
+}
+details[open] > summary .report-arrow {
+  transform: rotate(90deg);
+}
+
 .hairline {
   border: 0;
   border-top: var(--border-width) solid var(--line);
