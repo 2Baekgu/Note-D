@@ -147,7 +147,7 @@ export async function GET(request: Request) {
 
   // A summary is nice to have; the message is not optional.
   const summary = await summarise(chosen.title, chosen.content);
-  const message = buildMessage(chosen, summary ?? chosen.subtitle);
+  const message = buildMessage(chosen, summary.text ?? chosen.subtitle);
 
   const { error: insertError } = await supabase
     .from("daily_sends")
@@ -177,7 +177,10 @@ export async function GET(request: Request) {
     url: articleUrl(chosen.slug),
     author: chosen.author,
     publishedAt: chosen.publishedAt,
-    summarySource: summary ? "gpt-5-mini" : "subtitle",
+    summarySource: summary.text ? "openai" : "subtitle",
+    // Present only when the pitch fell back, so a silent degradation is
+    // visible in the response rather than needing a log dive.
+    ...(summary.error ? { summaryError: summary.error } : {}),
     sentOn: today,
     repeated: false,
   });

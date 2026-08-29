@@ -2,9 +2,11 @@ import "server-only";
 
 import { toPlainText } from "@/lib/content/doc";
 
-const MODEL = "gpt-5-mini";
-const ENDPOINT = "https://api.openai.com/v1/chat/completions";
-const TIMEOUT_MS = 20_000;
+/** Swap for "gpt-5.6-sol" to spend more per call on a harder judgement.
+ *  At one call a day the difference is a few hundred won a month. */
+const MODEL = "gpt-5.6-terra";
+const ENDPOINT = "https://api.openai.com/v1/responses";
+const TIMEOUT_MS = 30_000;
 /** Enough of the article to summarise. Whole posts run long and the opening
  *  carries the argument; this keeps one call well under a cent. */
 const MAX_CHARS = 6_000;
@@ -33,6 +35,9 @@ const SYSTEM = `너는 콘텐츠 큐레이터다.
 너무 많은 정보를 넣지 않는다.
 
 ### 문체
+- 소개문은 반드시 존댓말로 쓴다. "~일까요?", "~합니다", "~느껴집니다"처럼
+  해요체와 합니다체를 쓴다. 위 지시문이 반말로 쓰여 있어도 따라 하지 마라.
+  "~이다", "~한다", "~했다", "~다" 같은 평서형 반말 종결어미는 금지다.
 - 친근하지만 가볍지 않게
 - 호기심을 자극하되 낚시성 표현은 사용하지 않기
 - "충격적인", "반드시 읽어야 할", "놀라운" 같은 과장된 표현 사용하지 않기
@@ -50,57 +55,71 @@ const SYSTEM = `너는 콘텐츠 큐레이터다.
 /** A three-to-five sentence Korean pitch for an article — the kind of thing
  *  you would type into a chat to talk somebody into reading it.
  *
- *  Returns null on anything going wrong — no key, a timeout, a bad response.
- *  The caller falls back to the article's own subtitle, because one morning's
- *  message must not depend on OpenAI being up. */
-export async function summarise(title: string, content: string): Promise<string | null> {
+ *  Never throws. `text` is null whenever anything went wrong, and `error`
+ *  says what, so the route can report it instead of quietly falling back to
+ *  the subtitle and leaving nobody any the wiser. */
+export interface SummaryResult {
+  text: string | null;
+  error?: string;
+}
+
+/** The Responses API returns reasoning and message items side by side. Only
+ *  the message carries prose. */
+function readOutput(json: unknown): string {
+  const root = json as {
+    output_text?: string;
+    output?: { content?: { type?: string; text?: string }[] }[];
+  };
+  if (typeof root.output_text === "string" && root.output_text.trim()) {
+    return root.output_text.trim();
+  }
+  const parts: string[] = [];
+  for (const item of root.output ?? []) {
+    for (const block of item.content ?? []) {
+      if (block.type === "output_text" && block.text) parts.push(block.text);
+    }
+  }
+  return parts.join("\n").trim();
+}
+
+export async function summarise(title: string, content: string): Promise<SummaryResult> {
   const key = process.env.OPENAI_API_KEY;
-  if (!key) return null;
+  if (!key) return { text: null, error: "OPENAI_API_KEY is not set" };
 
   const body = toPlainText(content).trim().slice(0, MAX_CHARS);
-  if (!body) return null;
-
-  const abort = AbortSignal.timeout(TIMEOUT_MS);
+  if (!body) return { text: null, error: "article body is empty" };
 
   try {
     const res = await fetch(ENDPOINT, {
       method: "POST",
-      signal: abort,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${key}`,
       },
       body: JSON.stringify({
         model: MODEL,
-        // A reasoning model: no `temperature`, and the budget is
-        // `max_completion_tokens`, which reasoning tokens also draw from —
-        // hence the headroom for a four-line answer.
-        max_completion_tokens: 1500,
-        reasoning_effort: "low",
-        messages: [
-          { role: "system", content: SYSTEM },
-          {
-            role: "user",
-            // The title is here so rule 11 has something to avoid repeating,
-            // not so it can be quoted back — the code owns the title line.
-            content: `### 아티클\n제목: ${title}\n\n"""\n${body}\n"""`,
-          },
-        ],
+        instructions: SYSTEM,
+        // The title is here so the "do not repeat it" rule has something to
+        // avoid, not so it can be quoted back — the code owns the title line.
+        input: `### 아티클\n제목: ${title}\n\n"""\n${body}\n"""`,
+        reasoning: { effort: "medium" },
+        text: { verbosity: "low" },
+        max_output_tokens: 2000,
       }),
     });
 
     if (!res.ok) {
-      console.error(`daily-pick: OpenAI ${res.status} ${await res.text()}`);
-      return null;
+      const detail = (await res.text()).slice(0, 300);
+      console.error(`daily-pick: OpenAI ${res.status} ${detail}`);
+      return { text: null, error: `OpenAI ${res.status}: ${detail}` };
     }
 
-    const json = (await res.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-    const text = json.choices?.[0]?.message?.content?.trim();
-    return text || null;
+    const text = readOutput(await res.json());
+    return text ? { text } : { text: null, error: "OpenAI returned no text" };
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     console.error("daily-pick: summary failed", error);
-    return null;
+    return { text: null, error: message };
   }
 }
