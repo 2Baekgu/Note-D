@@ -437,7 +437,9 @@ export function EditorToolbar({
           width="w-auto min-w-0"
           trigger={
             <span className="flex flex-col items-center leading-none">
-              <span className="text-[0.85rem] font-semibold">T</span>
+              {/* Same side-bearing lean as the box above — nudged to sit over
+                  the middle of its colour bar. */}
+              <span className="-translate-x-[0.5px] text-[0.85rem] font-semibold">T</span>
               <span
                 className="mt-[1px] h-[3px] w-[13px] rounded-[1px] border border-line"
                 style={{ background: inkColor }}
