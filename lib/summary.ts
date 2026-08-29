@@ -2,9 +2,11 @@ import "server-only";
 
 import { toPlainText } from "@/lib/content/doc";
 
-/** Swap for "gpt-5.6-sol" to spend more per call on a harder judgement.
- *  At one call a day the difference is a few hundred won a month. */
-const MODEL = "gpt-5.6-terra";
+/** The top of the 5.6 line. This is a writing job before it is a reasoning
+ *  one — the sentence has to be worth reading — and at one call a day the
+ *  best model costs a few hundred won a month more than the middle one.
+ *  Drop to "gpt-5.6-terra" to roughly halve that. */
+const MODEL = "gpt-5.6-sol";
 const ENDPOINT = "https://api.openai.com/v1/responses";
 const TIMEOUT_MS = 30_000;
 /** Enough of the article to summarise. Whole posts run long and the opening
