@@ -1126,6 +1126,20 @@ select.field {
   transition: border-color var(--duration-base) var(--ease);
 }
 
+/* The card is an anchor, so the article's link styling reaches it: a red
+   underline under every line of it, and a tinted background on hover. Neither
+   belongs on a card — the border is the affordance. */
+.bookmark,
+a.bookmark,
+a.bookmark:hover,
+.bookmark * {
+  /* `a.bookmark` matches the specificity of `.prose-body a`, which sets the
+     accent underline; without the type selector that rule wins and draws a
+     red line across the whole card. */
+  text-decoration: none;
+  background-color: transparent;
+}
+
 a.bookmark:hover {
   border-color: var(--ink);
 }
@@ -1133,7 +1147,7 @@ a.bookmark:hover {
 .bookmark-thumb {
   flex: 0 0 auto;
   width: 8.5rem;
-  background: var(--paper-soft);
+  background-color: var(--paper-soft);
 }
 
 .bookmark-thumb img {

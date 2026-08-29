@@ -21,6 +21,9 @@ function View({ node, selected }: NodeViewProps) {
     <NodeViewWrapper
       className="tiptap-bookmark"
       data-selected={selected ? "true" : undefined}
+      // The card's text is fetched metadata, not something being written —
+      // the browser should not squiggle it.
+      spellCheck={false}
     >
       <BookmarkCard
         url={attrs.url}
