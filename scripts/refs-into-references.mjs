@@ -90,12 +90,23 @@ function sourcesStart(blocks) {
   return sawUrl ? i : -1;
 }
 
+/** Links that belong to the sentence above them, not to a source list:
+ *  an example the text points at, a section that ends on its video, an image
+ *  credit. Read once, judged by hand, and left alone since. */
+const KEEP_IN_BODY = new Set([
+  "jakobs-law",
+  "coupang-interface-intent",
+  "anchoring-effect",
+  "method-of-loci",
+]);
+
 const { data } = await sb.from("articles")
   .select("id,slug,title,content,references_json")
   .eq("status", "published").order("published_at");
 
 const plan = [];
 for (const a of data) {
+  if (KEEP_IN_BODY.has(a.slug)) continue;
   const blocks = toBlocks(a.content);
   const cut = sourcesStart(blocks);
   // Never eat the article: a run this long is a false read.
