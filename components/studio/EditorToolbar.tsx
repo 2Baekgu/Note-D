@@ -21,10 +21,12 @@ const BLOCKS = [
   { label: "본문3", size: "3", preview: "0.875rem" },
 ] as const;
 
+/** The site's own two faces first — the serif here is the one the titles are
+ *  set in, Fraunces over Noto Serif KR — then the system fallbacks. */
 const FONTS = [
   { label: "기본서체", value: "" },
   { label: "프리텐다드", value: "var(--font-sans)" },
-  { label: "본명조", value: "var(--font-serif)" },
+  { label: "세리프", value: "var(--font-serif)" },
   { label: "나눔고딕", value: "'Nanum Gothic', sans-serif" },
   { label: "궁서", value: "'Batang', 'UnBatang', serif" },
   { label: "모노", value: "ui-monospace, SFMono-Regular, monospace" },
@@ -515,8 +517,9 @@ export function EditorToolbar({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    if (!editor.isActive("blockquote")) editor.chain().focus().toggleBlockquote().run();
-                    editor.chain().focus().updateAttributes("blockquote", { variant }).run();
+                    const chain = editor.chain().focus();
+                    if (!editor.isActive("blockquote")) chain.toggleBlockquote();
+                    chain.updateAttributes("blockquote", { variant }).run();
                     close();
                   }}
                   className={item}
@@ -607,8 +610,15 @@ export function EditorToolbar({
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    editor.chain().focus().setHorizontalRule().run();
-                    editor.chain().focus().updateAttributes("horizontalRule", { variant }).run();
+                    // setHorizontalRule leaves the cursor in the paragraph
+                    // after the rule, so a follow-up updateAttributes finds
+                    // no rule to update — every style came out as the plain
+                    // one. Insert the node with its variant already on it.
+                    editor
+                      .chain()
+                      .focus()
+                      .insertContent({ type: "horizontalRule", attrs: { variant } })
+                      .run();
                     close();
                   }}
                   className="flex w-full items-center gap-3 px-3 py-2.5 transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.05)]"

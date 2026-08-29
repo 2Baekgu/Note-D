@@ -29,7 +29,9 @@ export const baseExtensions: Extensions = [
   TextStyle,
   Color,
   FontFamily,
-  TextAlign.configure({ types: ["heading", "paragraph"] }),
+  // blockquote included so alignment moves the quote itself, mark and all,
+  // rather than shuffling text around inside a full-width box.
+  TextAlign.configure({ types: ["heading", "paragraph", "blockquote"] }),
   Highlight.configure({ multicolor: true }),
   TableKit.configure({ table: { resizable: true } }),
   BlockVariants,

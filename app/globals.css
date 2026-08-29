@@ -1307,12 +1307,46 @@ a.bookmark:hover {
 
 /* ── quote shapes ─────────────────────────────────────────── */
 
-/* The default keeps the bar it has always had; the menu names it 세로선. */
+/* A quote is one block. Alignment moves the whole thing — the mark or the
+   bar travels with its text — which is why each shape is only as wide as it
+   needs to be and shifts with a margin rather than by pushing text about
+   inside a full-width box. */
+.tiptap blockquote,
+.prose-body blockquote {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.tiptap blockquote[style*="center"],
+.prose-body blockquote[style*="center"] {
+  margin-inline: auto;
+}
+
+.tiptap blockquote[style*="right"],
+.prose-body blockquote[style*="right"] {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* Whatever the node inside, a quote reads at quote size. A 제목 dropped into
+   a box quote used to arrive at heading size and tower over the box. */
+.tiptap blockquote :is(p, h1, h2, h3),
+.prose-body blockquote :is(p, h1, h2, h3) {
+  font-family: var(--font-serif);
+  font-size: var(--doc-body-1);
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: normal;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* 따옴표 인용 — the mark sits directly above its text, both aligned the
+   same way, the pair moving together. */
 .tiptap blockquote[data-variant="pull"],
 .prose-body blockquote[data-variant="pull"] {
   border-left: none;
   padding-left: 0;
-  text-align: center;
 }
 
 .tiptap blockquote[data-variant="pull"]::before,
@@ -1320,27 +1354,18 @@ a.bookmark:hover {
   content: "\201C";
   display: block;
   font-family: var(--font-serif);
-  font-size: 2.25rem;
-  line-height: 0.8;
+  font-size: 1.9rem;
+  line-height: 0.75;
   color: var(--ink-faint);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
 }
 
 .tiptap blockquote[data-variant="box"],
 .prose-body blockquote[data-variant="box"] {
   border-left: none;
-  padding: 1.5rem 1.75rem;
+  padding: 1.1rem 1.4rem;
   background: var(--paper-soft);
   border-radius: var(--radius-md);
-}
-
-.tiptap blockquote[data-variant="box"] p,
-.prose-body blockquote[data-variant="box"] p,
-.tiptap blockquote[data-variant="pull"] p,
-.prose-body blockquote[data-variant="pull"] p {
-  font-family: inherit;
-  font-size: var(--doc-body-1);
-  line-height: 1.7;
 }
 
 /* ── list shapes ──────────────────────────────────────────── */
@@ -1363,34 +1388,40 @@ a.bookmark:hover {
 .tiptap hr[data-variant="dots"],
 .prose-body hr[data-variant="dots"] {
   border-top: none;
-  height: 4px;
-  background-image: radial-gradient(circle, var(--ink-faint) 1.6px, transparent 1.7px);
-  background-size: 1.5rem 4px;
-  background-position: center;
-  background-repeat: repeat-x;
-  width: 5rem;
+  height: 5px;
+  width: 4.5rem;
   margin-inline: auto;
+  /* Three dots, not a dotted line. */
+  background-image: radial-gradient(circle, var(--ink-faint) 2px, transparent 2.1px);
+  background-size: 33.34% 100%;
+  background-repeat: repeat-x;
 }
 
 .tiptap hr[data-variant="heavy"],
 .prose-body hr[data-variant="heavy"] {
-  border-top: 3px solid var(--ink);
-  width: 4rem;
+  border-top: 2px solid var(--ink);
+  width: 3.75rem;
   margin-inline: auto;
 }
 
 .tiptap hr[data-variant="wave"],
 .prose-body hr[data-variant="wave"] {
   border-top: none;
-  height: 8px;
-  width: 4.5rem;
+  height: 9px;
+  width: 4rem;
   margin-inline: auto;
-  /* A zigzag drawn with two crossing gradients. */
-  background:
-    linear-gradient(45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
-      0 0 / 8px 8px repeat-x,
-    linear-gradient(-45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
-      4px 0 / 8px 8px repeat-x;
+  background-repeat: repeat-x;
+  background-position: center;
+  background-size: 12px 9px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='9'%3E%3Cpath d='M0 7 3 2l3 5 3-5 3 5' fill='none' stroke='%23a8a49b' stroke-width='1.2'/%3E%3C/svg%3E");
+}
+
+.tiptap hr[data-variant="diamond"],
+.prose-body hr[data-variant="diamond"],
+.tiptap hr[data-variant="ring"],
+.prose-body hr[data-variant="ring"] {
+  width: 14rem;
+  margin-inline: auto;
 }
 
 .tiptap hr[data-variant="diamond"]::after,
@@ -1554,13 +1585,18 @@ a.bookmark:hover {
   word-break: keep-all;
   overflow-wrap: break-word;
   color: var(--ink);
-}.tiptap p,
+}
+
+.tiptap p,
 .prose-body p {
-  font-size: var(--text-body-lg);
-  line-height: 1.75;
+  font-size: var(--doc-body-2);
+  /* 1.75 with a 1.5rem gap made one Enter look like two. */
+  line-height: 1.7;
   color: var(--ink-muted);
-  margin-bottom: 1.5rem;
-}/* Sans,
+  margin-bottom: 0.9rem;
+}
+
+/* Sans,
 like the article. `.serif-heads` only reaches --t-display and t-h1,
 so headings inside a piece have always been Pretendard. */
 .tiptap h2,
@@ -1568,54 +1604,74 @@ so headings inside a piece have always been Pretendard. */
 .prose-body h3 {
   font-weight: 600;
   color: var(--ink);
-}.tiptap h2,
+}
+
+.tiptap h2,
 .prose-body h2 {
   font-size: var(--doc-h2);
   line-height: 1.34;
   letter-spacing: -0.018em;
   margin-top: 4rem;
   margin-bottom: 1rem;
-}.tiptap h3,
+}
+
+.tiptap h3,
 .prose-body h3 {
   font-size: var(--doc-h3);
   line-height: 1.45;
   letter-spacing: -0.012em;
   margin-top: 3rem;
   margin-bottom: 0.75rem;
-}.tiptap blockquote,
+}
+
+.tiptap blockquote,
 .prose-body blockquote {
   border-left: 2px solid var(--accent);
   padding-left: 1.5rem;
-  margin-block: 4rem;
-}.tiptap blockquote p,
+  margin-block: 2rem;
+}
+
+.tiptap blockquote p,
 .prose-body blockquote p {
   font-family: var(--font-serif);
-  font-size: var(--text-h2);
-  line-height: 1.35;
+  font-size: var(--doc-body-1);
+  line-height: 1.65;
   color: var(--ink);
   margin-bottom: 0;
-}.tiptap ul,
+}
+
+.tiptap ul,
 .prose-body ul,
 .tiptap ol,
 .prose-body ol {
   padding-left: 1.5rem;
-  margin-bottom: 2rem;
-  font-size: var(--text-body-lg);
-  line-height: 1.75;
+  margin-bottom: 1.25rem;
+  font-size: var(--doc-body-2);
+  line-height: 1.65;
   color: var(--ink-muted);
-}.tiptap ul,
+}
+
+.tiptap ul,
 .prose-body ul {
   list-style: disc;
-}.tiptap ol,
+}
+
+.tiptap ol,
 .prose-body ol {
   list-style: decimal;
-}.tiptap li,
+}
+
+.tiptap li,
 .prose-body li {
-  margin-bottom: 0.75rem;
-}.tiptap li p,
+  margin-bottom: 0.25rem;
+}
+
+.tiptap li p,
 .prose-body li p {
   margin-bottom: 0;
-}.tiptap li::marker,
+}
+
+.tiptap li::marker,
 .prose-body li::marker {
   color: var(--accent);
   font-size: 0.85em;
