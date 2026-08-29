@@ -99,6 +99,17 @@
   --text-body: 0.9375rem;
   --text-caption: 0.8125rem;
   --text-label: 0.75rem;
+
+  /* The ramp inside an article body. The page title is --text-h1, so these
+     all sit below it, and the three body sizes are far enough apart to read
+     as three. Headings carry weight as well as size, which is what keeps
+     제목3 and 본문1 distinct at only 2px apart. */
+  --doc-h1: 1.875rem;
+  --doc-h2: 1.5rem;
+  --doc-h3: 1.25rem;
+  --doc-body-1: 1.125rem;
+  --doc-body-2: 1.0625rem;
+  --doc-body-3: 0.9375rem;
 }
 
 /* Expose tokens to Tailwind utilities (bg-paper, text-ink-muted,
@@ -1268,6 +1279,189 @@ a.bookmark:hover {
   opacity: 1;
 }
 
+/* ── the block menu's six steps ───────────────────────────── */
+
+.tiptap h1,
+.prose-body h1 {
+  font-size: var(--doc-h1);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-top: 4.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tiptap p[data-size="1"],
+.prose-body p[data-size="1"] {
+  font-size: var(--doc-body-1);
+}
+.tiptap p[data-size="2"],
+.prose-body p[data-size="2"] {
+  font-size: var(--doc-body-2);
+}
+.tiptap p[data-size="3"],
+.prose-body p[data-size="3"] {
+  font-size: var(--doc-body-3);
+}
+
+/* ── quote shapes ─────────────────────────────────────────── */
+
+/* The default keeps the bar it has always had; the menu names it 세로선. */
+.tiptap blockquote[data-variant="pull"],
+.prose-body blockquote[data-variant="pull"] {
+  border-left: none;
+  padding-left: 0;
+  text-align: center;
+}
+
+.tiptap blockquote[data-variant="pull"]::before,
+.prose-body blockquote[data-variant="pull"]::before {
+  content: "\201C";
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 2.25rem;
+  line-height: 0.8;
+  color: var(--ink-faint);
+  margin-bottom: 0.75rem;
+}
+
+.tiptap blockquote[data-variant="box"],
+.prose-body blockquote[data-variant="box"] {
+  border-left: none;
+  padding: 1.5rem 1.75rem;
+  background: var(--paper-soft);
+  border-radius: var(--radius-md);
+}
+
+.tiptap blockquote[data-variant="box"] p,
+.prose-body blockquote[data-variant="box"] p,
+.tiptap blockquote[data-variant="pull"] p,
+.prose-body blockquote[data-variant="pull"] p {
+  font-family: inherit;
+  font-size: var(--doc-body-1);
+  line-height: 1.7;
+}
+
+/* ── list shapes ──────────────────────────────────────────── */
+
+.tiptap ul[data-variant="circle"],
+.prose-body ul[data-variant="circle"] {
+  list-style: circle;
+}
+
+/* ── rules ────────────────────────────────────────────────── */
+
+.tiptap hr,
+.prose-body hr {
+  position: relative;
+  border: 0;
+  border-top: var(--border-width) solid var(--line);
+  margin-block: 3.5rem;
+}
+
+.tiptap hr[data-variant="dots"],
+.prose-body hr[data-variant="dots"] {
+  border-top: none;
+  height: 4px;
+  background-image: radial-gradient(circle, var(--ink-faint) 1.6px, transparent 1.7px);
+  background-size: 1.5rem 4px;
+  background-position: center;
+  background-repeat: repeat-x;
+  width: 5rem;
+  margin-inline: auto;
+}
+
+.tiptap hr[data-variant="heavy"],
+.prose-body hr[data-variant="heavy"] {
+  border-top: 3px solid var(--ink);
+  width: 4rem;
+  margin-inline: auto;
+}
+
+.tiptap hr[data-variant="wave"],
+.prose-body hr[data-variant="wave"] {
+  border-top: none;
+  height: 8px;
+  width: 4.5rem;
+  margin-inline: auto;
+  /* A zigzag drawn with two crossing gradients. */
+  background:
+    linear-gradient(45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
+      0 0 / 8px 8px repeat-x,
+    linear-gradient(-45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
+      4px 0 / 8px 8px repeat-x;
+}
+
+.tiptap hr[data-variant="diamond"]::after,
+.prose-body hr[data-variant="diamond"]::after,
+.tiptap hr[data-variant="ring"]::after,
+.prose-body hr[data-variant="ring"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  background: var(--paper);
+  border: var(--border-width) solid var(--line);
+}
+
+.tiptap hr[data-variant="diamond"]::after,
+.prose-body hr[data-variant="diamond"]::after {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.tiptap hr[data-variant="ring"]::after,
+.prose-body hr[data-variant="ring"]::after {
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+/* A miniature of each rule, drawn in the menu that inserts it. */
+.rule-sample {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-top: var(--border-width) solid var(--line);
+}
+.rule-sample[data-variant="dots"] {
+  border-top: none;
+  height: 4px;
+  background-image: radial-gradient(circle, var(--ink-faint) 1.4px, transparent 1.5px);
+  background-size: 0.85rem 4px;
+  background-position: center;
+  background-repeat: repeat-x;
+}
+.rule-sample[data-variant="heavy"] {
+  border-top: 3px solid var(--ink);
+}
+.rule-sample[data-variant="wave"] {
+  border-top: none;
+  height: 8px;
+  background:
+    linear-gradient(45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
+      0 0 / 8px 8px repeat-x,
+    linear-gradient(-45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
+      4px 0 / 8px 8px repeat-x;
+}
+.rule-sample[data-variant="diamond"]::after,
+.rule-sample[data-variant="ring"]::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  background: var(--surface);
+  border: var(--border-width) solid var(--line);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.rule-sample[data-variant="ring"]::after {
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
 /* ── marks the toolbar writes ─────────────────────────────── */
 
 .tiptap u,
@@ -1376,14 +1570,14 @@ so headings inside a piece have always been Pretendard. */
   color: var(--ink);
 }.tiptap h2,
 .prose-body h2 {
-  font-size: var(--text-h2);
+  font-size: var(--doc-h2);
   line-height: 1.34;
   letter-spacing: -0.018em;
   margin-top: 4rem;
   margin-bottom: 1rem;
 }.tiptap h3,
 .prose-body h3 {
-  font-size: var(--text-h3);
+  font-size: var(--doc-h3);
   line-height: 1.45;
   letter-spacing: -0.012em;
   margin-top: 3rem;

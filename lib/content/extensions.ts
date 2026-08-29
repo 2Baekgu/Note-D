@@ -9,6 +9,7 @@ import type { Extensions } from "@tiptap/core";
 
 import { CaptionedImage } from "./nodes/captioned-image";
 import { Bookmark } from "./nodes/bookmark";
+import { BlockVariants } from "./nodes/variants";
 
 /** Everything but the two custom nodes, which the editor swaps for versions
  *  carrying a React node view.
@@ -31,6 +32,7 @@ export const baseExtensions: Extensions = [
   TextAlign.configure({ types: ["heading", "paragraph"] }),
   Highlight.configure({ multicolor: true }),
   TableKit.configure({ table: { resizable: true } }),
+  BlockVariants,
 ];
 
 /** The schema-only nodes, for rendering a stored document outside React. */

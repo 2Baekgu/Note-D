@@ -9,13 +9,16 @@ import { cn } from "@/lib/utils";
  *  things that insert a block. It sticks to the top of the window, because
  *  the reason to reach for it is usually halfway down a draft. */
 
+/** Six steps down from the biggest in-body heading to the smallest body
+ *  size. Headings carry weight as well as size, which is what keeps 제목3 and
+ *  본문1 apart at two pixels. The preview column mirrors the real ramp. */
 const BLOCKS = [
-  { label: "제목1", level: 1 },
-  { label: "제목2", level: 2 },
-  { label: "제목3", level: 3 },
-  { label: "본문1", size: "1.125rem" },
-  { label: "본문2", size: "1rem" },
-  { label: "본문3", size: "0.875rem" },
+  { label: "제목1", level: 1, preview: "1.5rem", bold: true },
+  { label: "제목2", level: 2, preview: "1.25rem", bold: true },
+  { label: "제목3", level: 3, preview: "1.0625rem", bold: true },
+  { label: "본문1", size: "1", preview: "1rem" },
+  { label: "본문2", size: "2", preview: "0.9375rem" },
+  { label: "본문3", size: "3", preview: "0.875rem" },
 ] as const;
 
 const FONTS = [
@@ -32,6 +35,151 @@ const PALETTE = [
   "#e8452a", "#f08b28", "#f5c518", "#1f9d55", "#1d7fd4", "#6b4fd6", "#c2185b",
   "#f9d5cf", "#fbe4cb", "#fdf3c8", "#cfe9d8", "#cfe0f5", "#ddd5f7", "#f7d3e2",
 ];
+
+/** The three quote shapes from the reference. `null` is the plain left bar,
+ *  which is what a quote has always looked like here. */
+const QUOTES = [
+  ["pull", "가운데 인용", "❝"],
+  [null, "세로선 인용", "▎"],
+  ["box", "박스 인용", "▭"],
+] as const;
+
+const LISTS = [
+  ["bullet", null, "글머리 기호", "•"],
+  ["bullet", "circle", "속 빈 기호", "◦"],
+  ["ordered", null, "번호 매기기", "1."],
+] as const;
+
+const RULES = [
+  [null, "기본선"],
+  ["dots", "점 세 개"],
+  ["heavy", "굵은 선"],
+  ["wave", "물결"],
+  ["diamond", "마름모"],
+  ["ring", "동그라미"],
+] as const;
+
+/** Drag across the grid to pick a size, the way the reference does. */
+function TableGrid({ editor, close }: { editor: Editor; close: () => void }) {
+  const [hover, setHover] = useState({ rows: 0, cols: 0 });
+  const MAX = 8;
+
+  return (
+    <div className="p-2.5">
+      <div
+        className="grid gap-[3px]"
+        style={{ gridTemplateColumns: `repeat(${MAX}, 1.05rem)` }}
+        onMouseLeave={() => setHover({ rows: 0, cols: 0 })}
+      >
+        {Array.from({ length: MAX * MAX }, (_, i) => {
+          const row = Math.floor(i / MAX) + 1;
+          const col = (i % MAX) + 1;
+          const on = row <= hover.rows && col <= hover.cols;
+          return (
+            <button
+              key={i}
+              type="button"
+              onMouseEnter={() => setHover({ rows: row, cols: col })}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                editor
+                  .chain()
+                  .focus()
+                  .insertTable({ rows: row, cols: col, withHeaderRow: true })
+                  .run();
+                close();
+              }}
+              className={cn(
+                "h-[1.05rem] w-[1.05rem] border",
+                on ? "border-ink bg-[rgba(22,21,15,0.12)]" : "border-line",
+              )}
+            />
+          );
+        })}
+      </div>
+      <p className="t-caption mt-2 text-center text-ink-muted">
+        {hover.rows ? `${hover.cols} × ${hover.rows}` : "크기를 고르세요"}
+      </p>
+    </div>
+  );
+}
+
+/** URL, the text it should read as, and whether it opens in a new tab —
+ *  the panel the reference shows, instead of a browser prompt. */
+function LinkForm({ editor, close }: { editor: Editor; close: () => void }) {
+  const existing = editor.getAttributes("link").href as string | undefined;
+  const [url, setUrl] = useState(existing ?? "");
+  const [text, setText] = useState("");
+  const [blank, setBlank] = useState(true);
+
+  const apply = () => {
+    const href = url.trim();
+    if (!href) return;
+    const chain = editor.chain().focus();
+    const label = text.trim();
+    if (label) chain.insertContent(label).setTextSelection({
+      from: editor.state.selection.from,
+      to: editor.state.selection.from + label.length,
+    });
+    chain
+      .setLink({ href, target: blank ? "_blank" : null })
+      .run();
+    close();
+  };
+
+  return (
+    <div className="p-3">
+      <input
+        autoFocus
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { e.preventDefault(); apply(); }
+        }}
+        placeholder="URL"
+        className="field w-full"
+      />
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { e.preventDefault(); apply(); }
+        }}
+        placeholder="대체텍스트"
+        className="field mt-2 w-full"
+      />
+      <label className="t-caption mt-3 flex items-center gap-2 text-ink-muted">
+        <input
+          type="checkbox"
+          checked={blank}
+          onChange={(e) => setBlank(e.target.checked)}
+          className="h-3.5 w-3.5 accent-[var(--ink)]"
+        />
+        새창으로 열기
+      </label>
+      <div className="mt-3 flex justify-end gap-2">
+        {existing && (
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => { editor.chain().focus().unsetLink().run(); close(); }}
+            className="t-label text-ink-faint underline underline-offset-4"
+          >
+            해제
+          </button>
+        )}
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={apply}
+          className="chip chip-solid chip-sm"
+        >
+          확인
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function Divider() {
   return <span className="mx-1.5 h-5 w-px shrink-0 bg-line" aria-hidden="true" />;
@@ -137,14 +285,18 @@ function Swatches({ onPick }: { onPick: (color: string) => void }) {
     // squeezes the grid into a column of slivers.
     <div className="w-[13.75rem] p-2.5">
       <div className="grid grid-cols-7 gap-2">
+        {/* The stroke is drawn inside the circle — rotating a bordered box
+            pushed its corners past the rim. */}
         <button
           type="button"
           title="없음"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onPick("")}
-          className="h-5 w-5 rounded-full border border-line bg-paper"
+          className="h-5 w-5 overflow-hidden rounded-full border border-line bg-paper"
         >
-          <span className="block h-full w-full rotate-45 border-l border-accent" />
+          <svg viewBox="0 0 20 20" className="h-full w-full">
+            <line x1="4" y1="16" x2="16" y2="4" stroke="var(--accent)" strokeWidth="1.5" />
+          </svg>
         </button>
         {PALETTE.map((c) => (
           <button
@@ -177,8 +329,15 @@ export function EditorToolbar({
     "flex w-full items-center gap-2 px-3 py-2 text-left text-ink transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.05)]";
 
   const blockLabel =
-    BLOCKS.find((b) => "level" in b && editor.isActive("heading", { level: b.level }))?.label ??
-    "본문2";
+    BLOCKS.find((b) =>
+      "level" in b
+        ? editor.isActive("heading", { level: b.level })
+        : editor.isActive("paragraph", { size: b.size }),
+    )?.label ?? "본문2";
+
+  /** What the colour button should be showing right now. */
+  const inkColor = (editor.getAttributes("textStyle").color as string) || "#16150f";
+  const markColor = (editor.getAttributes("highlight").color as string) || "#fdf3c8";
 
   return (
     <div className="editor-toolbar">
@@ -217,14 +376,11 @@ export function EditorToolbar({
                   onClick={() => {
                     const chain = editor.chain().focus();
                     if ("level" in b) chain.setNode("heading", { level: b.level }).run();
-                    else chain.setParagraph().run();
+                    else chain.setNode("paragraph", { size: b.size }).run();
                     close();
                   }}
                   className={item}
-                  style={{
-                    fontSize: "level" in b ? `${1.6 - b.level * 0.2}rem` : b.size,
-                    fontWeight: "level" in b ? 600 : 400,
-                  }}
+                  style={{ fontSize: b.preview, fontWeight: "bold" in b ? 600 : 400 }}
                 >
                   {b.label}
                 </button>
@@ -279,7 +435,10 @@ export function EditorToolbar({
           trigger={
             <span className="flex flex-col items-center leading-none">
               <span className="text-[0.85rem] font-semibold">T</span>
-              <span className="mt-[1px] h-[3px] w-[13px] rounded-[1px] bg-accent" />
+              <span
+                className="mt-[1px] h-[3px] w-[13px] rounded-[1px] border border-line"
+                style={{ background: inkColor }}
+              />
             </span>
           }
         >
@@ -299,7 +458,10 @@ export function EditorToolbar({
           label="배경색"
           width="w-auto min-w-0"
           trigger={
-            <span className="flex h-[17px] w-[15px] items-center justify-center rounded-[2px] border border-current text-[0.72rem] font-semibold">
+            <span
+              className="flex h-[17px] w-[15px] items-center justify-center rounded-[2px] border border-current text-[0.72rem] font-semibold"
+              style={{ background: markColor }}
+            >
               T
             </span>
           }
@@ -340,99 +502,124 @@ export function EditorToolbar({
 
         <Divider />
 
-        <Btn label="인용" on={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-          <span className="font-serif text-[0.8rem] font-semibold leading-none tracking-tight">66</span>
-        </Btn>
-
-        <Menu label="표" width="w-auto min-w-0" trigger={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            <rect x="3" y="4" width="18" height="16" rx="1.5" />
-            <path d="M3 10h18M3 15h18M9 4v16M15 4v16" />
-          </svg>
-        }>
-          {(close) => (
-            <div className="p-2">
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-                  close();
-                }}
-                className={item}
-              >
-                3 × 3 표 넣기
-              </button>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => { editor.chain().focus().addRowAfter().run(); close(); }}
-                className={item}
-              >
-                아래에 행 추가
-              </button>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => { editor.chain().focus().addColumnAfter().run(); close(); }}
-                className={item}
-              >
-                오른쪽에 열 추가
-              </button>
-              <button
-                type="button"
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => { editor.chain().focus().deleteTable().run(); close(); }}
-                className={cn(item, "text-accent")}
-              >
-                표 삭제
-              </button>
-            </div>
-          )}
-        </Menu>
-
-        <Btn
-          label="링크"
-          on={editor.isActive("link")}
-          onClick={() => {
-            if (editor.isActive("link")) {
-              editor.chain().focus().unsetLink().run();
-              return;
-            }
-            const url = window.prompt("링크 주소");
-            if (url) editor.chain().focus().setLink({ href: url }).run();
-          }}
+        <Menu
+          label="인용"
+          width="w-44"
+          trigger={<span className="font-serif text-[0.8rem] font-semibold leading-none tracking-tight">66</span>}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
-            <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5" />
-            <path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5" />
-          </svg>
-        </Btn>
-
-        <Menu label="목록" width="w-40" trigger={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
-          </svg>
-        }>
           {(close) => (
             <>
-              <button type="button" onMouseDown={(e)=>e.preventDefault()}
-                onClick={() => { editor.chain().focus().toggleBulletList().run(); close(); }} className={item}>
-                • 글머리 기호
-              </button>
-              <button type="button" onMouseDown={(e)=>e.preventDefault()}
-                onClick={() => { editor.chain().focus().toggleOrderedList().run(); close(); }} className={item}>
-                1. 번호 매기기
-              </button>
+              {QUOTES.map(([variant, label, glyph]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (!editor.isActive("blockquote")) editor.chain().focus().toggleBlockquote().run();
+                    editor.chain().focus().updateAttributes("blockquote", { variant }).run();
+                    close();
+                  }}
+                  className={item}
+                >
+                  <span className="w-4 text-center text-ink-faint">{glyph}</span>
+                  {label}
+                </button>
+              ))}
             </>
           )}
         </Menu>
 
-        <Btn label="구분선" onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-            <path d="M4 12h16" />
-          </svg>
-        </Btn>
+        <Menu
+          label="표"
+          width="w-auto min-w-0"
+          trigger={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <rect x="3" y="4" width="18" height="16" rx="1.5" />
+              <path d="M3 10h18M3 15h18M9 4v16M15 4v16" />
+            </svg>
+          }
+        >
+          {(close) => <TableGrid editor={editor} close={close} />}
+        </Menu>
+
+        <Menu
+          label="링크"
+          width="w-72"
+          trigger={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+              <path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5" />
+              <path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5" />
+            </svg>
+          }
+        >
+          {(close) => <LinkForm editor={editor} close={close} />}
+        </Menu>
+
+        <Menu
+          label="목록"
+          width="w-44"
+          trigger={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />
+            </svg>
+          }
+        >
+          {(close) => (
+            <>
+              {LISTS.map(([kind, variant, label, glyph]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    if (kind === "ordered") {
+                      editor.chain().focus().toggleOrderedList().run();
+                    } else {
+                      if (!editor.isActive("bulletList")) editor.chain().focus().toggleBulletList().run();
+                      editor.chain().focus().updateAttributes("bulletList", { variant }).run();
+                    }
+                    close();
+                  }}
+                  className={item}
+                >
+                  <span className="w-4 text-center text-ink-faint">{glyph}</span>
+                  {label}
+                </button>
+              ))}
+            </>
+          )}
+        </Menu>
+
+        <Menu
+          label="구분선"
+          width="w-52"
+          trigger={
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M4 12h16" />
+            </svg>
+          }
+        >
+          {(close) => (
+            <div className="py-1">
+              {RULES.map(([variant, label]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    editor.chain().focus().setHorizontalRule().run();
+                    editor.chain().focus().updateAttributes("horizontalRule", { variant }).run();
+                    close();
+                  }}
+                  className="flex w-full items-center gap-3 px-3 py-2.5 transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.05)]"
+                >
+                  <span className="rule-sample flex-1" data-variant={variant ?? undefined} />
+                  <span className="t-caption w-16 shrink-0 text-left text-ink-muted">{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </Menu>
 
         <Divider />
 
