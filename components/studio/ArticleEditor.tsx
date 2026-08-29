@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Article, Reference } from "@/lib/types";
 import { topics } from "@/lib/data/topics";
@@ -26,6 +26,25 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [actionsRef, actionsStuck] = useStuck<HTMLDivElement>();
+
+  // The editor toolbar sticks directly under this bar, and the bar changes
+  // height when it wraps. Measure it rather than guess, or the two overlap.
+  useEffect(() => {
+    const bar = actionsRef.current;
+    if (!bar) return;
+    const write = () =>
+      document.documentElement.style.setProperty(
+        "--studio-bar-h",
+        `${Math.round(bar.getBoundingClientRect().height)}px`,
+      );
+    write();
+    const ro = new ResizeObserver(write);
+    ro.observe(bar);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty("--studio-bar-h");
+    };
+  }, [actionsRef]);
 
   // The session may arrive after the first render, so the author falls back
   // rather than being written into state by an effect. RLS only accepts

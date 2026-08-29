@@ -37,35 +37,40 @@ function Divider() {
   return <span className="mx-1.5 h-5 w-px shrink-0 bg-line" aria-hidden="true" />;
 }
 
+/** The small dark label the reference shows under whatever the mouse is on.
+ *  `title` would do the same job a second and a half later. */
+function Tip({ children }: { children: React.ReactNode }) {
+  return <span className="editor-tip">{children}</span>;
+}
+
 function Btn({
   on,
   label,
   onClick,
   children,
-  wide,
 }: {
   on?: boolean;
   label: string;
   onClick: () => void;
   children: React.ReactNode;
-  wide?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      aria-pressed={on}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-      className={cn(
-        "flex h-8 shrink-0 items-center justify-center rounded-sm text-ink-muted transition-colors duration-[var(--duration-fast)]",
-        wide ? "gap-1 px-2" : "w-8",
-        on ? "bg-ink text-on-inverse" : "hover:bg-[rgba(22,21,15,0.06)] hover:text-ink",
-      )}
-    >
-      {children}
-    </button>
+    <span className="editor-tipwrap">
+      <button
+        type="button"
+        aria-label={label}
+        aria-pressed={on}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={onClick}
+        className={cn(
+          "flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-ink-muted transition-colors duration-[var(--duration-fast)]",
+          on ? "bg-ink text-on-inverse" : "hover:bg-[rgba(22,21,15,0.06)] hover:text-ink",
+        )}
+      >
+        {children}
+      </button>
+      <Tip>{label}</Tip>
+    </span>
   );
 }
 
@@ -99,10 +104,9 @@ function Menu({
   }, [open]);
 
   return (
-    <div ref={wrap} className="relative shrink-0">
+    <div ref={wrap} className="editor-tipwrap relative shrink-0">
       <button
         type="button"
-        title={label}
         aria-label={label}
         aria-expanded={open}
         onMouseDown={(e) => e.preventDefault()}
@@ -113,8 +117,11 @@ function Menu({
         )}
       >
         {trigger}
-        <span className="text-[0.6rem] leading-none opacity-60">▾</span>
+        <svg width="8" height="8" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" className="opacity-60">
+          <path d="m2 4 3 3 3-3" />
+        </svg>
       </button>
+      {!open && <Tip>{label}</Tip>}
       {open && (
         <div className={cn("surface absolute left-0 top-[calc(100%+0.35rem)] z-40 py-1 shadow-float", width)}>
           {children(() => setOpen(false))}
@@ -126,8 +133,10 @@ function Menu({
 
 function Swatches({ onPick }: { onPick: (color: string) => void }) {
   return (
-    <div className="p-2">
-      <div className="grid grid-cols-7 gap-1.5">
+    // A fixed width, or the absolutely positioned popover shrinks to fit and
+    // squeezes the grid into a column of slivers.
+    <div className="w-[13.75rem] p-2.5">
+      <div className="grid grid-cols-7 gap-2">
         <button
           type="button"
           title="없음"
@@ -173,12 +182,11 @@ export function EditorToolbar({
 
   return (
     <div className="editor-toolbar">
-      <div className="scroll-x flex items-center gap-0.5 px-1">
+      {/* No overflow here: a scrolling row clips the popovers that open out
+          of it, which is why nothing appeared on a click. It wraps instead. */}
+      <div className="flex flex-wrap items-center gap-0.5 px-1.5 py-1">
         {/* 첨부 */}
-        <label
-          title="사진 첨부"
-          className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-ink-muted transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.06)] hover:text-ink"
-        >
+        <label className="editor-tipwrap flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm text-ink-muted transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.06)] hover:text-ink">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
             <rect x="3" y="4" width="18" height="16" rx="2" />
             <circle cx="8.5" cy="9.5" r="1.5" />
@@ -194,6 +202,7 @@ export function EditorToolbar({
               e.target.value = "";
             }}
           />
+          <Tip>첨부</Tip>
         </label>
 
         {/* 문단 모양 */}
@@ -258,13 +267,22 @@ export function EditorToolbar({
           <em className="font-serif text-[0.95rem]">I</em>
         </Btn>
         <Btn label="밑줄" on={editor.isActive("underline")} onClick={() => editor.chain().focus().toggleUnderline().run()}>
-          <span className="text-[0.95rem] underline underline-offset-2">U</span>
+          <span className="text-[0.9rem] underline underline-offset-[3px]">U</span>
         </Btn>
         <Btn label="취소선" on={editor.isActive("strike")} onClick={() => editor.chain().focus().toggleStrike().run()}>
-          <span className="text-[0.95rem] line-through">S</span>
+          <span className="text-[0.9rem] line-through">T</span>
         </Btn>
 
-        <Menu label="글자색" width="w-auto" trigger={<span className="text-[0.95rem] font-semibold">A</span>}>
+        <Menu
+          label="글자색"
+          width="w-auto min-w-0"
+          trigger={
+            <span className="flex flex-col items-center leading-none">
+              <span className="text-[0.85rem] font-semibold">T</span>
+              <span className="mt-[1px] h-[3px] w-[13px] rounded-[1px] bg-accent" />
+            </span>
+          }
+        >
           {(close) => (
             <Swatches
               onPick={(c) => {
@@ -279,8 +297,12 @@ export function EditorToolbar({
 
         <Menu
           label="배경색"
-          width="w-auto"
-          trigger={<span className="rounded-[3px] bg-accent-soft px-1 text-[0.95rem] font-semibold">A</span>}
+          width="w-auto min-w-0"
+          trigger={
+            <span className="flex h-[17px] w-[15px] items-center justify-center rounded-[2px] border border-current text-[0.72rem] font-semibold">
+              T
+            </span>
+          }
         >
           {(close) => (
             <Swatches
@@ -298,10 +320,10 @@ export function EditorToolbar({
 
         {(
           [
-            ["left", "왼쪽 정렬", "M4 6h16M4 11h10M4 16h16M4 21h10"],
-            ["center", "가운데 정렬", "M4 6h16M7 11h10M4 16h16M7 21h10"],
-            ["right", "오른쪽 정렬", "M4 6h16M10 11h10M4 16h16M10 21h10"],
-            ["justify", "양쪽 정렬", "M4 6h16M4 11h16M4 16h16M4 21h16"],
+            ["left", "왼쪽 정렬", "M3 5h18M3 10h11M3 15h18M3 20h11"],
+            ["center", "가운데 정렬", "M3 5h18M6.5 10h11M3 15h18M6.5 20h11"],
+            ["right", "오른쪽 정렬", "M3 5h18M10 10h11M3 15h18M10 20h11"],
+            ["justify", "양쪽 정렬", "M3 5h18M3 10h18M3 15h18M3 20h18"],
           ] as const
         ).map(([value, label, d]) => (
           <Btn
@@ -310,7 +332,7 @@ export function EditorToolbar({
             on={editor.isActive({ textAlign: value })}
             onClick={() => editor.chain().focus().setTextAlign(value).run()}
           >
-            <svg width="16" height="16" viewBox="0 0 24 26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+            <svg width="16" height="16" viewBox="0 0 24 25" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d={d} />
             </svg>
           </Btn>
@@ -319,10 +341,10 @@ export function EditorToolbar({
         <Divider />
 
         <Btn label="인용" on={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
-          <span className="font-serif text-[1.05rem] leading-none">”</span>
+          <span className="font-serif text-[0.8rem] font-semibold leading-none tracking-tight">66</span>
         </Btn>
 
-        <Menu label="표" width="w-auto" trigger={
+        <Menu label="표" width="w-auto min-w-0" trigger={
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
             <rect x="3" y="4" width="18" height="16" rx="1.5" />
             <path d="M3 10h18M3 15h18M9 4v16M15 4v16" />

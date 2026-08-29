@@ -337,40 +337,6 @@ export function RichEditor({
         </ChipButton>
       </BubbleMenu>
 
-      <BubbleMenu
-        editor={editor}
-        pluginKey="textMenu"
-        shouldShow={({ editor: e, from, to }) => !e.isActive("image") && from !== to}
-        className="surface flex items-center gap-1 px-1.5 py-1 shadow-float"
-      >
-        <Mark editor={editor} name="bold" onClick={() => editor.chain().focus().toggleBold().run()}>
-          <strong>B</strong>
-        </Mark>
-        <Mark editor={editor} name="italic" onClick={() => editor.chain().focus().toggleItalic().run()}>
-          <em>I</em>
-        </Mark>
-        <Mark editor={editor} name="highlight" onClick={() => editor.chain().focus().toggleHighlight().run()}>
-          형광
-        </Mark>
-        <Mark editor={editor} name="code" onClick={() => editor.chain().focus().toggleCode().run()}>
-          코드
-        </Mark>
-        <Mark
-          editor={editor}
-          name="link"
-          onClick={() => {
-            if (editor.isActive("link")) {
-              editor.chain().focus().unsetLink().run();
-              return;
-            }
-            const url = window.prompt("링크 주소");
-            if (url) editor.chain().focus().setLink({ href: url }).run();
-          }}
-        >
-          링크
-        </Mark>
-      </BubbleMenu>
-
       <p className="t-caption mt-2 text-ink-faint">
         {tools === "image" ? (
           "이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣을 수 있습니다."
@@ -388,28 +354,6 @@ export function RichEditor({
   );
 }
 
-function Mark({
-  editor,
-  name,
-  onClick,
-  children,
-}: {
-  editor: Editor;
-  name: string;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <ChipButton
-      size="sm"
-      tone={editor.isActive(name) ? "solid" : "ghost"}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
-    >
-      {children}
-    </ChipButton>
-  );
-}
 
 /** The strip the bug-report dialog gets: a picture button and nothing else,
  *  because a report needs evidence, not formatting. */
