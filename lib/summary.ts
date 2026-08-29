@@ -33,8 +33,16 @@ const SYSTEM = `너는 콘텐츠 큐레이터다.
 12. 이모지는 전체에서 1개 정도만, 정말 어울리는 자리에만 쓴다. 없어도 되면 안 써도 된다. 문장마다 붙이거나 문장을 이모지로 시작하지 않는다.
 
 ### 길이
-전체 소개문은 3~5문장으로 작성한다.
-너무 많은 정보를 넣지 않는다.
+전체 소개문은 6~10문장으로 작성한다.
+길어진 만큼 정보를 더 욱여넣으라는 뜻이 아니다.
+같은 이야기를 호흡을 두고 편하게 풀어 쓰라는 뜻이다.
+
+### 줄바꿈
+읽는 사람은 카카오톡에서 이 글을 본다. 한 덩어리로 몰아 쓰면 읽히지 않는다.
+- 내용이 바뀌는 지점에서 문단을 나눈다.
+- 문단과 문단 사이에는 빈 줄을 하나 넣는다.
+- 한 문단은 2~3문장 정도가 읽기 좋다.
+- 어디서 끊을지는 네가 판단한다. 기계적으로 자르지 말고, 숨 쉴 자리에서 끊는다.
 
 ### 문체
 - 소개문은 반드시 존댓말로 쓴다. "~일까요?", "~합니다", "~느껴집니다"처럼
@@ -48,14 +56,16 @@ const SYSTEM = `너는 콘텐츠 큐레이터다.
 
 ### 출력
 소개문 텍스트만 출력한다. 제목, URL, 작성자, 이모지 머리말(📚 등)은 절대 포함하지 마라. 그건 코드가 붙인다.
+문단 구분은 빈 줄로만 한다. 제목이나 번호, 불릿 기호는 붙이지 않는다.
 
 ### 좋은 결과의 기준
 내용을 읽지 않은 사람도 이 글이 어떤 이야기인지 이해할 수 있어야 한다.
 하지만 소개문만 읽고 아티클의 결론을 모두 알 수 있어서는 안 된다.
 "요약했다"는 느낌보다 "읽어보고 싶게 소개했다"는 느낌이 나야 한다.`;
 
-/** A three-to-five sentence Korean pitch for an article — the kind of thing
- *  you would type into a chat to talk somebody into reading it.
+/** A Korean pitch for an article — six to ten sentences in a few short
+ *  paragraphs, the kind of thing you would type into a chat to talk somebody
+ *  into reading it.
  *
  *  Never throws. `text` is null whenever anything went wrong, and `error`
  *  says what, so the route can report it instead of quietly falling back to
@@ -106,8 +116,8 @@ export async function summarise(title: string, content: string): Promise<Summary
         // avoid, not so it can be quoted back — the code owns the title line.
         input: `### 아티클\n제목: ${title}\n\n"""\n${body}\n"""`,
         reasoning: { effort: "medium" },
-        text: { verbosity: "low" },
-        max_output_tokens: 2000,
+        text: { verbosity: "medium" },
+        max_output_tokens: 4000,
       }),
     });
 

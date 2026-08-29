@@ -45,18 +45,28 @@ export function articleUrl(slug: string): string {
  *  not to repeat, or the 📚 heading it was told the code owns. Strip those,
  *  so a stray line cannot end up doubled in the message.
  *
- *  Trailing spaces go too: the model ends lines with the two that mean a
- *  markdown line break and mean nothing at all in a chat room. */
+ *  Blank lines survive: they are the model's paragraph breaks, and they are
+ *  what makes six sentences readable on a phone. Runs of them collapse to
+ *  one, and trailing spaces go — the model ends lines with the two that mean
+ *  a markdown line break and mean nothing at all in a chat room. */
 function cleanIntro(intro: string, title: string): string {
   const heading = /^[📚🔗✍️]/u;
   const bareUrl = /^https?:\/\/\S+$/;
 
-  return intro
+  const lines = intro
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean)
-    .filter((line) => line !== title && !heading.test(line) && !bareUrl.test(line))
-    .join("\n");
+    .filter((line) => line !== title && !heading.test(line) && !bareUrl.test(line));
+
+  const kept: string[] = [];
+  for (const line of lines) {
+    // Drop a blank that opens the intro or follows another blank.
+    if (!line && (kept.length === 0 || kept[kept.length - 1] === "")) continue;
+    kept.push(line);
+  }
+  while (kept.length && kept[kept.length - 1] === "") kept.pop();
+
+  return kept.join("\n");
 }
 
 export function buildMessage(article: DailyArticle, intro: string): string {
