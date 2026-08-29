@@ -1377,45 +1377,93 @@ a.bookmark:hover {
 
 /* ── rules ────────────────────────────────────────────────── */
 
+/* Every style is drawn with backgrounds rather than a pseudo-element: an
+   <hr> does not reliably render ::before/::after, which is why the diamond
+   and the ring were arriving as plain lines. The menu's miniatures share
+   these declarations, so a sample cannot show something the page will not. */
+
 .tiptap hr,
 .prose-body hr {
-  position: relative;
   border: 0;
   border-top: var(--border-width) solid var(--line);
   margin-block: 3.5rem;
 }
 
-.tiptap hr[data-variant="dots"],
-.prose-body hr[data-variant="dots"] {
+.tiptap hr[data-variant],
+.prose-body hr[data-variant],
+.rule-sample[data-variant] {
   border-top: none;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Three dots. The 33.34% tile is what keeps it three at any width. */
+.tiptap hr[data-variant="dots"],
+.prose-body hr[data-variant="dots"],
+.rule-sample[data-variant="dots"] {
   height: 5px;
-  width: 4.5rem;
-  margin-inline: auto;
-  /* Three dots, not a dotted line. */
   background-image: radial-gradient(circle, var(--ink-faint) 2px, transparent 2.1px);
   background-size: 33.34% 100%;
   background-repeat: repeat-x;
 }
 
 .tiptap hr[data-variant="heavy"],
-.prose-body hr[data-variant="heavy"] {
-  border-top: 2px solid var(--ink);
-  width: 3.75rem;
-  margin-inline: auto;
+.prose-body hr[data-variant="heavy"],
+.rule-sample[data-variant="heavy"] {
+  height: 2px;
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-size: 100% 2px;
 }
 
 .tiptap hr[data-variant="wave"],
-.prose-body hr[data-variant="wave"] {
-  border-top: none;
+.prose-body hr[data-variant="wave"],
+.rule-sample[data-variant="wave"] {
   height: 9px;
-  width: 4rem;
-  margin-inline: auto;
   background-repeat: repeat-x;
-  background-position: center;
   background-size: 12px 9px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='9'%3E%3Cpath d='M0 7 3 2l3 5 3-5 3 5' fill='none' stroke='%23a8a49b' stroke-width='1.2'/%3E%3C/svg%3E");
 }
 
+/* A hairline with a mark set into it — the mark is painted over the line on
+   an opaque backing, which is the gap the reference shows. */
+.tiptap hr[data-variant="diamond"],
+.prose-body hr[data-variant="diamond"],
+.rule-sample[data-variant="diamond"] {
+  height: 11px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11'%3E%3Crect x='2.2' y='2.2' width='6.6' height='6.6' transform='rotate(45 5.5 5.5)' fill='%23ffffff' stroke='%23a8a49b' stroke-width='1'/%3E%3C/svg%3E"),
+    linear-gradient(var(--line), var(--line));
+  background-size: 11px 11px, 100% 1px;
+  background-position: center, center;
+}
+
+.tiptap hr[data-variant="ring"],
+.prose-body hr[data-variant="ring"],
+.rule-sample[data-variant="ring"] {
+  height: 11px;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11'%3E%3Ccircle cx='5.5' cy='5.5' r='3.6' fill='%23ffffff' stroke='%23a8a49b' stroke-width='1'/%3E%3C/svg%3E"),
+    linear-gradient(var(--line), var(--line));
+  background-size: 11px 11px, 100% 1px;
+  background-position: center, center;
+}
+
+/* Published widths. The miniatures keep their own, below. */
+.tiptap hr[data-variant="dots"],
+.prose-body hr[data-variant="dots"] {
+  width: 4.5rem;
+  margin-inline: auto;
+}
+.tiptap hr[data-variant="heavy"],
+.prose-body hr[data-variant="heavy"] {
+  width: 3rem;
+  margin-inline: auto;
+}
+.tiptap hr[data-variant="wave"],
+.prose-body hr[data-variant="wave"] {
+  width: 4rem;
+  margin-inline: auto;
+}
 .tiptap hr[data-variant="diamond"],
 .prose-body hr[data-variant="diamond"],
 .tiptap hr[data-variant="ring"],
@@ -1424,73 +1472,25 @@ a.bookmark:hover {
   margin-inline: auto;
 }
 
-.tiptap hr[data-variant="diamond"]::after,
-.prose-body hr[data-variant="diamond"]::after,
-.tiptap hr[data-variant="ring"]::after,
-.prose-body hr[data-variant="ring"]::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 9px;
-  height: 9px;
-  background: var(--paper);
-  border: var(--border-width) solid var(--line);
-}
-
-.tiptap hr[data-variant="diamond"]::after,
-.prose-body hr[data-variant="diamond"]::after {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.tiptap hr[data-variant="ring"]::after,
-.prose-body hr[data-variant="ring"]::after {
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-}
-
-/* A miniature of each rule, drawn in the menu that inserts it. */
+/* A miniature of each rule, sharing the drawings above so the menu cannot
+   promise a shape the page does not produce. */
 .rule-sample {
-  position: relative;
   display: block;
-  height: 10px;
-  border-top: var(--border-width) solid var(--line);
-}
-.rule-sample[data-variant="dots"] {
-  border-top: none;
-  height: 4px;
-  background-image: radial-gradient(circle, var(--ink-faint) 1.4px, transparent 1.5px);
-  background-size: 0.85rem 4px;
+  height: 11px;
+  background-image: linear-gradient(var(--line), var(--line));
+  background-size: 100% 1px;
   background-position: center;
-  background-repeat: repeat-x;
+  background-repeat: no-repeat;
+}
+
+.rule-sample[data-variant="dots"] {
+  width: 3.25rem;
 }
 .rule-sample[data-variant="heavy"] {
-  border-top: 3px solid var(--ink);
+  width: 2.25rem;
 }
 .rule-sample[data-variant="wave"] {
-  border-top: none;
-  height: 8px;
-  background:
-    linear-gradient(45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
-      0 0 / 8px 8px repeat-x,
-    linear-gradient(-45deg, transparent 45%, var(--ink-faint) 45%, var(--ink-faint) 55%, transparent 55%)
-      4px 0 / 8px 8px repeat-x;
-}
-.rule-sample[data-variant="diamond"]::after,
-.rule-sample[data-variant="ring"]::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 0;
-  width: 7px;
-  height: 7px;
-  background: var(--surface);
-  border: var(--border-width) solid var(--line);
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-.rule-sample[data-variant="ring"]::after {
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
+  width: 3rem;
 }
 
 /* ── marks the toolbar writes ─────────────────────────────── */
