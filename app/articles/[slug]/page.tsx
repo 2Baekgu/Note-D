@@ -34,10 +34,29 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
   if (!article) return { title: "Not found" };
+  // Without og:image a shared link is a bare title and a domain — which is
+  // exactly what a bookmark card of one of our own articles looked like.
+  // metadataBase resolves the cover's relative path to an absolute URL.
+  const images = article.coverImage ? [article.coverImage] : undefined;
+
   return {
     title: article.title,
     description: article.subtitle,
-    openGraph: { title: article.title, description: article.subtitle, type: "article" },
+    openGraph: {
+      title: article.title,
+      description: article.subtitle,
+      type: "article",
+      url: `/articles/${encodeURIComponent(article.slug)}`,
+      publishedTime: article.publishedAt,
+      authors: [article.author.name],
+      images,
+    },
+    twitter: {
+      card: images ? "summary_large_image" : "summary",
+      title: article.title,
+      description: article.subtitle,
+      images,
+    },
   };
 }
 
