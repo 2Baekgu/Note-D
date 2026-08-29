@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Highlight from "@tiptap/extension-highlight";
 import { CaptionedImage } from "./CaptionedImage";
+import { Bookmark } from "./BookmarkNode";
 import Placeholder from "@tiptap/extension-placeholder";
 import { blocksToDoc, isDoc, type DocNode } from "@/lib/content/doc";
 import { parseContent } from "@/lib/content/parse";
@@ -13,6 +14,21 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { ChipButton } from "@/components/ui/Chip";
 import { uploadImage } from "@/lib/studio";
 import { cn } from "@/lib/utils";
+
+interface LinkChoice {
+  url: string;
+  /** Absolute document positions of the bare URL text. */
+  from: number;
+  to: number;
+  /** Where to draw the menu, relative to the sheet. */
+  x: number;
+  y: number;
+}
+
+const CHOICES = [
+  { label: "URL 그대로", hint: "링크 텍스트로 둡니다" },
+  { label: "북마크로", hint: "썸네일 카드로 바꿉니다" },
+];
 
 /** The article editor, on ProseMirror by way of TipTap — the same engine
  *  Notion-style editors are built on. It owns selection, undo, IME and paste,
@@ -51,11 +67,41 @@ export function RichEditor({
   const { mode } = useAuth();
   const [uploading, setUploading] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  // Set when Enter lands at the end of a bare URL: the choice between leaving
+  // it as a link and expanding it into a card.
+  const [linkChoice, setLinkChoice] = useState<LinkChoice | null>(null);
+  const [choice, setChoice] = useState(0);
+  const [fetching, setFetching] = useState(false);
 
   // Seeded once; TipTap owns the document from here on.
   const [initial] = useState<DocNode>(() =>
     isDoc(value) ? (JSON.parse(value.trim()) as DocNode) : blocksToDoc(parseContent(value)),
   );
+
+  // The menu is driven from the keyboard because the caret never leaves the
+  // editor: arrows move the selection, Enter takes it, Escape drops it.
+  useEffect(() => {
+    if (!linkChoice) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        e.stopPropagation();
+        setChoice((i) => (i + 1) % CHOICES.length);
+      } else if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (choice === 0) keepUrl();
+        else void makeBookmark();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        setLinkChoice(null);
+      }
+    };
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  });
 
   const editor = useEditor({
     // Next renders this on the server first; TipTap must wait for the client.
@@ -66,6 +112,7 @@ export function RichEditor({
         link: { openOnClick: false, HTMLAttributes: { rel: "noreferrer noopener" } },
       }),
       CaptionedImage,
+      Bookmark,
       Highlight,
       Placeholder.configure({
         placeholder: ({ node }) =>
@@ -78,6 +125,30 @@ export function RichEditor({
     onUpdate: ({ editor: e }) => onChange(JSON.stringify(e.getJSON())),
     editorProps: {
       attributes: { class: "tiptap" },
+      handleKeyDown: (view, event) => {
+        if (event.key !== "Enter" || event.shiftKey || event.isComposing) return false;
+        const { selection } = view.state;
+        if (!selection.empty) return false;
+
+        const $from = selection.$from;
+        const before = $from.parent.textBetween(0, $from.parentOffset, undefined, " ");
+        const match = before.match(/(https?:\/\/\S+)$/);
+        if (!match) return false;
+
+        const url = match[1];
+        const to = $from.pos;
+        const box = sheetRef.current?.getBoundingClientRect();
+        const caret = view.coordsAtPos(to);
+        setChoice(0);
+        setLinkChoice({
+          url,
+          from: to - url.length,
+          to,
+          x: box ? caret.left - box.left : caret.left,
+          y: box ? caret.bottom - box.top : caret.bottom,
+        });
+        return true; // swallow the Enter until a choice is made
+      },
       handlePaste: (_view, event) => {
         const files = imagesFrom(event.clipboardData);
         if (!files.length) return false;
@@ -119,6 +190,58 @@ export function RichEditor({
     }
   }
 
+  /** Leaves the URL where it is and finishes the Enter we swallowed. */
+  function keepUrl() {
+    if (!editor || !linkChoice) return;
+    editor
+      .chain()
+      .focus()
+      .setTextSelection({ from: linkChoice.from, to: linkChoice.to })
+      .setLink({ href: linkChoice.url })
+      .setTextSelection(linkChoice.to)
+      .unsetMark("link")
+      .splitBlock()
+      .run();
+    setLinkChoice(null);
+  }
+
+  /** Swaps the URL for a card. The metadata is fetched once, here — a reader
+   *  should never wait on someone else's server. */
+  async function makeBookmark() {
+    if (!editor || !linkChoice) return;
+    const { url, from, to } = linkChoice;
+    setFetching(true);
+
+    let attrs = {
+      url,
+      title: url,
+      description: "",
+      image: "",
+      site: (() => {
+        try {
+          return new URL(url).hostname.replace(/^www\./, "");
+        } catch {
+          return "";
+        }
+      })(),
+    };
+    try {
+      const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+      if (res.ok) attrs = { ...attrs, ...(await res.json()) };
+    } catch {
+      /* the card still works with just the address */
+    }
+
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from, to })
+      .insertContent([{ type: "bookmark", attrs }, { type: "paragraph" }])
+      .run();
+    setFetching(false);
+    setLinkChoice(null);
+  }
+
   if (!editor) {
     return (
       <div
@@ -141,8 +264,9 @@ export function RichEditor({
       />
 
       <div
+        ref={sheetRef}
         className={cn(
-          "surface mt-3",
+          "surface relative mt-3",
           compact
             ? "min-h-[12rem] px-5 py-5"
             : "min-h-[34rem] px-6 py-12 sm:px-14 sm:py-16",
@@ -152,6 +276,39 @@ export function RichEditor({
           <div className="editor-column mb-10 border-b border-line pb-8">{header}</div>
         )}
         <EditorContent editor={editor} />
+
+        {linkChoice && (
+          <div
+            role="listbox"
+            aria-label="링크를 어떻게 넣을까요"
+            className="surface absolute z-30 w-56 overflow-hidden py-1 shadow-float"
+            style={{ left: linkChoice.x, top: linkChoice.y + 6 }}
+          >
+            {CHOICES.map((c, i) => (
+              <button
+                key={c.label}
+                type="button"
+                role="option"
+                aria-selected={choice === i}
+                onMouseEnter={() => setChoice(i)}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => (i === 0 ? keepUrl() : void makeBookmark())}
+                className={cn(
+                  "block w-full px-3 py-2 text-left transition-colors duration-[var(--duration-fast)]",
+                  choice === i && "bg-[rgba(22,21,15,0.05)]",
+                )}
+              >
+                <span className="t-body block">{c.label}</span>
+                <span className="t-caption block text-ink-faint">
+                  {fetching && i === 1 ? "불러오는 중…" : c.hint}
+                </span>
+              </button>
+            ))}
+            <p className="t-caption border-t border-line px-3 pb-1 pt-2 text-ink-faint">
+              ↑↓ 선택 · Enter 확인 · Esc 취소
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Selecting a picture offers its caption. `title` is where TipTap keeps

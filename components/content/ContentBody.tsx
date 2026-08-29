@@ -2,6 +2,7 @@ import Link from "next/link";
 import { youtubeId, type Block } from "@/lib/content/parse";
 import { toBlocks } from "@/lib/content/doc";
 import { CoverArt } from "@/components/article/CoverArt";
+import { BookmarkCard } from "@/components/content/BookmarkCard";
 import { imageSizes } from "@/lib/data/image-sizes";
 import { cn } from "@/lib/utils";
 
@@ -167,6 +168,19 @@ function BlockView({ block, index, seed }: { block: Block; index: number; seed: 
         </figure>
       );
     }
+
+    case "bookmark":
+      return (
+        <div className={cn(COLUMN, "my-10")}>
+          <BookmarkCard
+            url={block.url}
+            title={block.title}
+            description={block.description}
+            image={block.image}
+            site={block.site}
+          />
+        </div>
+      );
 
     case "divider":
       return (

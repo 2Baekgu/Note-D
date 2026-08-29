@@ -21,6 +21,14 @@ export type Block =
   | { type: "image"; src: string; alt: string; caption?: string }
   | { type: "highlight"; text: string }
   | { type: "embed"; url: string; provider: "youtube" | "iframe" }
+  | {
+      type: "bookmark";
+      url: string;
+      title: string;
+      description: string;
+      image: string;
+      site: string;
+    }
   | { type: "divider" };
 
 const YT =
@@ -160,6 +168,10 @@ export function blocksToPlainText(blocks: Block[]): string {
           return b.text;
         case "list":
           return b.items.join(" ");
+        // A bookmark's title is what a reader would call the link, so search
+        // and the reading-time count should both see it.
+        case "bookmark":
+          return `${b.title} ${b.description}`;
         default:
           return "";
       }

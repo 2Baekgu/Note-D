@@ -1108,6 +1108,101 @@ select.field {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   BOOKMARK CARD
+
+   A pasted link, expanded the way a chat app expands one. Used by the
+   article renderer and by the editor's node view, so both look the same.
+   ═══════════════════════════════════════════════════════════ */
+
+.bookmark {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border: var(--border-width) solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color var(--duration-base) var(--ease);
+}
+
+a.bookmark:hover {
+  border-color: var(--ink);
+}
+
+.bookmark-thumb {
+  flex: 0 0 auto;
+  width: 8.5rem;
+  background: var(--paper-soft);
+}
+
+.bookmark-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bookmark-text {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 1.15rem 1.35rem;
+}
+
+.bookmark-title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+  /* Two lines, then stop — the card must stay a card. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bookmark-desc {
+  font-size: var(--text-caption);
+  line-height: 1.55;
+  color: var(--ink-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bookmark-site {
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 30rem) {
+  .bookmark {
+    flex-direction: column;
+  }
+  .bookmark-thumb {
+    width: 100%;
+    aspect-ratio: 2 / 1;
+  }
+}
+
+/* In the editor it is a block you select, not a link you follow. */
+.tiptap-bookmark {
+  margin-block: 1.75rem;
+}
+.tiptap-bookmark[data-selected="true"] .bookmark {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════
    EDITOR  (TipTap / ProseMirror)
 
    These mirror ContentBody block for block — same sizes, same rhythm, same

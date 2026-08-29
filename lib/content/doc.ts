@@ -148,6 +148,20 @@ export function docToBlocks(doc: DocNode): Block[] {
         break;
       }
 
+      case "bookmark": {
+        const url = String(node.attrs?.url ?? "");
+        if (!url) break;
+        blocks.push({
+          type: "bookmark",
+          url,
+          title: String(node.attrs?.title ?? ""),
+          description: String(node.attrs?.description ?? ""),
+          image: String(node.attrs?.image ?? ""),
+          site: String(node.attrs?.site ?? ""),
+        });
+        break;
+      }
+
       case "horizontalRule":
         blocks.push({ type: "divider" });
         break;
@@ -241,6 +255,19 @@ export function blocksToDoc(blocks: Block[]): DocNode {
             src: block.src,
             alt: block.alt,
             title: block.caption ?? null,
+          },
+        });
+        break;
+
+      case "bookmark":
+        content.push({
+          type: "bookmark",
+          attrs: {
+            url: block.url,
+            title: block.title,
+            description: block.description,
+            image: block.image,
+            site: block.site,
           },
         });
         break;

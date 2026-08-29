@@ -7,6 +7,12 @@ import { pathToFileURL } from "node:url";
 const ROOT = pathToFileURL(`${process.cwd()}/`).href;
 
 export async function resolve(specifier, context, next) {
+  // `server-only` throws outside a bundler. These scripts *are* the server,
+  // so it has nothing to protect here.
+  if (specifier === "server-only") {
+    return { url: "data:text/javascript,", shortCircuit: true };
+  }
+
   const path = specifier.startsWith("@/") ? `${ROOT}${specifier.slice(2)}` : specifier;
 
   if ((path.startsWith(".") || path.startsWith(ROOT)) && !/\.[a-z]+$/i.test(path)) {
