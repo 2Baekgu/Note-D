@@ -26,7 +26,9 @@ export function StudioDashboard({
   const router = useRouter();
   const [local, setLocal] = useState<Article[]>([]);
   const [tab, setTab] = useState<Tab>("all");
-  const [mine, setMine] = useState(false);
+  // You open the Studio to look after your own writing, so that is the view
+  // it opens on. The chip stays right there to widen it.
+  const [mine, setMine] = useState(true);
   // Deleting is not undoable, so the button asks once before it does it.
   const [confirming, setConfirming] = useState<string | null>(null);
   const [gone, setGone] = useState<string[]>([]);
@@ -139,7 +141,13 @@ export function StudioDashboard({
                     </Chip>
                   )}
                 </div>
-                <p className="t-h3 mt-3">{a.title || "제목 없음"}</p>
+                {a.status === "published" && !isLocal ? (
+                  <Link href={`/articles/${a.slug}`} className="mt-3 block">
+                    <span className="t-h3 link-underline">{a.title || "제목 없음"}</span>
+                  </Link>
+                ) : (
+                  <p className="t-h3 mt-3">{a.title || "제목 없음"}</p>
+                )}
                 <p className="t-caption mt-1 line-clamp-1 text-ink-muted">{a.subtitle}</p>
               </div>
 
@@ -155,11 +163,6 @@ export function StudioDashboard({
               </span>
 
               <div className="flex items-center gap-3 sm:justify-end">
-                {a.status === "published" && !isLocal && (
-                  <Link href={`/articles/${a.slug}`} className="t-label link-underline text-ink-muted">
-                    View
-                  </Link>
-                )}
                 {canEdit && (
                   <Link href={`/studio/${a.id}`} className="t-label link-underline">
                     Edit
@@ -199,10 +202,23 @@ export function StudioDashboard({
 
         {rows.length === 0 && (
           <div className="px-6 py-24 text-center">
-            <p className="t-h2">아직 글이 없습니다</p>
-            <ButtonLink href="/studio/new" variant="secondary" className="mt-6">
-              첫 아티클 쓰기 →
-            </ButtonLink>
+            <p className="t-h2">
+              {mine && all.length > 0 ? "내가 쓴 글이 없습니다" : "아직 글이 없습니다"}
+            </p>
+            {mine && all.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setMine(false)}
+                className="t-label link-underline mt-4 text-ink-muted"
+              >
+                전체 글 보기
+              </button>
+            )}
+            <div>
+              <ButtonLink href="/studio/new" variant="secondary" className="mt-6">
+                첫 아티클 쓰기 →
+              </ButtonLink>
+            </div>
           </div>
         )}
       </div>
