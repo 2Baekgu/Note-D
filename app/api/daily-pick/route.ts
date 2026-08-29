@@ -38,16 +38,29 @@ function authorise(request: Request): boolean {
   return Boolean(given) && tokenMatches(given, expected);
 }
 
+/** `?format=text` answers with the message alone, so a Shortcut can copy the
+ *  body straight to the clipboard without a dictionary step in between. */
+function send(request: Request, payload: { message: string } & Record<string, unknown>) {
+  const wantsText = new URL(request.url).searchParams.get("format") === "text";
+  if (wantsText) {
+    return new Response(payload.message, {
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+  return NextResponse.json(payload);
+}
+
 /** Replays a row that was already written today, so a second call this
  *  morning repeats the first one word for word. */
 function replay(
+  request: Request,
   articles: DailyArticle[],
   articleId: string,
   message: string,
   sentOn: string,
 ) {
   const article = articles.find((a) => a.id === articleId);
-  return NextResponse.json({
+  return send(request, {
     message,
     articleId,
     title: article?.title ?? "",
@@ -119,7 +132,7 @@ export async function GET(request: Request) {
   // Already picked this morning: hand back exactly what went out, so a retry
   // or a second run of the Shortcut cannot post a different article.
   const already = sends.find((s) => s.sent_on === today);
-  if (already) return replay(articles, already.article_id, already.message, today);
+  if (already) return replay(request, articles, already.article_id, already.message, today);
 
   const lastSent = new Map<string, string>();
   for (const s of sends) {
@@ -151,13 +164,13 @@ export async function GET(request: Request) {
         .maybeSingle();
       if (winner) {
         const w = winner as { article_id: string; message: string };
-        return replay(articles, w.article_id, w.message, today);
+        return replay(request, articles, w.article_id, w.message, today);
       }
     }
     return NextResponse.json({ error: insertError.message }, { status: 500 });
   }
 
-  return NextResponse.json({
+  return send(request, {
     message,
     articleId: chosen.id,
     title: chosen.title,

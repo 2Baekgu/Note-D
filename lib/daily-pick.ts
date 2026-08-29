@@ -36,13 +36,23 @@ export function articleUrl(slug: string): string {
   return `${siteUrl()}/articles/${encodeURIComponent(slug)}`;
 }
 
+/** Models like to end a line with two spaces — a markdown line break that is
+ *  just stray whitespace in a chat room. Tidy each line, drop blank ones. */
+function tidy(summary: string): string {
+  return summary
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 export function buildMessage(article: DailyArticle, summary: string): string {
   return [
     "📚 오늘의 아티클",
     "",
     article.title,
     "",
-    summary.trim(),
+    tidy(summary),
     "",
     articleUrl(article.slug),
     `— ${article.author}`,
