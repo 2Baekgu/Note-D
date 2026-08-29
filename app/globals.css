@@ -1680,21 +1680,31 @@ so headings inside a piece have always been Pretendard. */
 
 /* Figure, not a bare image — the caption belongs to the picture's width, the
    same as in the published article. */
-.tiptap .tiptap-figure {
-  margin-block: 4rem;
+/* Both surfaces, or a published picture loses its corners, its caption
+   colour and its centre — which is what the block renderer used to give it
+   through classes that went away with it. */
+.tiptap .tiptap-figure,
+.prose-body .tiptap-figure,
+.prose-body figure {
+  margin-block: 2.75rem;
   width: fit-content;
   max-width: 100%;
+  /* Centred unless the picture has been aligned by hand. */
   margin-inline: auto;
 }
 
-.tiptap .tiptap-figure img {
+.tiptap .tiptap-figure img,
+.prose-body .tiptap-figure img,
+.prose-body figure img {
   display: block;
   height: auto;
   max-width: 100%;
   border-radius: var(--radius-md);
 }
 
-.tiptap .tiptap-figure figcaption {
+.tiptap .tiptap-figure figcaption,
+.prose-body .tiptap-figure figcaption,
+.prose-body figure figcaption {
   margin-top: 0.75rem;
   text-align: center;
   font-size: var(--text-caption);

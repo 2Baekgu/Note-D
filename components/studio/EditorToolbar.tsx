@@ -467,7 +467,7 @@ export function EditorToolbar({
             >
               {/* The glyph carries more side bearing on its right than its
                   left, so centring the box leaves the letter looking off. */}
-              <span className="translate-x-[0.5px]">T</span>
+              <span className="-translate-x-[0.5px]">T</span>
             </span>
           }
         >
@@ -511,7 +511,14 @@ export function EditorToolbar({
           label="인용"
           width="w-44"
           trigger={
-            <span className="text-[0.9rem] font-medium leading-none tracking-[-0.06em]">66</span>
+            /* Two filled quote marks — a disc with a tail rising from it,
+               which is what the glyph is when it is drawn rather than typed. */
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="5.6" cy="15.4" r="5.2" />
+              <path d="M1.1 14.2C.7 8.6 3.6 4.2 8.6 2.7c.7-.2 1.3.4 1.1 1.1l-.5 2.1c-.1.4-.4.7-.8.8-2.4.7-3.9 2.9-4.1 6z" />
+              <circle cx="17.6" cy="15.4" r="5.2" />
+              <path d="M13.1 14.2c-.4-5.6 2.5-10 7.5-11.5.7-.2 1.3.4 1.1 1.1l-.5 2.1c-.1.4-.4.7-.8.8-2.4.7-3.9 2.9-4.1 6z" />
+            </svg>
           }
         >
           {(close) => (
