@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { ViewBeacon } from "@/components/site/ViewBeacon";
 import { site } from "@/lib/site";
 
 /* Pretendard is the only typeface in the system — Korean, Latin and numerals.
@@ -59,6 +60,7 @@ export default function RootLayout({
           본문으로 건너뛰기
         </a>
         <AuthProvider>
+          <ViewBeacon />
           <Header />
           <main id="main">{children}</main>
           <Footer />
