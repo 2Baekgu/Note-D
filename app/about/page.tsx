@@ -91,12 +91,6 @@ export default function AboutPage() {
         <HowItWorks />
       </Reveal>
 
-      <GridRule />
-
-      <Reveal as="section" className="shell section-pad">
-        <OpenChatCard />
-      </Reveal>
-
       {/* What */}
       <GridRule />
 
@@ -133,6 +127,14 @@ export default function AboutPage() {
             </li>
           ))}
         </ol>
+      </Reveal>
+
+      {/* The invitation lands after the principles: by here a reader knows
+          what this is, so "come talk to us" is an answer rather than an ask. */}
+      <GridRule />
+
+      <Reveal as="section" className="shell section-pad">
+        <OpenChatCard />
       </Reveal>
 
       {/* CTA */}
