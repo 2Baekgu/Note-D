@@ -96,7 +96,15 @@ function View({ node, editor, getPos }: NodeViewProps) {
         img.dataset.measuring = "";
         if (!img.naturalWidth || !img.naturalHeight) return;
         item.style.flexGrow = String(img.naturalWidth / img.naturalHeight);
-        record(i, img.src, img.naturalWidth, img.naturalHeight);
+        // The raw attribute, not `img.src`: the browser resolves that to an
+        // absolute URL while the document stores the path as written, and
+        // comparing the two would reject every measurement.
+        record(
+          i,
+          img.getAttribute("src") ?? "",
+          img.naturalWidth,
+          img.naturalHeight,
+        );
       };
 
       if (img.complete) measure();

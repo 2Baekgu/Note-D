@@ -11,20 +11,29 @@ import { ArticleHead } from "@/components/article/ArticleHead";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Chip, ChipButton } from "@/components/ui/Chip";
+import { Toast } from "@/components/ui/Toast";
 import { useStuck } from "@/components/ui/useStuck";
 import { RichEditor } from "./RichEditor";
 import { emptyArticle, persistArticle } from "@/lib/studio";
-import { firstLine, readingTime, toBlocks, toPlainText } from "@/lib/content/doc";
+import {
+  firstLine,
+  readingTime,
+  toBlocks,
+  toPlainText,
+} from "@/lib/content/doc";
 import { cn, slugify } from "@/lib/utils";
 
 export function ArticleEditor({ initial }: { initial?: Article }) {
   const { user, isAdmin } = useAuth();
   const router = useRouter();
 
-  const [article, setArticle] = useState<Article>(() => initial ?? emptyArticle(""));
+  const [article, setArticle] = useState<Article>(
+    () => initial ?? emptyArticle(""),
+  );
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [noticeTone, setNoticeTone] = useState<"ok" | "error">("ok");
   const [actionsRef, actionsStuck] = useStuck<HTMLDivElement>();
 
   // The editor toolbar sticks directly under this bar, and the bar changes
@@ -63,7 +72,8 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
     };
   }, [authorId, user]);
 
-  const patch = (values: Partial<Article>) => setArticle((a) => ({ ...a, ...values }));
+  const patch = (values: Partial<Article>) =>
+    setArticle((a) => ({ ...a, ...values }));
 
   // A published article keeps the slug it went out with — changing it would
   // break its URL — so only a new one takes its slug from the title.
@@ -74,23 +84,35 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
   const bodyImages = useMemo(() => {
     const seen = new Set<string>();
     for (const block of toBlocks(article.content)) {
-      if (block.type === "image" && block.src && !block.src.startsWith("art:")) {
+      if (
+        block.type === "image" &&
+        block.src &&
+        !block.src.startsWith("art:")
+      ) {
         seen.add(block.src);
       }
     }
     return [...seen];
   }, [article.content]);
-  const valid = article.title.trim().length > 1 && article.content.trim().length > 10;
+  const valid =
+    article.title.trim().length > 1 && article.content.trim().length > 10;
+
+  function say(message: string, tone: "ok" | "error" = "ok") {
+    setNoticeTone(tone);
+    setNotice(message);
+  }
 
   async function save(status: Article["status"]) {
     if (!valid) {
-      setNotice("제목과 본문을 먼저 채워주세요.");
+      say("제목과 본문을 먼저 채워주세요.", "error");
       return;
     }
     setSaving(true);
     setNotice(null);
     if (!authorId) {
-      setNotice("로그인이 필요합니다.");
+      // Without this the button sits on "Saving…" for good.
+      setSaving(false);
+      say("로그인이 필요합니다.", "error");
       return;
     }
 
@@ -105,10 +127,10 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
     setSaving(false);
 
     if (!result.ok) {
-      setNotice(result.error ?? "저장에 실패했습니다.");
+      say(result.error ?? "저장에 실패했습니다.", "error");
       return;
     }
-    setNotice(
+    say(
       result.storage === "local"
         ? status === "published"
           ? "발행했습니다 — 데모 모드라 이 브라우저에만 저장됩니다."
@@ -118,6 +140,16 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
           : "초안을 저장했습니다.",
     );
     patch({ status });
+
+    // Published means done writing: go and read it. The pause is the length
+    // of the toast, so the word lands before the page changes under it.
+    if (status === "published" && result.storage !== "local") {
+      window.setTimeout(
+        () => router.push(`/articles/${encodeURIComponent(computedSlug)}`),
+        900,
+      );
+      return;
+    }
     if (!initial) router.replace("/studio");
   }
 
@@ -125,7 +157,9 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
     return (
       <div className="surface-dashed px-6 py-24 text-center">
         <p className="t-h1">로그인이 필요합니다</p>
-        <p className="t-body mt-3 text-ink-muted">아티클 작성은 스터디 멤버만 가능합니다.</p>
+        <p className="t-body mt-3 text-ink-muted">
+          아티클 작성은 스터디 멤버만 가능합니다.
+        </p>
         <ButtonLink href="/login?next=/studio" className="mt-8">
           Sign in →
         </ButtonLink>
@@ -144,11 +178,14 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
       <div className="surface-dashed px-6 py-24 text-center">
         <p className="t-h1">다른 사람의 글입니다</p>
         <p className="t-body mx-auto mt-3 max-w-[40ch] text-ink-muted">
-          {author.name}님이 쓴 글이라 수정할 수 없습니다. 읽는 것은 누구나 할 수 있어요.
+          {author.name}님이 쓴 글이라 수정할 수 없습니다. 읽는 것은 누구나 할 수
+          있어요.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {initial?.status === "published" && (
-            <ButtonLink href={`/articles/${initial.slug}`}>글 보러 가기 →</ButtonLink>
+            <ButtonLink href={`/articles/${initial.slug}`}>
+              글 보러 가기 →
+            </ButtonLink>
           )}
           <ButtonLink href="/studio" variant="secondary">
             ← Studio
@@ -172,7 +209,10 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
           ← Studio
         </ButtonLink>
 
-        <Chip tone={article.status === "published" ? "solid" : "outline"} size="sm">
+        <Chip
+          tone={article.status === "published" ? "solid" : "outline"}
+          size="sm"
+        >
           {article.status}
         </Chip>
 
@@ -191,7 +231,12 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
             ))}
           </div>
 
-          <Button variant="secondary" size="sm" disabled={saving} onClick={() => save("draft")}>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={saving}
+            onClick={() => save("draft")}
+          >
             Save draft
           </Button>
           <Button
@@ -205,9 +250,11 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
         </div>
       </div>
 
-      {notice && (
-        <p className="surface t-caption mt-4 px-4 py-3 text-ink-muted">{notice}</p>
-      )}
+      <Toast
+        message={notice}
+        tone={noticeTone}
+        onDone={() => setNotice(null)}
+      />
 
       {/* One column. The article column inside RichEditor already holds the
           measure, so the sidebar was only ever squeezing it. */}
@@ -280,7 +327,11 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                     <button
                       type="button"
                       onClick={() =>
-                        patch({ references: article.references.filter((_, j) => j !== i) })
+                        patch({
+                          references: article.references.filter(
+                            (_, j) => j !== i,
+                          ),
+                        })
                       }
                       className="t-label px-3 text-ink-faint transition-colors duration-[var(--duration-base)] hover:text-accent"
                       aria-label={`참고자료 ${i + 1} 삭제`}
@@ -314,10 +365,16 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                 <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                   <Field label="Author">
                     <div className="flex items-center gap-3">
-                      <Avatar name={author.name} src={author.profileImage} size="md" />
+                      <Avatar
+                        name={author.name}
+                        src={author.profileImage}
+                        size="md"
+                      />
                       <div className="min-w-0">
                         <p className="t-body truncate">{author.name}</p>
-                        <p className="t-caption text-ink-faint">본인 명의로만 발행됩니다.</p>
+                        <p className="t-caption text-ink-faint">
+                          본인 명의로만 발행됩니다.
+                        </p>
                       </div>
                     </div>
                   </Field>
@@ -379,16 +436,24 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
               </section>
             </>
           ) : (
-            <Preview article={{ ...article, slug: computedSlug }} author={author} />
+            <Preview
+              article={{ ...article, slug: computedSlug }}
+              author={author}
+            />
           )}
         </div>
-
       </div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="border-t border-line pt-4">
       <p className="t-label mb-3 text-ink-faint">{label}</p>
@@ -424,7 +489,10 @@ function Preview({
           thumbnail and nothing else. */}
       <div className="article-shell mt-16">
         {article.content.trim() ? (
-          <ContentBody content={article.content} seed={article.slug || "preview"} />
+          <ContentBody
+            content={article.content}
+            seed={article.slug || "preview"}
+          />
         ) : (
           <p className="t-body py-16 text-center text-ink-faint">
             본문을 입력하면 여기에 미리보기가 나타납니다.
@@ -451,13 +519,19 @@ function CoverPicker({
   // Whatever the article opened with stays on offer, along with the current
   // pick — otherwise choosing a different cover made the old one vanish from
   // the list and there was no way back to it.
-  const options = [...new Set([...(original ? [original] : []), ...(value ? [value] : []), ...images])];
+  const options = [
+    ...new Set([
+      ...(original ? [original] : []),
+      ...(value ? [value] : []),
+      ...images,
+    ]),
+  ];
 
   if (!options.length) {
     return (
       <p className="t-caption text-ink-muted">
-        본문에 이미지를 넣으면 그중에서 커버를 고를 수 있습니다. 없으면 주제를 시드로 한
-        커버 아트가 대신 그려집니다.
+        본문에 이미지를 넣으면 그중에서 커버를 고를 수 있습니다. 없으면 주제를
+        시드로 한 커버 아트가 대신 그려집니다.
       </p>
     );
   }

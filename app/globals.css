@@ -1798,6 +1798,45 @@ so headings inside a piece have always been Pretendard. */
   }
 }
 
+/* ── Toast ────────────────────────────────────────────────
+   Rises, holds, and sinks away. The percentages are shares of whatever
+   lifetime the component sets, so one keyframe serves both tones. */
+.toast-dock {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  z-index: 80;
+  padding-inline: 1rem;
+  pointer-events: none;
+  animation-name: toast-life;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+@keyframes toast-life {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0.75rem);
+  }
+  6%,
+  90% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 0.75rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-dock {
+    animation-name: none;
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 /* The mark drawn while a picture is being dragged beside another. It stands
    where a column edge would be, which is the one thing ProseMirror's own
    cursor cannot say — that one is always a horizontal rule. */
