@@ -86,6 +86,15 @@ function join(articles: Article[], users: User[]): ArticleWithAuthor[] {
 
 /* ── Members ─────────────────────────────────────────────── */
 
+/** Everything about a member that a reader may see.
+ *
+ *  Spelled out rather than `*` because `*` swept up `email` and shipped three
+ *  people's addresses into the HTML of every page that names an author. The
+ *  database refuses the column to anonymous readers now too — this list is
+ *  what keeps the roster readable for them at all. */
+const PUBLIC_PROFILE_COLUMNS =
+  "id, name, handle, profile_image, role, title, bio, joined_at";
+
 /** Memoised per request. A single page can ask for the roster three or four
  *  times over — the author of the article, the related cards, the header —
  *  and each one was its own round trip to the database. */
@@ -94,12 +103,34 @@ export const listMembers = cache(async function listMembers(): Promise<User[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select(PUBLIC_PROFILE_COLUMNS)
       .order("joined_at", { ascending: true });
     if (!error && data?.length) return data.map(rowToUser);
   }
   return sampleMembers;
 });
+
+/** The roster with addresses attached, for the one screen that writes to
+ *  members and needs to tell them apart. Signed-in callers only: the column
+ *  is not granted to anonymous readers, so this comes back empty for them —
+ *  which is right, since the screen is theirs either way. */
+export async function listMembersWithContact(): Promise<User[]> {
+  const supabase = await getSupabaseServerClient();
+  if (!supabase) return sampleMembers;
+
+  // The guard lives here rather than at the call site, so no future screen
+  // can ask for addresses on behalf of a visitor who isn't signed in.
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth?.user) return listMembers();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select(`${PUBLIC_PROFILE_COLUMNS}, email`)
+    .order("joined_at", { ascending: true });
+
+  if (error || !data?.length) return listMembers();
+  return data.map(rowToUser);
+}
 
 /** The roster as the site shows it. Signing up makes you a guest, and a
  *  guest is a reader — they only join the list once they can publish. The

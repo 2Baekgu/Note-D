@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listArticles, listMembers } from "@/lib/repo";
+import { listArticles, listMembersWithContact } from "@/lib/repo";
 import { AdminPanel } from "@/components/studio/AdminPanel";
 import { AdminNav } from "@/components/studio/AdminNav";
 import { PageFrame } from "@/components/site/PageFrame";
@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
   const [members, articles] = await Promise.all([
-    listMembers(),
+    listMembersWithContact(),
     listArticles({ includeDrafts: true }),
   ]);
 
