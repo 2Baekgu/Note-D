@@ -249,7 +249,9 @@ export function RichEditor({
   /** Position the vertical mark, or take it away. Written straight to the
    *  node: `dragover` fires on every pointer move and React has no business
    *  re-rendering the sheet that often. */
-  function showRowMark(spot: { left: number; top: number; height: number } | null) {
+  function showRowMark(
+    spot: { left: number; top: number; height: number } | null,
+  ) {
     const el = rowMark.current;
     const sheet = sheetRef.current;
     if (!el || !sheet) return;
@@ -271,7 +273,9 @@ export function RichEditor({
 
   /** A picture's own shape, read once it has loaded. A row divides the line
    *  by these, so the pictures end up the same height. */
-  function naturalSize(src: string): Promise<{ width?: number; height?: number }> {
+  function naturalSize(
+    src: string,
+  ): Promise<{ width?: number; height?: number }> {
     return new Promise((resolve) => {
       const probe = new Image();
       probe.onload = () =>
@@ -373,7 +377,8 @@ export function RichEditor({
            about drops on the text itself, so the margin is caught here and
            the picture goes to the end rather than nowhere. */
         onDragOver={(e) => {
-          if (Array.from(e.dataTransfer.types).includes("Files")) e.preventDefault();
+          if (Array.from(e.dataTransfer.types).includes("Files"))
+            e.preventDefault();
         }}
         onDrop={(e) => {
           // Inside the text, ProseMirror has already dealt with it.
@@ -382,7 +387,10 @@ export function RichEditor({
           if (!files.length) return;
           e.preventDefault();
           const at = editor ? dropPos(editor.view, e.nativeEvent) : null;
-          void insertImages(files, at ?? editor?.state.doc.content.size ?? null);
+          void insertImages(
+            files,
+            at ?? editor?.state.doc.content.size ?? null,
+          );
         }}
         className={cn(
           "surface relative mt-3",
@@ -400,7 +408,11 @@ export function RichEditor({
 
         {/* Where a dragged picture would land when it lands beside another:
             a column edge, so a column rule. */}
-        <div ref={rowMark} className="editor-row-mark" style={{ display: "none" }} />
+        <div
+          ref={rowMark}
+          className="editor-row-mark"
+          style={{ display: "none" }}
+        />
 
         {linkChoice && (
           <div
@@ -452,11 +464,10 @@ export function RichEditor({
         <input
           value={(editor.getAttributes("image").title as string) ?? ""}
           onChange={(e) =>
-            editor
-              .chain()
-              .focus()
-              .updateAttributes("image", { title: e.target.value })
-              .run()
+            /* No `.focus()`: the selection is remembered while the caret
+               sits in this box, and pulling focus back to the editor between
+               keystrokes is how an IME composition gets cut in half. */
+            editor.commands.updateAttributes("image", { title: e.target.value })
           }
           placeholder="사진 설명을 적어주세요"
           className="t-caption w-56 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
@@ -484,11 +495,9 @@ export function RichEditor({
         <input
           value={(editor.getAttributes("imageRow").caption as string) ?? ""}
           onChange={(e) =>
-            editor
-              .chain()
-              .focus()
-              .updateAttributes("imageRow", { caption: e.target.value })
-              .run()
+            editor.commands.updateAttributes("imageRow", {
+              caption: e.target.value,
+            })
           }
           placeholder="사진 설명을 적어주세요"
           className="t-caption w-56 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"

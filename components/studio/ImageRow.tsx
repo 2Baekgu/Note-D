@@ -20,21 +20,61 @@ function View({ node, editor, getPos }: NodeViewProps) {
   const caption = String(node.attrs.caption ?? "");
   const ref = useRef<HTMLElement>(null);
 
+  /** Write a measured shape into the document.
+   *
+   *  Everything is looked up again here rather than closed over. A picture
+   *  may finish loading long after the pass that asked for it — a caption
+   *  typed in between rewrites the row on every keystroke — and acting on a
+   *  remembered position would put one picture's address on another.
+   *
+   *  It is not an edit anyone made, so it stays out of the undo history. */
+  const record = useCallback(
+    (index: number, src: string, width: number, height: number) => {
+      const pos = typeof getPos === "function" ? getPos() : null;
+      if (pos === null || pos === undefined) return;
+
+      const { state } = editor.view;
+      const row = state.doc.nodeAt(pos);
+      if (!row || row.type.name !== "imageRow" || index >= row.childCount)
+        return;
+
+      let at = pos + 1;
+      for (let k = 0; k < index; k += 1) at += row.child(k).nodeSize;
+
+      const current = state.doc.nodeAt(at);
+      // The picture that was measured has to still be the picture that is
+      // there, or this belongs to a row that has moved on.
+      if (
+        !current ||
+        current.type.name !== "image" ||
+        current.attrs.src !== src
+      )
+        return;
+      if (current.attrs.width === width && current.attrs.height === height)
+        return;
+
+      editor.view.dispatch(
+        state.tr
+          .setNodeMarkup(at, undefined, { ...current.attrs, width, height })
+          .setMeta("addToHistory", false),
+      );
+    },
+    [editor, getPos],
+  );
+
   /** Give every picture the width its own height asks for.
    *
    *  Published, the figure is the flex item and carries `flex-grow` as an
    *  inline style of its own. In the editor it is two levels down — every
    *  node view arrives wrapped, and ProseMirror adds one more around the lot
-   *  — so the ratio has to be put on the wrapper by hand.
-   *
-   *  A picture whose shape the document does not know yet is measured once it
-   *  has loaded and the answer written back, so the published page inherits
-   *  it without anyone having to re-save on purpose. */
+   *  — so the ratio has to be put on the wrapper by hand. */
   const share = useCallback(() => {
     const host = ref.current?.querySelector(".tiptap-row-items");
     if (!host) return;
 
-    const items = host.querySelectorAll<HTMLElement>(":scope > * > .react-renderer");
+    const items = host.querySelectorAll<HTMLElement>(
+      ":scope > * > .react-renderer",
+    );
     items.forEach((item, i) => {
       const child = i < node.childCount ? node.child(i) : null;
       if (!child) return;
@@ -48,28 +88,24 @@ function View({ node, editor, getPos }: NodeViewProps) {
 
       const img = item.querySelector("img");
       if (!img) return;
+      // One listener per picture. A caption being typed re-renders the row on
+      // every keystroke, and without this each pass would queue another.
+      if (img.dataset.measuring === "1") return;
+
       const measure = () => {
+        img.dataset.measuring = "";
         if (!img.naturalWidth || !img.naturalHeight) return;
         item.style.flexGrow = String(img.naturalWidth / img.naturalHeight);
-
-        // Write it into the document so it survives publishing. Positions are
-        // resolved fresh: the row may have moved since this ran.
-        const pos = typeof getPos === "function" ? getPos() : null;
-        if (pos === null || pos === undefined) return;
-        let at = pos + 1;
-        for (let k = 0; k < i; k += 1) at += node.child(k).nodeSize;
-        editor.view.dispatch(
-          editor.view.state.tr.setNodeMarkup(at, undefined, {
-            ...child.attrs,
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-          }),
-        );
+        record(i, img.src, img.naturalWidth, img.naturalHeight);
       };
+
       if (img.complete) measure();
-      else img.addEventListener("load", measure, { once: true });
+      else {
+        img.dataset.measuring = "1";
+        img.addEventListener("load", measure, { once: true });
+      }
     });
-  }, [node, editor, getPos]);
+  }, [node, record]);
 
   useEffect(share, [share]);
 
