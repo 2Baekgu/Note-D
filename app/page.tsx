@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   authorCounts,
   topicCounts,
@@ -15,6 +16,14 @@ import { OpenChatCard } from "@/components/site/OpenChatCard";
 import { PageFrame } from "@/components/site/PageFrame";
 import { GridRule } from "@/components/site/GridRule";
 import { formatDate } from "@/lib/utils";
+
+/** The front door says the name and nothing else. Every other page earns its
+ *  "— Note:D" suffix by being somewhere in particular; the home page is just
+ *  the site, so `absolute` skips the template. The share preview keeps the
+ *  longer name — that is set on openGraph in the layout and stays put. */
+export const metadata: Metadata = {
+  title: { absolute: site.name },
+};
 
 /** Home samples the archive rather than listing it — four columns, three
  *  rows deep, then a link into /articles. */
