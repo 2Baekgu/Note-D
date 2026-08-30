@@ -27,19 +27,6 @@ export function StatsPanel({ stats }: { stats: Stats }) {
     );
   }
 
-  // Counting has begun and nobody has arrived yet. Everything below reads
-  // from the first visit, and there isn't one.
-  if (!stats.daily.length) {
-    return (
-      <div className="surface-dashed px-6 py-24 text-center">
-        <p className="t-h2">아직 기록된 방문이 없습니다</p>
-        <p className="t-body mx-auto mt-4 max-w-[46ch] text-ink-muted">
-          집계는 켜져 있습니다. 누군가 페이지를 열면 그때부터 이 화면이 채워집니다.
-        </p>
-      </div>
-    );
-  }
-
   const { totals } = stats;
   const delta = totals.previous7 ? (totals.last7 - totals.previous7) / totals.previous7 : null;
   const guestViews = totals.views - totals.memberViews;
@@ -106,7 +93,7 @@ export function StatsPanel({ stats }: { stats: Stats }) {
 
 /** "집계 시작일부터" reads better than a number of days nobody counted. */
 const sinceNote = (since: string | null) =>
-  since ? `${label(since)}부터 지금까지` : "집계 시작 전";
+  since ? `${label(since)}부터 지금까지` : "아직 기록 없음";
 
 const label = (d: string) => `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일`;
 
@@ -178,7 +165,9 @@ function Trend({
   const line = days.map((d, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(d.views).toFixed(1)}`).join(" ");
   const area = `${line} L${x(days.length - 1).toFixed(1)},${(PAD.top + plotH).toFixed(1)} L${x(0).toFixed(1)},${(PAD.top + plotH).toFixed(1)} Z`;
 
-  const ticks = [0, top / 2, top];
+  // Rounded before the duplicates are dropped: with a ceiling of 1, a
+  // midpoint of 0.5 would print as a second "1".
+  const ticks = [...new Set([0, Math.round(top / 2), top])];
   const busiest = hasPoints
     ? days.reduce((best, d, i) => (d.views > days[best].views ? i : best), 0)
     : 0;

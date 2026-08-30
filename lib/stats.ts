@@ -114,7 +114,6 @@ export async function getStats(): Promise<Stats> {
   }
 
   const articles = await listArticles({ includeDrafts: true });
-  if (!rows.length) return { ...empty, ready: true };
   // Which article a view belongs to is read from the path rather than a
   // stored id: the path already carries the slug, and a row recorded before
   // an article existed still finds its way home.
@@ -181,7 +180,10 @@ export async function getStats(): Promise<Stats> {
   // line rather than a day that silently never happened. Past a couple of
   // months that is more points than a chart this size can show, and the line
   // is drawn by week instead.
-  const firstDay = seoulDay(rows[0].viewed_at);
+  // With nothing recorded yet the chart still draws: a fortnight of zeroes
+  // reads as "nobody has come", which is a fact, where a blank panel reads as
+  // "this is broken".
+  const firstDay = rows.length ? seoulDay(rows[0].viewed_at) : dayKey(13);
   const span = Math.max(
     1,
     Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${firstDay}T00:00:00Z`)) / 86_400_000) + 1,
@@ -222,7 +224,7 @@ export async function getStats(): Promise<Stats> {
     },
     daily,
     grain,
-    since: firstDay,
+    since: rows.length ? firstDay : null,
     articles: rank(perArticle, 10),
     pages: rank(perPage, 10),
     referrers: rank(
