@@ -9,11 +9,15 @@ import { listArticles } from "@/lib/repo";
  *  JavaScript is easier to change than a materialised view is to migrate.
  *  If this ever gets slow, that is the moment for the view — not before. */
 
-const WINDOW_DAYS = 90;
-const TREND_DAYS = 30;
+/** PostgREST answers with a page at a time, so a busy month would otherwise
+ *  be counted as its first thousand visits and no more. */
+const PAGE = 1000;
+/** Past this many days the trend is drawn by week; below it, by day. A young
+ *  site should see every day it has had. */
+const DAILY_LIMIT = 70;
 
 export interface DayCount {
-  /** `YYYY-MM-DD`, Seoul. */
+  /** `YYYY-MM-DD`, Seoul — the day, or the Monday that starts the week. */
   day: string;
   views: number;
   visitors: number;
@@ -38,10 +42,13 @@ export interface Stats {
     memberViews: number;
   };
   daily: DayCount[];
+  /** How the trend is bucketed, so the chart can say which it is drawing. */
+  grain: "day" | "week";
+  /** The first day anything was recorded, `null` when nothing has been. */
+  since: string | null;
   articles: Ranked[];
   pages: Ranked[];
   referrers: Ranked[];
-  windowDays: number;
 }
 
 const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -52,10 +59,11 @@ const empty: Stats = {
   ready: false,
   totals: { views: 0, visitors: 0, today: 0, last7: 0, previous7: 0, memberViews: 0 },
   daily: [],
+  grain: "day",
+  since: null,
   articles: [],
   pages: [],
   referrers: [],
-  windowDays: WINDOW_DAYS,
 };
 
 type Row = {
@@ -87,20 +95,26 @@ export async function getStats(): Promise<Stats> {
   const supabase = await getSupabaseServerClient();
   if (!supabase) return empty;
 
-  const since = new Date(Date.now() - WINDOW_DAYS * 86_400_000).toISOString();
-  const [{ data, error }, articles] = await Promise.all([
-    supabase
+  // Everything, from the first visit ever recorded. The site is new enough
+  // that "all time" is the interesting number, and a page at a time is what
+  // keeps it true once it is not.
+  const rows: Row[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
       .from("page_views")
       .select("path, visitor, is_member, referrer_host, viewed_at")
-      .gte("viewed_at", since)
-      .order("viewed_at", { ascending: true }),
-    listArticles({ includeDrafts: true }),
-  ]);
+      .order("viewed_at", { ascending: true })
+      .range(from, from + PAGE - 1);
 
-  // No table yet, or not an admin asking: either way there is nothing to show.
-  if (error || !data) return empty;
+    // No table yet, or not an admin asking: either way, nothing to show.
+    if (error) return empty;
+    if (!data?.length) break;
+    rows.push(...(data as Row[]));
+    if (data.length < PAGE) break;
+  }
 
-  const rows = data as Row[];
+  const articles = await listArticles({ includeDrafts: true });
+  if (!rows.length) return { ...empty, ready: true };
   // Which article a view belongs to is read from the path rather than a
   // stored id: the path already carries the slug, and a row recorded before
   // an article existed still finds its way home.
@@ -163,13 +177,37 @@ export async function getStats(): Promise<Stats> {
     }
   }
 
-  // Every day in the window, so a quiet day is a gap in the line rather than
-  // a day that silently never happened.
+  // Every day since the first visit, so a quiet day reads as a dip in the
+  // line rather than a day that silently never happened. Past a couple of
+  // months that is more points than a chart this size can show, and the line
+  // is drawn by week instead.
+  const firstDay = seoulDay(rows[0].viewed_at);
+  const span = Math.max(
+    1,
+    Math.round((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${firstDay}T00:00:00Z`)) / 86_400_000) + 1,
+  );
+  const grain: "day" | "week" = span > DAILY_LIMIT ? "week" : "day";
+
   const daily: DayCount[] = [];
-  for (let i = TREND_DAYS - 1; i >= 0; i -= 1) {
-    const day = dayKey(i);
-    const hit = perDay.get(day);
-    daily.push({ day, views: hit?.views ?? 0, visitors: hit?.visitors.size ?? 0 });
+  if (grain === "day") {
+    for (let i = span - 1; i >= 0; i -= 1) {
+      const day = dayKey(i);
+      const hit = perDay.get(day);
+      daily.push({ day, views: hit?.views ?? 0, visitors: hit?.visitors.size ?? 0 });
+    }
+  } else {
+    // Weeks run back from today, so the last bucket is always the current one.
+    for (let end = span - 1; end >= 0; end -= 7) {
+      const bucket = { day: dayKey(Math.min(end, span - 1)), views: 0, visitors: new Set<string>() };
+      for (let i = end; i > end - 7 && i >= 0; i -= 1) {
+        const hit = perDay.get(dayKey(i));
+        if (!hit) continue;
+        bucket.views += hit.views;
+        hit.visitors.forEach((v) => bucket.visitors.add(v));
+      }
+      daily.push({ day: bucket.day, views: bucket.views, visitors: bucket.visitors.size });
+    }
+    daily.reverse();
   }
 
   return {
@@ -183,12 +221,13 @@ export async function getStats(): Promise<Stats> {
       memberViews,
     },
     daily,
+    grain,
+    since: firstDay,
     articles: rank(perArticle, 10),
     pages: rank(perPage, 10),
     referrers: rank(
       new Map([...perReferrer].map(([k, v]) => [k, { ...v, href: undefined }])),
       8,
     ),
-    windowDays: WINDOW_DAYS,
   };
 }

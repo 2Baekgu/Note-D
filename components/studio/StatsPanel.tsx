@@ -35,7 +35,7 @@ export function StatsPanel({ stats }: { stats: Stats }) {
     <div className="space-y-16">
       <section aria-label="요약">
         <div className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          <Tile label="전체 조회" value={totals.views} note={`최근 ${stats.windowDays}일`} />
+          <Tile label="전체 조회" value={totals.views} note={sinceNote(stats.since)} />
           <Tile label="순 방문자" value={totals.visitors} note="브라우저 기준" />
           <Tile label="오늘" value={totals.today} note="서울 기준 오늘" />
           <Tile
@@ -51,11 +51,11 @@ export function StatsPanel({ stats }: { stats: Stats }) {
         </div>
       </section>
 
-      <Trend days={stats.daily} />
+      <Trend days={stats.daily} grain={stats.grain} since={stats.since} />
 
       <Bars
         title="많이 읽힌 글"
-        caption={`최근 ${stats.windowDays}일 · 조회수 기준 상위 ${stats.articles.length}편`}
+        caption={`전체 기간 · 조회수 기준 상위 ${stats.articles.length}편`}
         rows={stats.articles}
         empty="아직 읽힌 글이 없습니다."
       />
@@ -82,7 +82,7 @@ export function StatsPanel({ stats }: { stats: Stats }) {
 
       <Bars
         title="많이 열린 페이지"
-        caption="글이 아닌 화면까지 포함한 전체"
+        caption="글이 아닌 화면까지 포함한 전체 기간"
         rows={stats.pages}
         empty="기록이 없습니다."
         mono
@@ -90,6 +90,12 @@ export function StatsPanel({ stats }: { stats: Stats }) {
     </div>
   );
 }
+
+/** "집계 시작일부터" reads better than a number of days nobody counted. */
+const sinceNote = (since: string | null) =>
+  since ? `${label(since)}부터 지금까지` : "집계 시작 전";
+
+const label = (d: string) => `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일`;
 
 const share = (part: number, whole: number) =>
   whole ? `전체의 ${Math.round((part / whole) * 100)}%` : "—";
@@ -124,10 +130,20 @@ function Tile({
   );
 }
 
-/** Thirty days of reading. A single series, so no legend — the heading says
- *  what is plotted — and only the busiest day is labelled. */
-function Trend({ days }: { days: DayCount[] }) {
+/** Every day since counting began, or every week once that is too many days
+ *  to draw. A single series, so no legend — the heading says what is plotted
+ *  — and only the busiest point carries a label. */
+function Trend({
+  days,
+  grain,
+  since,
+}: {
+  days: DayCount[];
+  grain: "day" | "week";
+  since: string | null;
+}) {
   const [at, setAt] = useState<number | null>(null);
+  const unit = grain === "week" ? "주" : "일";
 
   const W = 720;
   const H = 210;
@@ -149,21 +165,22 @@ function Trend({ days }: { days: DayCount[] }) {
   const ticks = [0, top / 2, top];
   const busiest = days.reduce((best, d, i) => (d.views > days[best].views ? i : best), 0);
   const shown = at ?? busiest;
-  const label = (d: string) => `${Number(d.slice(5, 7))}월 ${Number(d.slice(8, 10))}일`;
 
   return (
     <section aria-labelledby="trend">
       <h2 id="trend" className="t-h2">
-        일별 조회수
+        {grain === "week" ? "주별" : "일별"} 조회수
       </h2>
-      <p className="t-caption mt-2 text-ink-faint">최근 30일 · 서울 기준</p>
+      <p className="t-caption mt-2 text-ink-faint">
+        {sinceNote(since)} · 서울 기준
+      </p>
 
       <figure className="surface mt-6 overflow-hidden p-4 sm:p-6">
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="block w-full"
           role="img"
-          aria-label={`최근 30일 일별 조회수. 가장 많은 날은 ${label(days[busiest].day)}, ${fmt(days[busiest].views)}회.`}
+          aria-label={`${sinceNote(since)}의 ${unit}별 조회수. 가장 많은 ${unit}은 ${label(days[busiest].day)}, ${fmt(days[busiest].views)}회.`}
           onMouseLeave={() => setAt(null)}
         >
           {ticks.map((t) => (
@@ -224,8 +241,11 @@ function Trend({ days }: { days: DayCount[] }) {
         </svg>
 
         <figcaption className="t-caption mt-3 text-ink-muted">
-          <b className="font-medium text-ink">{label(days[shown].day)}</b> · 조회{" "}
-          {fmt(days[shown].views)}회 · 방문자 {fmt(days[shown].visitors)}명
+          <b className="font-medium text-ink">
+            {label(days[shown].day)}
+            {grain === "week" && " 주"}
+          </b>{" "}
+          · 조회 {fmt(days[shown].views)}회 · 방문자 {fmt(days[shown].visitors)}명
         </figcaption>
       </figure>
     </section>
