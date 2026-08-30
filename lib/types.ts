@@ -78,6 +78,8 @@ export interface Reaction {
   count: number;
   /** Whether the person reading has left this one. */
   mine: boolean;
+  /** Who left it, oldest first, so hovering can say so by name. */
+  names: string[];
 }
 
 /** Something that happened on your writing while you were away. */

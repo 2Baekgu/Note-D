@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { Comment } from "@/lib/types";
+import type { Comment, Reaction } from "@/lib/types";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -158,17 +158,36 @@ export function Discussion({
   async function react(comment: Comment, emoji: string) {
     if (!user) return;
     const had = comment.reactions.some((r) => r.emoji === emoji && r.mine);
-    const next = had
+    // The name list moves with the count, so the tooltip is right before the
+    // server has answered.
+    const next: Reaction[] = had
       ? comment.reactions
           .map((r) =>
-            r.emoji === emoji ? { ...r, count: r.count - 1, mine: false } : r,
+            r.emoji === emoji
+              ? {
+                  ...r,
+                  count: r.count - 1,
+                  mine: false,
+                  names: r.names.filter((n) => n !== user.name),
+                }
+              : r,
           )
           .filter((r) => r.count > 0)
       : comment.reactions.some((r) => r.emoji === emoji)
         ? comment.reactions.map((r) =>
-            r.emoji === emoji ? { ...r, count: r.count + 1, mine: true } : r,
+            r.emoji === emoji
+              ? {
+                  ...r,
+                  count: r.count + 1,
+                  mine: true,
+                  names: [...r.names, user.name],
+                }
+              : r,
           )
-        : [...comment.reactions, { emoji, count: 1, mine: true }];
+        : [
+            ...comment.reactions,
+            { emoji, count: 1, mine: true, names: [user.name] },
+          ];
 
     patch(comment.id, { reactions: next });
     const res = await toggleReaction(comment.id, user.id, emoji, had);
@@ -339,22 +358,12 @@ function CommentRow({
 
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
           {c.reactions.map((r) => (
-            <button
+            <ReactionPill
               key={r.emoji}
-              type="button"
+              reaction={r}
               disabled={!signedIn}
               onClick={() => onReact(c, r.emoji)}
-              aria-pressed={r.mine}
-              className={cn(
-                "flex items-center gap-1 rounded-pill border px-2 py-0.5 text-[0.8125rem] transition-colors duration-[var(--duration-fast)]",
-                r.mine
-                  ? "border-ink bg-[rgba(22,21,15,0.05)]"
-                  : "border-line hover:border-ink",
-              )}
-            >
-              <span>{r.emoji}</span>
-              <span className="t-caption text-ink-muted">{r.count}</span>
-            </button>
+            />
           ))}
 
           {signedIn && <EmojiPicker onPick={(e) => onReact(c, e)} />}
@@ -422,6 +431,66 @@ function CommentRow({
         )}
       </div>
     </div>
+  );
+}
+
+/** Who left a reaction, on hover — the count alone says a thing happened but
+ *  not who did it, and in a study of three that is the interesting half.
+ *  Focus shows it too, so it is not mouse-only. */
+function ReactionPill({
+  reaction: r,
+  disabled,
+  onClick,
+}: {
+  reaction: Reaction;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  const [shown, setShown] = useState(false);
+
+  const who =
+    r.names.length === 0
+      ? ""
+      : r.names.length <= 3
+        ? r.names.join(", ")
+        : `${r.names.slice(0, 3).join(", ")} 외 ${r.names.length - 3}명`;
+
+  return (
+    <span className="relative inline-flex">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onClick}
+        aria-pressed={r.mine}
+        aria-label={`${r.emoji} ${who}`}
+        onMouseEnter={() => setShown(true)}
+        onMouseLeave={() => setShown(false)}
+        onFocus={() => setShown(true)}
+        onBlur={() => setShown(false)}
+        className={cn(
+          "flex items-center gap-1 rounded-pill border px-2 py-0.5 text-[0.8125rem] transition-colors duration-[var(--duration-fast)]",
+          r.mine
+            ? "border-ink bg-[rgba(22,21,15,0.05)]"
+            : "border-line hover:border-ink",
+        )}
+      >
+        <span>{r.emoji}</span>
+        <span className="t-caption text-ink-muted">{r.count}</span>
+      </button>
+
+      {shown && who && (
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute bottom-[calc(100%+0.4rem)] left-1/2 z-40 flex -translate-x-1/2 flex-col items-center"
+        >
+          <span className="whitespace-nowrap rounded-md bg-ink px-2.5 py-1.5 text-[0.75rem] leading-snug text-paper shadow-float">
+            <b className="font-medium">{who}</b>님이 {r.emoji} 남겼어요
+          </span>
+          {/* the pointer, a rotated corner of the same box */}
+          <span className="-mt-[3px] h-2 w-2 rotate-45 rounded-[1px] bg-ink" />
+        </span>
+      )}
+    </span>
   );
 }
 

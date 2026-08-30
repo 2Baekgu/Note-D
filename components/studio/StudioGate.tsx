@@ -89,10 +89,12 @@ function Invitation({
 
   return (
     <div className="surface-dashed px-6 py-16 sm:py-24">
-      <div className="mx-auto max-w-[52ch] text-center">
+      {/* The measure belongs to the paragraph, not the heading: at t-h1 the
+          sentence is wider than 52ch of body text and was folding in half. */}
+      <div className="text-center">
         <p className="t-label text-accent">Guest</p>
-        <p className="t-h1 mt-4">Studio는 멤버만 이용할 수 있습니다</p>
-        <p className="t-body mt-5 text-ink-muted">
+        <p className="t-h1 mt-4 text-balance">Studio는 멤버만 이용할 수 있습니다</p>
+        <p className="t-body mx-auto mt-5 max-w-[52ch] text-ink-muted">
           {name}님, 반갑습니다. 지금은 게스트라서 모든 아티클을 읽고 댓글을 남길 수
           있습니다. 글을 쓰려면 멤버가 되어야 하고, 멤버는 일주일에 한 편씩 각자 공부한
           내용을 정리해 발행합니다.
