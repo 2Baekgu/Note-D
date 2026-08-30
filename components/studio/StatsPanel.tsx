@@ -27,6 +27,19 @@ export function StatsPanel({ stats }: { stats: Stats }) {
     );
   }
 
+  // Counting has begun and nobody has arrived yet. Everything below reads
+  // from the first visit, and there isn't one.
+  if (!stats.daily.length) {
+    return (
+      <div className="surface-dashed px-6 py-24 text-center">
+        <p className="t-h2">아직 기록된 방문이 없습니다</p>
+        <p className="t-body mx-auto mt-4 max-w-[46ch] text-ink-muted">
+          집계는 켜져 있습니다. 누군가 페이지를 열면 그때부터 이 화면이 채워집니다.
+        </p>
+      </div>
+    );
+  }
+
   const { totals } = stats;
   const delta = totals.previous7 ? (totals.last7 - totals.previous7) / totals.previous7 : null;
   const guestViews = totals.views - totals.memberViews;
@@ -144,6 +157,9 @@ function Trend({
 }) {
   const [at, setAt] = useState<number | null>(null);
   const unit = grain === "week" ? "주" : "일";
+  // Hooks first, then the guard: a chart of nothing has no busiest point to
+  // read, and asking for one is what took this whole page down.
+  const hasPoints = days.length > 0;
 
   const W = 720;
   const H = 210;
@@ -163,8 +179,13 @@ function Trend({
   const area = `${line} L${x(days.length - 1).toFixed(1)},${(PAD.top + plotH).toFixed(1)} L${x(0).toFixed(1)},${(PAD.top + plotH).toFixed(1)} Z`;
 
   const ticks = [0, top / 2, top];
-  const busiest = days.reduce((best, d, i) => (d.views > days[best].views ? i : best), 0);
+  const busiest = hasPoints
+    ? days.reduce((best, d, i) => (d.views > days[best].views ? i : best), 0)
+    : 0;
   const shown = at ?? busiest;
+  const point = days[shown];
+
+  if (!hasPoints) return null;
 
   return (
     <section aria-labelledby="trend">
@@ -211,7 +232,7 @@ function Trend({
 
           {/* The marker sits on the day being read; its surface ring keeps it
               legible where it crosses the line. */}
-          <circle cx={x(shown)} cy={y(days[shown].views)} r="5" fill="var(--accent)" stroke="var(--paper)" strokeWidth="2" />
+          <circle cx={x(shown)} cy={y(point.views)} r="5" fill="var(--accent)" stroke="var(--paper)" strokeWidth="2" />
 
           {/* Hit targets are the full column height, not the 8px dot. */}
           {days.map((d, i) => (
@@ -242,10 +263,10 @@ function Trend({
 
         <figcaption className="t-caption mt-3 text-ink-muted">
           <b className="font-medium text-ink">
-            {label(days[shown].day)}
+            {label(point.day)}
             {grain === "week" && " 주"}
           </b>{" "}
-          · 조회 {fmt(days[shown].views)}회 · 방문자 {fmt(days[shown].visitors)}명
+          · 조회 {fmt(point.views)}회 · 방문자 {fmt(point.visitors)}명
         </figcaption>
       </figure>
     </section>
