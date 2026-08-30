@@ -8,6 +8,7 @@ import { TableKit } from "@tiptap/extension-table";
 import type { Extensions } from "@tiptap/core";
 
 import { CaptionedImage } from "./nodes/captioned-image";
+import { ImageRow } from "./nodes/image-row";
 import { Bookmark } from "./nodes/bookmark";
 import { BlockVariants } from "./nodes/variants";
 
@@ -38,4 +39,9 @@ export const baseExtensions: Extensions = [
 ];
 
 /** The schema-only nodes, for rendering a stored document outside React. */
-export const renderExtensions: Extensions = [...baseExtensions, CaptionedImage, Bookmark];
+export const renderExtensions: Extensions = [
+  ...baseExtensions,
+  CaptionedImage,
+  ImageRow,
+  Bookmark,
+];

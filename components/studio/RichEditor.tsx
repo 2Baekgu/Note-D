@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { CaptionedImage } from "./CaptionedImage";
+import { ImageRow } from "./ImageRow";
 import { baseExtensions } from "@/lib/content/extensions";
 import { EditorToolbar } from "./EditorToolbar";
 import { Bookmark } from "./BookmarkNode";
@@ -76,7 +77,9 @@ export function RichEditor({
 
   // Seeded once; TipTap owns the document from here on.
   const [initial] = useState<DocNode>(() =>
-    isDoc(value) ? (JSON.parse(value.trim()) as DocNode) : blocksToDoc(parseContent(value)),
+    isDoc(value)
+      ? (JSON.parse(value.trim()) as DocNode)
+      : blocksToDoc(parseContent(value)),
   );
 
   // The menu is driven from the keyboard because the caret never leaves the
@@ -109,6 +112,7 @@ export function RichEditor({
     extensions: [
       ...baseExtensions,
       CaptionedImage,
+      ImageRow,
       Bookmark,
       Placeholder.configure({
         placeholder: ({ node }) =>
@@ -122,12 +126,18 @@ export function RichEditor({
     editorProps: {
       attributes: { class: "tiptap" },
       handleKeyDown: (view, event) => {
-        if (event.key !== "Enter" || event.shiftKey || event.isComposing) return false;
+        if (event.key !== "Enter" || event.shiftKey || event.isComposing)
+          return false;
         const { selection } = view.state;
         if (!selection.empty) return false;
 
         const $from = selection.$from;
-        const before = $from.parent.textBetween(0, $from.parentOffset, undefined, " ");
+        const before = $from.parent.textBetween(
+          0,
+          $from.parentOffset,
+          undefined,
+          " ",
+        );
         const match = before.match(/(https?:\/\/\S+)$/);
         if (!match) return false;
 
@@ -162,8 +172,12 @@ export function RichEditor({
     },
   });
 
+  const rowFileInput = useRef<HTMLInputElement>(null);
+
   function imagesFrom(data: DataTransfer | null) {
-    return Array.from(data?.files ?? []).filter((f) => f.type.startsWith("image/"));
+    return Array.from(data?.files ?? []).filter((f) =>
+      f.type.startsWith("image/"),
+    );
   }
 
   async function insertImages(files: File[]) {
@@ -183,6 +197,109 @@ export function RichEditor({
       } else {
         setError(res.error ?? "업로드에 실패했습니다.");
       }
+    }
+  }
+
+  /** How many pictures the selected row holds, so the menu can stop at five
+   *  rather than letting the schema refuse the sixth silently. */
+  const rowCount = (() => {
+    if (!editor || !editor.isActive("imageRow")) return 0;
+    const { $from } = editor.state.selection;
+    for (let d = $from.depth; d > 0; d -= 1) {
+      const n = $from.node(d);
+      if (n.type.name === "imageRow") return n.childCount;
+    }
+    return 0;
+  })();
+
+  /** Wrap the selected picture in a row of one. It looks unchanged until a
+   *  second picture joins it, which is the point: the row is the thing you
+   *  drag into. */
+  function makeRow() {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .command(({ tr, state, dispatch }) => {
+        const { from, to } = state.selection;
+        const image = state.doc.nodeAt(from);
+        if (!image || image.type.name !== "image") return false;
+
+        const rowType = state.schema.nodes.imageRow;
+        // The picture's own caption becomes the row's; a picture inside a row
+        // never shows one of its own.
+        const row = rowType.create(
+          { caption: image.attrs.title ?? "" },
+          image.type.create({ ...image.attrs, title: null }),
+        );
+        if (dispatch) tr.replaceWith(from, to, row);
+        return true;
+      })
+      .run();
+  }
+
+  /** Back to separate pictures, each standing on its own. */
+  function unmakeRow() {
+    if (!editor) return;
+    editor
+      .chain()
+      .focus()
+      .command(({ tr, state, dispatch }) => {
+        const { $from } = state.selection;
+        for (let d = $from.depth; d > 0; d -= 1) {
+          if ($from.node(d).type.name !== "imageRow") continue;
+          const row = $from.node(d);
+          const start = $from.before(d);
+          if (dispatch)
+            tr.replaceWith(start, start + row.nodeSize, row.content);
+          return true;
+        }
+        return false;
+      })
+      .run();
+  }
+
+  /** Upload straight into the row, for people who would rather not drag. */
+  async function addToRow(files: File[]) {
+    if (!editor || !files.length) return;
+    const room = 5 - rowCount;
+    if (room <= 0) return;
+
+    setError(null);
+    const picked = files.slice(0, room);
+    setUploading((n) => n + picked.length);
+
+    for (const file of picked) {
+      const res = await uploadImage(file, folder);
+      setUploading((n) => n - 1);
+      if (!res.url) {
+        setError(res.error ?? "업로드에 실패했습니다.");
+        continue;
+      }
+      editor
+        .chain()
+        .focus()
+        .command(({ tr, state, dispatch }) => {
+          const { $from } = state.selection;
+          for (let d = $from.depth; d > 0; d -= 1) {
+            const row = $from.node(d);
+            if (row.type.name !== "imageRow") continue;
+            if (row.childCount >= 5) return false;
+            const end = $from.before(d) + row.nodeSize - 1;
+            if (dispatch) {
+              tr.insert(
+                end,
+                state.schema.nodes.image.create({
+                  src: res.url,
+                  alt: file.name.replace(/\.[^.]+$/, ""),
+                }),
+              );
+            }
+            return true;
+          }
+          return false;
+        })
+        .run();
     }
   }
 
@@ -222,7 +339,9 @@ export function RichEditor({
       })(),
     };
     try {
-      const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+      const res = await fetch(
+        `/api/link-preview?url=${encodeURIComponent(url)}`,
+      );
       if (res.ok) attrs = { ...attrs, ...(await res.json()) };
     } catch {
       /* the card still works with just the address */
@@ -243,7 +362,9 @@ export function RichEditor({
       <div
         className={cn(
           "surface",
-          compact ? "min-h-[12rem] px-5 py-5" : "min-h-[30rem] px-6 py-10 sm:px-14",
+          compact
+            ? "min-h-[12rem] px-5 py-5"
+            : "min-h-[30rem] px-6 py-10 sm:px-14",
         )}
       />
     );
@@ -252,7 +373,12 @@ export function RichEditor({
   return (
     <div>
       {tools === "image" ? (
-        <ImageOnlyToolbar editor={editor} uploading={uploading} onPick={insertImages} meta={meta} />
+        <ImageOnlyToolbar
+          editor={editor}
+          uploading={uploading}
+          onPick={insertImages}
+          meta={meta}
+        />
       ) : (
         <EditorToolbar
           editor={editor}
@@ -272,7 +398,9 @@ export function RichEditor({
         )}
       >
         {header && (
-          <div className="editor-column mb-10 border-b border-line pb-8">{header}</div>
+          <div className="editor-column mb-10 border-b border-line pb-8">
+            {header}
+          </div>
         )}
         <EditorContent editor={editor} />
 
@@ -311,22 +439,38 @@ export function RichEditor({
       </div>
 
       {/* Selecting a picture offers its caption. `title` is where TipTap keeps
-          it and where the renderer reads it from. */}
+          it and where the renderer reads it from. A picture standing on its
+          own can also be turned into a row, which is where the second one
+          gets dragged. */}
       <BubbleMenu
         editor={editor}
         pluginKey="imageMenu"
-        shouldShow={({ editor: e }) => e.isActive("image")}
+        shouldShow={({ editor: e }) =>
+          e.isActive("image") && !e.isActive("imageRow")
+        }
         className="surface flex items-center gap-2 px-2 py-1.5 shadow-float"
       >
         <span className="t-label shrink-0 text-ink-faint">주석</span>
         <input
           value={(editor.getAttributes("image").title as string) ?? ""}
           onChange={(e) =>
-            editor.chain().focus().updateAttributes("image", { title: e.target.value }).run()
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("image", { title: e.target.value })
+              .run()
           }
           placeholder="사진 설명을 적어주세요"
           className="t-caption w-56 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
         />
+        <ChipButton
+          size="sm"
+          tone="ghost"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={makeRow}
+        >
+          가로 배치
+        </ChipButton>
         <ChipButton
           size="sm"
           tone="ghost"
@@ -337,23 +481,77 @@ export function RichEditor({
         </ChipButton>
       </BubbleMenu>
 
+      {/* A row: one caption for the lot, a way to add to it without dragging,
+          and a way back to separate pictures. */}
+      <BubbleMenu
+        editor={editor}
+        pluginKey="imageRowMenu"
+        shouldShow={({ editor: e }) => e.isActive("imageRow")}
+        className="surface flex items-center gap-2 px-2 py-1.5 shadow-float"
+      >
+        <span className="t-label shrink-0 text-ink-faint">주석</span>
+        <input
+          value={(editor.getAttributes("imageRow").caption as string) ?? ""}
+          onChange={(e) =>
+            editor
+              .chain()
+              .focus()
+              .updateAttributes("imageRow", { caption: e.target.value })
+              .run()
+          }
+          placeholder="사진 설명을 적어주세요"
+          className="t-caption w-48 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+        />
+        <span className="t-caption shrink-0 text-ink-faint">{rowCount}/5</span>
+        <ChipButton
+          size="sm"
+          tone="ghost"
+          disabled={rowCount >= 5}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => rowFileInput.current?.click()}
+        >
+          사진 추가
+        </ChipButton>
+        <ChipButton
+          size="sm"
+          tone="ghost"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={unmakeRow}
+        >
+          해제
+        </ChipButton>
+      </BubbleMenu>
+
+      <input
+        ref={rowFileInput}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={(e) => {
+          void addToRow(Array.from(e.target.files ?? []));
+          e.target.value = "";
+        }}
+      />
+
       <p className="t-caption mt-2 text-ink-faint">
         {tools === "image" ? (
           "이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣을 수 있습니다."
         ) : (
           <>
-            이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣습니다. <code>## </code> <code>- </code>{" "}
-            <code>&gt; </code>처럼 치면 바로 그 블록이 되고, 글자를 선택하면 서식 버튼이 뜹니다.
+            이미지는 끌어다 놓거나 붙여넣기(⌘V)로 넣습니다. <code>## </code>{" "}
+            <code>- </code> <code>&gt; </code>처럼 치면 바로 그 블록이 되고,
+            글자를 선택하면 서식 버튼이 뜹니다.
           </>
         )}
-        {mode === "demo" && " 데모 모드에서는 이미지가 글 안에 직접 담겨 용량이 커집니다."}
+        {mode === "demo" &&
+          " 데모 모드에서는 이미지가 글 안에 직접 담겨 용량이 커집니다."}
       </p>
 
       {error && <p className="t-caption mt-2 text-accent">{error}</p>}
     </div>
   );
 }
-
 
 /** The strip the bug-report dialog gets: a picture button and nothing else,
  *  because a report needs evidence, not formatting. */
@@ -368,10 +566,11 @@ function ImageOnlyToolbar({
   onPick: (files: File[]) => void;
   meta?: React.ReactNode;
 }) {
-
   return (
     <div className="scroll-x flex items-center gap-1.5 pb-1">
-      <label className={cn("chip chip-outline chip-sm shrink-0 cursor-pointer")}>
+      <label
+        className={cn("chip chip-outline chip-sm shrink-0 cursor-pointer")}
+      >
         + 이미지
         <input
           type="file"
@@ -391,9 +590,15 @@ function ImageOnlyToolbar({
         </span>
       )}
 
-      {meta && <span className="t-caption ml-auto shrink-0 text-ink-faint">{meta}</span>}
+      {meta && (
+        <span className="t-caption ml-auto shrink-0 text-ink-faint">
+          {meta}
+        </span>
+      )}
 
-      <span className={cn("flex shrink-0 items-center gap-1", !meta && "ml-auto")}>
+      <span
+        className={cn("flex shrink-0 items-center gap-1", !meta && "ml-auto")}
+      >
         <ChipButton
           size="sm"
           tone="ghost"

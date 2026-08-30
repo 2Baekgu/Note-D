@@ -1,6 +1,10 @@
 "use client";
 
-import { NodeViewWrapper, ReactNodeViewRenderer, type NodeViewProps } from "@tiptap/react";
+import {
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+  type NodeViewProps,
+} from "@tiptap/react";
 import { CaptionedImage as BaseImage } from "@/lib/content/nodes/captioned-image";
 
 /** The editor's view of the shared image node. The caption is not editable
@@ -12,7 +16,16 @@ function View({ node, selected }: NodeViewProps) {
   const caption = String(node.attrs.title ?? "");
 
   return (
-    <NodeViewWrapper as="figure" className="tiptap-figure" data-selected={selected}>
+    // `data-drag-handle` is what lets ProseMirror pick the picture up —
+    // without it a node view is inert, and there is no dragging one into
+    // a row or back out of it.
+    <NodeViewWrapper
+      as="figure"
+      className="tiptap-figure"
+      data-selected={selected}
+      draggable
+      data-drag-handle
+    >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} draggable={false} />
       {caption && <figcaption contentEditable={false}>{caption}</figcaption>}

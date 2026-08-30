@@ -1711,6 +1711,83 @@ so headings inside a piece have always been Pretendard. */
   color: var(--ink-faint);
 }
 
+/* ── Pictures side by side ────────────────────────────────
+   The row fills the column and each picture keeps its own shape: every item
+   is an equal share of the width (`flex: 1 1 0`) and the height follows from
+   the picture, so nothing is stretched or cropped to fit a box. `min-width: 0`
+   is what stops a wide picture from refusing to shrink and pushing the row
+   past the column. */
+.tiptap .tiptap-row,
+.prose-body .tiptap-row {
+  margin-block: 2.75rem;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+.tiptap .tiptap-row-items,
+.prose-body .tiptap-row-items {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+/* Each picture is one share, and the figure it arrives wrapped in stops
+   behaving like a standalone picture: no margin, no width of its own. */
+.tiptap .tiptap-row-items > *,
+.prose-body .tiptap-row-items > * {
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  width: auto;
+}
+
+.tiptap .tiptap-row-items img,
+.prose-body .tiptap-row-items img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* A picture inside a row never speaks for itself. */
+.tiptap .tiptap-row-items figcaption,
+.prose-body .tiptap-row-items figcaption {
+  display: none;
+}
+
+.tiptap .tiptap-row > figcaption,
+.prose-body .tiptap-row > figcaption {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+}
+
+/* Four or five across is unreadable on a phone; wrap to two columns and let
+   the row find its own height. */
+@media (max-width: 640px) {
+  .tiptap .tiptap-row[data-count="3"] .tiptap-row-items,
+  .prose-body .tiptap-row[data-count="3"] .tiptap-row-items,
+  .tiptap .tiptap-row[data-count="4"] .tiptap-row-items,
+  .prose-body .tiptap-row[data-count="4"] .tiptap-row-items,
+  .tiptap .tiptap-row[data-count="5"] .tiptap-row-items,
+  .prose-body .tiptap-row[data-count="5"] .tiptap-row-items {
+    flex-wrap: wrap;
+  }
+  /* `flex-grow: 0` matters here: with it the odd picture on the last line
+     stays half a row wide instead of stretching to fill it alone. */
+  .tiptap .tiptap-row .tiptap-row-items > *,
+  .prose-body .tiptap-row .tiptap-row-items > * {
+    flex: 0 1 calc(50% - 0.375rem);
+  }
+}
+
+.tiptap .tiptap-row[data-selected="true"] > .tiptap-row-items {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-md);
+}
+
 .tiptap .tiptap-figure[data-selected="true"] img {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
