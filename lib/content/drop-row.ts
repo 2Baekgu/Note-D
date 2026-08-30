@@ -57,6 +57,34 @@ function sideOf(view: EditorView, pos: number, event: DragEvent): "before" | "af
   return event.clientX < box.left + box.width / 2 ? "before" : "after";
 }
 
+/** Where a vertical mark should be drawn while a picture is being dragged
+ *  beside another, in viewport coordinates. `null` means this drop is an
+ *  ordinary one and ProseMirror's own horizontal cursor is right.
+ *
+ *  A row lays its pictures out across the line, so the gap they would fall
+ *  into is a gap between columns. A horizontal rule drawn under a picture
+ *  says "it will go below", which is the one thing that will not happen. */
+export function rowDropMark(
+  view: EditorView,
+  event: DragEvent,
+): { left: number; top: number; height: number } | null {
+  const targetPos = targetImage(view, event);
+  if (targetPos === null) return null;
+
+  const side = sideOf(view, targetPos, event);
+  if (!side) return null;
+
+  const dom = view.nodeDOM(targetPos);
+  if (!(dom instanceof HTMLElement)) return null;
+  const box = dom.getBoundingClientRect();
+
+  return {
+    left: side === "before" ? box.left : box.right,
+    top: box.top,
+    height: box.height,
+  };
+}
+
 export function dropIntoRow(
   view: EditorView,
   event: DragEvent,

@@ -1798,6 +1798,23 @@ so headings inside a piece have always been Pretendard. */
   }
 }
 
+/* The mark drawn while a picture is being dragged beside another. It stands
+   where a column edge would be, which is the one thing ProseMirror's own
+   cursor cannot say — that one is always a horizontal rule. */
+.editor-row-mark {
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* Two lines saying different things is worse than either alone. */
+[data-row-drop="true"] .ProseMirror-dropcursor {
+  display: none;
+}
+
 .tiptap .tiptap-row[data-selected="true"] > .tiptap-row-items {
   outline: 2px solid var(--accent);
   outline-offset: 4px;

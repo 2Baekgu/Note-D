@@ -14,7 +14,7 @@ import { parseContent } from "@/lib/content/parse";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ChipButton } from "@/components/ui/Chip";
 import { uploadImage } from "@/lib/studio";
-import { dropIntoRow, dropPos } from "@/lib/content/drop-row";
+import { dropIntoRow, dropPos, rowDropMark } from "@/lib/content/drop-row";
 import { cn } from "@/lib/utils";
 
 interface LinkChoice {
@@ -163,6 +163,27 @@ export function RichEditor({
         void insertImages(files);
         return true;
       },
+      handleDOMEvents: {
+        // Drawn by hand because ProseMirror's cursor is always a horizontal
+        // rule: correct between stacked blocks, wrong between two pictures
+        // sharing a line, where the gap is a column and not a row.
+        dragover: (view, event) => {
+          showRowMark(rowDropMark(view, event as DragEvent));
+          return false;
+        },
+        dragleave: () => {
+          showRowMark(null);
+          return false;
+        },
+        dragend: () => {
+          showRowMark(null);
+          return false;
+        },
+        drop: () => {
+          showRowMark(null);
+          return false;
+        },
+      },
       handleDrop: (view, event, slice, moved) => {
         // Files from outside: anywhere inside the editor counts. Landing on a
         // block exactly is not something a person aims for.
@@ -179,7 +200,7 @@ export function RichEditor({
     },
   });
 
-  const rowFileInput = useRef<HTMLInputElement>(null);
+  const rowMark = useRef<HTMLDivElement>(null);
 
   function imagesFrom(data: DataTransfer | null) {
     return Array.from(data?.files ?? []).filter((f) =>
@@ -204,14 +225,18 @@ export function RichEditor({
         setError(res.error ?? "업로드에 실패했습니다.");
         continue;
       }
-      const image = { src: res.url, alt: file.name.replace(/\.[^.]+$/, "") };
+      const image = {
+        src: res.url,
+        alt: file.name.replace(/\.[^.]+$/, ""),
+        ...(await naturalSize(res.url)),
+      };
 
       if (cursor === null) {
         editor.chain().focus().setImage(image).run();
         continue;
       }
-      const size = editor.state.doc.content.size;
-      const pos = Math.min(Math.max(cursor, 0), size);
+      const docSize = editor.state.doc.content.size;
+      const pos = Math.min(Math.max(cursor, 0), docSize);
       editor
         .chain()
         .focus()
@@ -221,107 +246,39 @@ export function RichEditor({
     }
   }
 
-  /** How many pictures the selected row holds, so the menu can stop at five
-   *  rather than letting the schema refuse the sixth silently. */
-  const rowCount = (() => {
-    if (!editor || !editor.isActive("imageRow")) return 0;
-    const { $from } = editor.state.selection;
-    for (let d = $from.depth; d > 0; d -= 1) {
-      const n = $from.node(d);
-      if (n.type.name === "imageRow") return n.childCount;
+  /** Position the vertical mark, or take it away. Written straight to the
+   *  node: `dragover` fires on every pointer move and React has no business
+   *  re-rendering the sheet that often. */
+  function showRowMark(spot: { left: number; top: number; height: number } | null) {
+    const el = rowMark.current;
+    const sheet = sheetRef.current;
+    if (!el || !sheet) return;
+
+    if (!spot) {
+      el.style.display = "none";
+      sheet.removeAttribute("data-row-drop");
+      return;
     }
-    return 0;
-  })();
-
-  /** Wrap the selected picture in a row of one. It looks unchanged until a
-   *  second picture joins it, which is the point: the row is the thing you
-   *  drag into. */
-  function makeRow() {
-    if (!editor) return;
-    editor
-      .chain()
-      .focus()
-      .command(({ tr, state, dispatch }) => {
-        const { from, to } = state.selection;
-        const image = state.doc.nodeAt(from);
-        if (!image || image.type.name !== "image") return false;
-
-        const rowType = state.schema.nodes.imageRow;
-        // The picture's own caption becomes the row's; a picture inside a row
-        // never shows one of its own.
-        const row = rowType.create(
-          { caption: image.attrs.title ?? "" },
-          image.type.create({ ...image.attrs, title: null }),
-        );
-        if (dispatch) tr.replaceWith(from, to, row);
-        return true;
-      })
-      .run();
+    const box = sheet.getBoundingClientRect();
+    el.style.display = "block";
+    el.style.left = `${spot.left - box.left}px`;
+    el.style.top = `${spot.top - box.top}px`;
+    el.style.height = `${spot.height}px`;
+    // Hides ProseMirror's own cursor, which would otherwise draw a second,
+    // contradictory line under the picture.
+    sheet.setAttribute("data-row-drop", "true");
   }
 
-  /** Back to separate pictures, each standing on its own. */
-  function unmakeRow() {
-    if (!editor) return;
-    editor
-      .chain()
-      .focus()
-      .command(({ tr, state, dispatch }) => {
-        const { $from } = state.selection;
-        for (let d = $from.depth; d > 0; d -= 1) {
-          if ($from.node(d).type.name !== "imageRow") continue;
-          const row = $from.node(d);
-          const start = $from.before(d);
-          if (dispatch)
-            tr.replaceWith(start, start + row.nodeSize, row.content);
-          return true;
-        }
-        return false;
-      })
-      .run();
-  }
-
-  /** Upload straight into the row, for people who would rather not drag. */
-  async function addToRow(files: File[]) {
-    if (!editor || !files.length) return;
-    const room = 5 - rowCount;
-    if (room <= 0) return;
-
-    setError(null);
-    const picked = files.slice(0, room);
-    setUploading((n) => n + picked.length);
-
-    for (const file of picked) {
-      const res = await uploadImage(file, folder);
-      setUploading((n) => n - 1);
-      if (!res.url) {
-        setError(res.error ?? "업로드에 실패했습니다.");
-        continue;
-      }
-      editor
-        .chain()
-        .focus()
-        .command(({ tr, state, dispatch }) => {
-          const { $from } = state.selection;
-          for (let d = $from.depth; d > 0; d -= 1) {
-            const row = $from.node(d);
-            if (row.type.name !== "imageRow") continue;
-            if (row.childCount >= 5) return false;
-            const end = $from.before(d) + row.nodeSize - 1;
-            if (dispatch) {
-              tr.insert(
-                end,
-                state.schema.nodes.image.create({
-                  src: res.url,
-                  alt: file.name.replace(/\.[^.]+$/, ""),
-                }),
-              );
-            }
-            return true;
-          }
-          return false;
-        })
-        .run();
-    }
+  /** A picture's own shape, read once it has loaded. A row divides the line
+   *  by these, so the pictures end up the same height. */
+  function naturalSize(src: string): Promise<{ width?: number; height?: number }> {
+    return new Promise((resolve) => {
+      const probe = new Image();
+      probe.onload = () =>
+        resolve({ width: probe.naturalWidth, height: probe.naturalHeight });
+      probe.onerror = () => resolve({});
+      probe.src = src;
+    });
   }
 
   /** Leaves the URL where it is and finishes the Enter we swallowed. */
@@ -441,6 +398,10 @@ export function RichEditor({
         )}
         <EditorContent editor={editor} />
 
+        {/* Where a dragged picture would land when it lands beside another:
+            a column edge, so a column rule. */}
+        <div ref={rowMark} className="editor-row-mark" style={{ display: "none" }} />
+
         {linkChoice && (
           <div
             role="listbox"
@@ -504,22 +465,15 @@ export function RichEditor({
           size="sm"
           tone="ghost"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={makeRow}
-        >
-          가로 배치
-        </ChipButton>
-        <ChipButton
-          size="sm"
-          tone="ghost"
-          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().deleteSelection().run()}
         >
           삭제
         </ChipButton>
       </BubbleMenu>
 
-      {/* A row: one caption for the lot, a way to add to it without dragging,
-          and a way back to separate pictures. */}
+      {/* A row: one caption for the lot. Which pictures are in it, and in
+          what order, is said by dragging them — there is nothing here to
+          press for that. */}
       <BubbleMenu
         editor={editor}
         pluginKey="imageRowMenu"
@@ -537,39 +491,17 @@ export function RichEditor({
               .run()
           }
           placeholder="사진 설명을 적어주세요"
-          className="t-caption w-48 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+          className="t-caption w-56 border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
         />
-        <span className="t-caption shrink-0 text-ink-faint">{rowCount}/5</span>
-        <ChipButton
-          size="sm"
-          tone="ghost"
-          disabled={rowCount >= 5}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => rowFileInput.current?.click()}
-        >
-          사진 추가
-        </ChipButton>
         <ChipButton
           size="sm"
           tone="ghost"
           onMouseDown={(e) => e.preventDefault()}
-          onClick={unmakeRow}
+          onClick={() => editor.chain().focus().deleteSelection().run()}
         >
-          해제
+          삭제
         </ChipButton>
       </BubbleMenu>
-
-      <input
-        ref={rowFileInput}
-        type="file"
-        accept="image/*"
-        multiple
-        hidden
-        onChange={(e) => {
-          void addToRow(Array.from(e.target.files ?? []));
-          e.target.value = "";
-        }}
-      />
 
       <p className="t-caption mt-2 text-ink-faint">
         {tools === "image" ? (
