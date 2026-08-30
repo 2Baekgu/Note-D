@@ -84,8 +84,8 @@ export default function AboutPage() {
         <div>
           <h2 className="t-h1">How we run it</h2>
           <p className="t-body-lg mt-6 text-ink-muted">
-            멤버들은 일주일에 한 편씩, 각자 공부한 것을 정리해 이곳에 발행합니다. 발표 대신 글로
-            남기고 질문과 반박은 댓글로 이어갑니다. 같은 시간에 모이지 않아도 대화는 계속됩니다.
+            멤버들은 일주일에 한 편씩, 각자 공부한 내용을 정리해 이곳에 발행합니다. 아티클을 읽고
+            궁금한 점이나 다른 생각이 생기면 댓글로 자유롭게 이야기를 나눕니다.
           </p>
         </div>
         <HowItWorks />
