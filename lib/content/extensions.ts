@@ -9,6 +9,7 @@ import type { Extensions } from "@tiptap/core";
 
 import { CaptionedImage } from "./nodes/captioned-image";
 import { ImageRow } from "./nodes/image-row";
+import { Youtube } from "./nodes/youtube";
 import { Bookmark } from "./nodes/bookmark";
 import { BlockVariants } from "./nodes/variants";
 
@@ -43,5 +44,6 @@ export const renderExtensions: Extensions = [
   ...baseExtensions,
   CaptionedImage,
   ImageRow,
+  Youtube,
   Bookmark,
 ];

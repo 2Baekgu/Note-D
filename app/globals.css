@@ -1798,6 +1798,68 @@ so headings inside a piece have always been Pretendard. */
   }
 }
 
+/* ── Video ────────────────────────────────────────────────
+   Sixteen by nine, whatever the column is. The frame is lazy, so a piece
+   with several videos costs nothing until one is scrolled to. */
+.tiptap .tiptap-video,
+.prose-body .tiptap-video {
+  margin-block: 2.75rem;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+.tiptap .tiptap-video-frame,
+.prose-body .tiptap-video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--ink);
+}
+
+.tiptap .tiptap-video-frame iframe,
+.prose-body .tiptap-video-frame iframe,
+.tiptap .tiptap-video-frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  object-fit: cover;
+}
+
+/* The editor's still wears the play badge the real player would draw. */
+.tiptap-video-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.75rem;
+  height: 2.6rem;
+  border-radius: 0.7rem;
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  pointer-events: none;
+}
+
+.tiptap .tiptap-video > figcaption,
+.prose-body .tiptap-video > figcaption {
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: var(--text-caption);
+  color: var(--ink-faint);
+}
+
+.tiptap .tiptap-video[data-selected="true"] .tiptap-video-frame {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
 /* ── Toast ────────────────────────────────────────────────
    Rises, holds, and sinks away. The percentages are shares of whatever
    lifetime the component sets, so one keyframe serves both tones. */

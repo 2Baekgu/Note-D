@@ -5,6 +5,7 @@ import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import { CaptionedImage } from "./CaptionedImage";
 import { ImageRow } from "./ImageRow";
+import { Youtube } from "./YoutubeNode";
 import { baseExtensions } from "@/lib/content/extensions";
 import { EditorToolbar } from "./EditorToolbar";
 import { Bookmark } from "./BookmarkNode";
@@ -15,6 +16,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { ChipButton } from "@/components/ui/Chip";
 import { uploadImage } from "@/lib/studio";
 import { dropIntoRow, dropPos, rowDropMark } from "@/lib/content/drop-row";
+import { parseYoutube } from "@/lib/content/nodes/youtube";
 import { cn } from "@/lib/utils";
 
 interface LinkChoice {
@@ -31,6 +33,13 @@ const CHOICES = [
   { label: "URL 그대로", hint: "링크 텍스트로 둡니다" },
   { label: "북마크로", hint: "썸네일 카드로 바꿉니다" },
 ];
+
+/** Offered only for a YouTube link, where playing it in place is almost
+ *  always what was meant. */
+const VIDEO_CHOICE = {
+  label: "동영상으로",
+  hint: "여기서 재생되는 영상으로 넣습니다",
+};
 
 /** The article editor, on ProseMirror by way of TipTap — the same engine
  *  Notion-style editors are built on. It owns selection, undo, IME and paste,
@@ -74,6 +83,8 @@ export function RichEditor({
   // it as a link and expanding it into a card.
   const [linkChoice, setLinkChoice] = useState<LinkChoice | null>(null);
   const [choice, setChoice] = useState(0);
+  const video = linkChoice ? parseYoutube(linkChoice.url) : null;
+  const choices = video ? [...CHOICES, VIDEO_CHOICE] : CHOICES;
   const [fetching, setFetching] = useState(false);
 
   // Seeded once; TipTap owns the document from here on.
@@ -91,12 +102,13 @@ export function RichEditor({
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         e.preventDefault();
         e.stopPropagation();
-        setChoice((i) => (i + 1) % CHOICES.length);
+        setChoice((i) => (i + 1) % choices.length);
       } else if (e.key === "Enter" || e.key === "Tab") {
         e.preventDefault();
         e.stopPropagation();
         if (choice === 0) keepUrl();
-        else void makeBookmark();
+        else if (choice === 1) void makeBookmark();
+        else makeVideo();
       } else if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
@@ -114,6 +126,7 @@ export function RichEditor({
       ...baseExtensions,
       CaptionedImage,
       ImageRow,
+      Youtube,
       Bookmark,
       Placeholder.configure({
         placeholder: ({ node }) =>
@@ -302,6 +315,24 @@ export function RichEditor({
 
   /** Swaps the URL for a card. The metadata is fetched once, here — a reader
    *  should never wait on someone else's server. */
+  /** Swap the bare link for the video itself. */
+  function makeVideo() {
+    if (!editor || !linkChoice || !video) return;
+    const { from, to } = linkChoice;
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(
+        { from, to },
+        {
+          type: "youtube",
+          attrs: { videoId: video.id, start: video.start, title: "" },
+        },
+      )
+      .run();
+    setLinkChoice(null);
+  }
+
   async function makeBookmark() {
     if (!editor || !linkChoice) return;
     const { url, from, to } = linkChoice;
@@ -421,7 +452,7 @@ export function RichEditor({
             className="surface absolute z-30 w-56 overflow-hidden py-1 shadow-float"
             style={{ left: linkChoice.x, top: linkChoice.y + 6 }}
           >
-            {CHOICES.map((c, i) => (
+            {choices.map((c, i) => (
               <button
                 key={c.label}
                 type="button"
@@ -429,7 +460,11 @@ export function RichEditor({
                 aria-selected={choice === i}
                 onMouseEnter={() => setChoice(i)}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => (i === 0 ? keepUrl() : void makeBookmark())}
+                onClick={() => {
+                  if (i === 0) keepUrl();
+                  else if (i === 1) void makeBookmark();
+                  else makeVideo();
+                }}
                 className={cn(
                   "block w-full px-3 py-2 text-left transition-colors duration-[var(--duration-fast)]",
                   choice === i && "bg-[rgba(22,21,15,0.05)]",
