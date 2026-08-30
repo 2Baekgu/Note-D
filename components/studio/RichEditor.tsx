@@ -14,6 +14,7 @@ import { parseContent } from "@/lib/content/parse";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ChipButton } from "@/components/ui/Chip";
 import { uploadImage } from "@/lib/studio";
+import { dropIntoRow, dropPos } from "@/lib/content/drop-row";
 import { cn } from "@/lib/utils";
 
 interface LinkChoice {
@@ -162,12 +163,18 @@ export function RichEditor({
         void insertImages(files);
         return true;
       },
-      handleDrop: (_view, event) => {
+      handleDrop: (view, event, slice, moved) => {
+        // Files from outside: anywhere inside the editor counts. Landing on a
+        // block exactly is not something a person aims for.
         const files = imagesFrom((event as DragEvent).dataTransfer);
-        if (!files.length) return false;
-        event.preventDefault();
-        void insertImages(files);
-        return true;
+        if (files.length) {
+          event.preventDefault();
+          void insertImages(files, dropPos(view, event as DragEvent));
+          return true;
+        }
+        // A picture dropped beside another picture means "side by side". No
+        // switch to flip first: where it lands is the instruction.
+        return dropIntoRow(view, event as DragEvent, slice, moved);
       },
     },
   });
@@ -180,23 +187,37 @@ export function RichEditor({
     );
   }
 
-  async function insertImages(files: File[]) {
+  /** `at` is where a drop landed. Without one the pictures go wherever the
+   *  caret is, which is what a paste or a toolbar pick means. */
+  async function insertImages(files: File[], at?: number | null) {
     if (!editor) return;
     setError(null);
     setUploading((n) => n + files.length);
 
+    // The first picture lands at the drop point; the rest queue after it.
+    let cursor = typeof at === "number" ? at : null;
+
     for (const file of files) {
       const res = await uploadImage(file, folder);
       setUploading((n) => n - 1);
-      if (res.url) {
-        editor
-          .chain()
-          .focus()
-          .setImage({ src: res.url, alt: file.name.replace(/\.[^.]+$/, "") })
-          .run();
-      } else {
+      if (!res.url) {
         setError(res.error ?? "업로드에 실패했습니다.");
+        continue;
       }
+      const image = { src: res.url, alt: file.name.replace(/\.[^.]+$/, "") };
+
+      if (cursor === null) {
+        editor.chain().focus().setImage(image).run();
+        continue;
+      }
+      const size = editor.state.doc.content.size;
+      const pos = Math.min(Math.max(cursor, 0), size);
+      editor
+        .chain()
+        .focus()
+        .insertContentAt(pos, { type: "image", attrs: image })
+        .run();
+      cursor = editor.state.selection.to;
     }
   }
 
@@ -390,6 +411,22 @@ export function RichEditor({
 
       <div
         ref={sheetRef}
+        /* The sheet is a wide page with generous margins, and a picture
+           dragged in lands wherever the hand lets go. ProseMirror only hears
+           about drops on the text itself, so the margin is caught here and
+           the picture goes to the end rather than nowhere. */
+        onDragOver={(e) => {
+          if (Array.from(e.dataTransfer.types).includes("Files")) e.preventDefault();
+        }}
+        onDrop={(e) => {
+          // Inside the text, ProseMirror has already dealt with it.
+          if (editor?.view.dom.contains(e.target as Node)) return;
+          const files = imagesFrom(e.dataTransfer);
+          if (!files.length) return;
+          e.preventDefault();
+          const at = editor ? dropPos(editor.view, e.nativeEvent) : null;
+          void insertImages(files, at ?? editor?.state.doc.content.size ?? null);
+        }}
         className={cn(
           "surface relative mt-3",
           compact
