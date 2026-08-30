@@ -1,4 +1,5 @@
 import "server-only";
+import { site } from "@/lib/site";
 
 /** Open Graph for a pasted link, so the editor can offer a bookmark card.
  *
@@ -105,9 +106,10 @@ export async function fetchPreview(target: URL): Promise<LinkPreview> {
       signal: AbortSignal.timeout(TIMEOUT_MS),
       redirect: "follow",
       headers: {
-        // Sites serve their richest metadata to crawlers.
-        "user-agent":
-          "Mozilla/5.0 (compatible; NotedBot/1.0; +https://notes-d.vercel.app)",
+        // Sites serve their richest metadata to crawlers. The address is
+        // where an annoyed webmaster would write to; it follows the site
+        // rather than being spelled out twice.
+        "user-agent": `Mozilla/5.0 (compatible; NotedBot/1.0; +${site.url})`,
         accept: "text/html,application/xhtml+xml",
       },
     });
