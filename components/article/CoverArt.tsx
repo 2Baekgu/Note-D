@@ -20,7 +20,7 @@ const PALETTES: Palette[] = [
   { bg: "#571C2B", a: "#9E3247", b: "#DD8093", c: "#F7E3E5", ink: "#2A0A13" }, // Cognitive Science
   { bg: "#6B4C10", a: "#C89020", b: "#EFC868", c: "#FAEED2", ink: "#2E1F04" }, // Product
   { bg: "#12275E", a: "#2B4BE0", b: "#7EA0FF", c: "#E6ECFF", ink: "#08132F" }, // Accessibility
-  { bg: "#232323", a: "#454545", b: "#B9F241", c: "#EDEDE8", ink: "#0D0D0D" }, // AI & UX
+  { bg: "#232323", a: "#454545", b: "#B9F241", c: "#EDEDE8", ink: "#0D0D0D" }, // Physical AI
   { bg: "#6E2D12", a: "#C2571F", b: "#EE9B60", c: "#F8E5D3", ink: "#331306" }, // Design Theory
 ];
 

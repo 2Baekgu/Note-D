@@ -7,7 +7,7 @@ export const xrUxAndAiGlass: Article = {
   title: "XR UX 패러다임의 전환과 AI Glass ‘최소 간섭 UX’",
   subtitle: "우리는 하루에도 수십 번 정보를 확인하기 위해, 메시지를 읽기 위해, 길을 찾기 위해 스마트폰을 꺼낸다.",
   authorId: "u-suyeon",
-  topics: ["AI & UX", "Interaction"],
+  topics: ["Physical AI", "Interaction"],
   coverImage: "/images/xr-ux-and-ai-glass/01.jpg",
   status: "published",
   publishedAt: "2026-02-08",
