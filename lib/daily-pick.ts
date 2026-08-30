@@ -27,7 +27,7 @@ const BLOCK_GAP = "\n\n";
 export const MAX_MESSAGE_CHARS = 500;
 
 
-/** The Korean calendar day, which is the day the 9am Shortcut belongs to. */
+/** The Korean calendar day, which is the day the 8am Shortcut belongs to. */
 export function seoulDay(now: Date): string {
   return new Date(now.getTime() + SEOUL_OFFSET_MS).toISOString().slice(0, 10);
 }

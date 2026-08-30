@@ -14,7 +14,7 @@ import {
 } from "@/lib/daily-pick";
 
 /** One article a morning for the study's open chat. An iPhone Shortcut calls
- *  this at 9am, takes `message`, and pastes it into the room.
+ *  this at 8am, takes `message`, and pastes it into the room.
  *
  *  The pick is recorded here rather than by the Shortcut, so a retry or a
  *  double-run returns the same text instead of burning a second article. */
