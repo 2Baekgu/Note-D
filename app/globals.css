@@ -1778,23 +1778,114 @@ so headings inside a piece have always been Pretendard. */
   color: var(--ink-faint);
 }
 
-/* Four or five across is unreadable on a phone. `flex-grow: 0` matters here:
-   with it the odd picture on the last line stays half a row wide instead of
-   stretching to fill the line alone. */
+/* On a phone the shares stay proportional — that is what keeps the pictures
+   the same height — so nothing here touches `flex-grow`. Handing every
+   picture a basis of half a row, as this once did, makes them equal widths
+   again and undoes the whole arrangement.
+
+   Only a crowded row breaks: a minimum width is what forces the wrap, and
+   within each line the pictures still divide it by shape. */
 @media (max-width: 640px) {
   .tiptap .tiptap-row-items,
   .prose-body .tiptap-row-items,
   .tiptap .tiptap-row-items > div {
     flex-wrap: wrap;
+    gap: 0.5rem;
   }
-  .tiptap .tiptap-row-items > *,
-  .tiptap .tiptap-row-items > div > *,
-  .prose-body .tiptap-row-items > * {
-    flex: 0 1 calc(50% - 0.375rem);
+  .tiptap .tiptap-row[data-count="4"] .tiptap-row-items > div > *,
+  .tiptap .tiptap-row[data-count="5"] .tiptap-row-items > div > *,
+  .prose-body .tiptap-row[data-count="4"] .tiptap-row-items > *,
+  .prose-body .tiptap-row[data-count="5"] .tiptap-row-items > * {
+    min-width: 44%;
   }
-  /* except the editor's own wrapper, which is still the whole row */
+  /* The editor's own wrapper is the row, not a picture in it. */
   .tiptap .tiptap-row-items > div {
     flex-basis: 100%;
+    min-width: 0;
+  }
+}
+
+/* ── Zoom ─────────────────────────────────────────────────
+   A picture in an article opens at its own size. The small ones in a row are
+   the reason: there, shape is kept at the cost of legibility, and this is
+   where the legibility comes back. */
+.prose-body .tiptap-figure img,
+.prose-body figure img {
+  cursor: zoom-in;
+}
+/* Except one that is already a link — a bookmark card's thumbnail — where
+   following the link is the point. */
+.prose-body a img {
+  cursor: pointer;
+}
+
+.zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(12, 11, 8, 0.92);
+  animation: zoom-in-backdrop 160ms ease-out both;
+}
+
+.zoom-backdrop img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  cursor: zoom-out;
+  animation: zoom-in-picture 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.zoom-close {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) ease;
+}
+.zoom-close:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+
+.zoom-caption {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  max-width: min(90vw, 60ch);
+  text-align: center;
+  font-size: var(--text-caption);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+@keyframes zoom-in-backdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes zoom-in-picture {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zoom-backdrop,
+  .zoom-backdrop img {
+    animation: none;
   }
 }
 

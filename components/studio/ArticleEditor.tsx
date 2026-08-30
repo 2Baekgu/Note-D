@@ -7,6 +7,7 @@ import { topics } from "@/lib/data/topics";
 import { members } from "@/lib/data/members";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ContentBody } from "@/components/content/ContentBody";
+import { ImageZoom } from "@/components/content/ImageZoom";
 import { ArticleHead } from "@/components/article/ArticleHead";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button, ButtonLink } from "@/components/ui/Button";
@@ -489,10 +490,13 @@ function Preview({
           thumbnail and nothing else. */}
       <div className="article-shell mt-16">
         {article.content.trim() ? (
-          <ContentBody
-            content={article.content}
-            seed={article.slug || "preview"}
-          />
+          <>
+            <ContentBody
+              content={article.content}
+              seed={article.slug || "preview"}
+            />
+            <ImageZoom />
+          </>
         ) : (
           <p className="t-body py-16 text-center text-ink-faint">
             본문을 입력하면 여기에 미리보기가 나타납니다.

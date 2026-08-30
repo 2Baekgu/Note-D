@@ -7,6 +7,7 @@ import {
   listComments,
   publishedArticleSlugs, toListItem } from "@/lib/repo";
 import { ContentBody } from "@/components/content/ContentBody";
+import { ImageZoom } from "@/components/content/ImageZoom";
 import { AuthorTools } from "@/components/article/AuthorTools";
 import { Discussion } from "@/components/article/Discussion";
 import { ReadingProgress } from "@/components/article/ReadingProgress";
@@ -106,6 +107,7 @@ export default async function ArticlePage({
         {/* ── Body ─────────────────────────────────────── */}
         <div className="article-shell mt-16">
           <ContentBody content={article.content} seed={article.slug} />
+          <ImageZoom />
         </div>
 
         {/* ── References ───────────────────────────────── */}
