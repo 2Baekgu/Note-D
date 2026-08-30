@@ -146,9 +146,7 @@ export function NotificationBell() {
           className="surface absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[21rem] overflow-hidden shadow-float"
         >
           <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-            <p className="t-label text-ink-faint">
-              알림{unread.length > 0 && ` · 안 읽음 ${unread.length}`}
-            </p>
+            <p className="t-label text-ink-faint">알림</p>
             {unread.length > 0 && (
               <button
                 type="button"
@@ -166,55 +164,60 @@ export function NotificationBell() {
             </p>
           ) : (
             <ul className="max-h-96 overflow-y-auto">
-              {items.map((n) => (
-                <li
-                  key={n.id}
-                  className="group relative border-b border-line last:border-0"
-                >
-                  <Link
-                    href={href(n)}
-                    onClick={() => {
-                      markRead([n.id]);
-                      setOpen(false);
-                    }}
-                    className={cn(
-                      "flex gap-3 py-3 pl-4 pr-9 transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.04)]",
-                      !n.readAt && "bg-[rgba(232,69,42,0.045)]",
-                    )}
+              {items.map((n) => {
+                const read = Boolean(n.readAt);
+                return (
+                  <li
+                    key={n.id}
+                    className="group relative border-b border-line last:border-0"
                   >
-                    <Avatar name={n.actorName} src={n.actorImage} size="sm" />
-                    <span className="min-w-0 flex-1">
-                      <span className="t-caption block text-ink">
-                        {line(n)}
+                    <Link
+                      href={href(n)}
+                      onClick={() => {
+                        markRead([n.id]);
+                        setOpen(false);
+                      }}
+                      className="flex gap-3 py-3 pl-4 pr-9 transition-colors duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.04)]"
+                    >
+                      {/* Read is a quieter state, not a gone one: the face and
+                        the sentence step back, the title and time stay put. */}
+                      <span className={cn(read && "opacity-45")}>
+                        <Avatar
+                          name={n.actorName}
+                          src={n.actorImage}
+                          size="sm"
+                        />
                       </span>
-                      <span className="t-caption mt-0.5 block truncate text-ink-faint">
-                        {n.articleTitle}
+                      <span className="min-w-0 flex-1">
+                        <span
+                          className={cn(
+                            "t-caption block text-ink",
+                            read && "opacity-55",
+                          )}
+                        >
+                          {line(n)}
+                        </span>
+                        <span className="t-caption mt-0.5 block truncate text-ink-faint">
+                          {n.articleTitle}
+                        </span>
+                        <span className="t-caption mt-0.5 block text-ink-faint">
+                          {relativeTime(n.createdAt)}
+                          {read && " · 읽음"}
+                        </span>
                       </span>
-                      <span className="t-caption mt-0.5 flex items-center gap-1.5 text-ink-faint">
-                        {relativeTime(n.createdAt)}
-                        <span aria-hidden="true">·</span>
-                        {n.readAt ? (
-                          <span>읽음</span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-accent">
-                            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                            안 읽음
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                  </Link>
+                    </Link>
 
-                  <button
-                    type="button"
-                    aria-label="알림 지우기"
-                    onClick={() => void clearOne(n.id)}
-                    className="absolute right-2 top-2.5 flex h-5 w-5 items-center justify-center rounded-pill text-[0.75rem] leading-none text-ink-faint opacity-60 transition-[opacity,background-color,color] duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.08)] hover:text-ink hover:opacity-100 focus-visible:opacity-100"
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
+                    <button
+                      type="button"
+                      aria-label="알림 지우기"
+                      onClick={() => void clearOne(n.id)}
+                      className="absolute right-2 top-2.5 flex h-5 w-5 items-center justify-center rounded-pill text-[0.75rem] leading-none text-ink-faint opacity-60 transition-[opacity,background-color,color] duration-[var(--duration-fast)] hover:bg-[rgba(22,21,15,0.08)] hover:text-ink hover:opacity-100 focus-visible:opacity-100"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
