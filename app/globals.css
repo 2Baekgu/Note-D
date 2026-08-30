@@ -1713,10 +1713,16 @@ so headings inside a piece have always been Pretendard. */
 
 /* ── Pictures side by side ────────────────────────────────
    The row fills the column and each picture keeps its own shape: every item
-   is an equal share of the width (`flex: 1 1 0`) and the height follows from
-   the picture, so nothing is stretched or cropped to fit a box. `min-width: 0`
-   is what stops a wide picture from refusing to shrink and pushing the row
-   past the column. */
+   is an equal share of the width and the height follows from the picture, so
+   nothing is stretched or cropped to fit a box. `min-width: 0` is what stops
+   a wide picture refusing to shrink and pushing the row past the column.
+
+   Two shapes to dress, not one. Published, the pictures are children of the
+   row. In the editor every node view arrives wrapped in a div of its own and
+   ProseMirror adds one more around the lot, so the pictures sit two levels
+   down. Both levels are laid out here rather than flattened with
+   `display: contents`, which would leave ProseMirror measuring a box that
+   isn't there. */
 .tiptap .tiptap-row,
 .prose-body .tiptap-row {
   margin-block: 2.75rem;
@@ -1726,20 +1732,29 @@ so headings inside a piece have always been Pretendard. */
 }
 
 .tiptap .tiptap-row-items,
-.prose-body .tiptap-row-items {
+.prose-body .tiptap-row-items,
+.tiptap .tiptap-row-items > div {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  width: 100%;
 }
 
-/* Each picture is one share, and the figure it arrives wrapped in stops
-   behaving like a standalone picture: no margin, no width of its own. */
 .tiptap .tiptap-row-items > *,
+.tiptap .tiptap-row-items > div > *,
 .prose-body .tiptap-row-items > * {
   flex: 1 1 0;
   min-width: 0;
   margin: 0;
+}
+
+/* The figure a picture wears when it stands alone — centred, only as wide as
+   it needs — is exactly wrong inside a row. */
+.tiptap .tiptap-row-items .tiptap-figure,
+.prose-body .tiptap-row-items .tiptap-figure {
+  margin: 0;
   width: auto;
+  max-width: 100%;
 }
 
 .tiptap .tiptap-row-items img,
@@ -1763,22 +1778,23 @@ so headings inside a piece have always been Pretendard. */
   color: var(--ink-faint);
 }
 
-/* Four or five across is unreadable on a phone; wrap to two columns and let
-   the row find its own height. */
+/* Four or five across is unreadable on a phone. `flex-grow: 0` matters here:
+   with it the odd picture on the last line stays half a row wide instead of
+   stretching to fill the line alone. */
 @media (max-width: 640px) {
-  .tiptap .tiptap-row[data-count="3"] .tiptap-row-items,
-  .prose-body .tiptap-row[data-count="3"] .tiptap-row-items,
-  .tiptap .tiptap-row[data-count="4"] .tiptap-row-items,
-  .prose-body .tiptap-row[data-count="4"] .tiptap-row-items,
-  .tiptap .tiptap-row[data-count="5"] .tiptap-row-items,
-  .prose-body .tiptap-row[data-count="5"] .tiptap-row-items {
+  .tiptap .tiptap-row-items,
+  .prose-body .tiptap-row-items,
+  .tiptap .tiptap-row-items > div {
     flex-wrap: wrap;
   }
-  /* `flex-grow: 0` matters here: with it the odd picture on the last line
-     stays half a row wide instead of stretching to fill it alone. */
-  .tiptap .tiptap-row .tiptap-row-items > *,
-  .prose-body .tiptap-row .tiptap-row-items > * {
+  .tiptap .tiptap-row-items > *,
+  .tiptap .tiptap-row-items > div > *,
+  .prose-body .tiptap-row-items > * {
     flex: 0 1 calc(50% - 0.375rem);
+  }
+  /* except the editor's own wrapper, which is still the whole row */
+  .tiptap .tiptap-row-items > div {
+    flex-basis: 100%;
   }
 }
 

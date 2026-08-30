@@ -156,6 +156,16 @@ export async function persistArticle(article: Article): Promise<SaveResult> {
  *  base64 data URL in localStorage — which has a few megabytes to spend. */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
 
+/** What a storage key may contain: letters, digits and the hyphen. A space
+ *  would break the markdown image syntax; anything non-ASCII is refused
+ *  outright. */
+const asciiSlug = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+
 /** Uploads an image to Supabase Storage; falls back to a data URL locally.
  *  `folder` separates covers from the images dropped into a body. */
 export async function uploadImage(
@@ -180,11 +190,16 @@ export async function uploadImage(
     });
   }
 
-  const ext = file.name.includes(".") ? file.name.split(".").pop() : "png";
-  const base = slugify(file.name.replace(/\.[^.]+$/, "")) || folder;
-  // The markdown image syntax stops the src at the first space, so the stored
-  // path must never contain one.
-  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${base}.${ext}`;
+  // `slugify` keeps Hangul on purpose — an article's address reads better for
+  // it. A storage key cannot: Supabase rejects anything outside ASCII with
+  // "Invalid key", which is how a screenshot named 화면-캡처.png failed to
+  // upload at all. The timestamp and the random suffix are what make the name
+  // unique, so dropping the rest of it costs nothing.
+  const ext = (file.name.split(".").pop() ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const base = asciiSlug(file.name.replace(/\.[^.]+$/, "")) || folder;
+  const path = `${folder}/${Date.now()}-${Math.random()
+    .toString(36)
+    .slice(2, 8)}-${base}.${ext || "png"}`;
 
   const { error } = await supabase.storage.from("media").upload(path, file, {
     cacheControl: "3600",
