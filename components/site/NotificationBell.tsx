@@ -30,7 +30,7 @@ export function NotificationBell() {
       const { data } = await supabase
         .from("notifications")
         .select(
-          "*, profiles!notifications_actor_id_fkey(name, profile_image), articles(title, slug)",
+          "*, profiles!notifications_actor_id_fkey(name, handle, profile_image), articles(title, slug)",
         )
         .order("created_at", { ascending: false })
         .limit(30);
@@ -43,6 +43,7 @@ export function NotificationBell() {
             id: String(row.id ?? ""),
             type: (row.type as Notification["type"]) ?? "comment",
             actorName: String(actor.name ?? "누군가"),
+            actorHandle: String(actor.handle ?? ""),
             actorImage: (actor.profile_image as string | null) ?? null,
             articleTitle: String(article.title ?? ""),
             articleSlug: String(article.slug ?? ""),
@@ -102,17 +103,41 @@ export function NotificationBell() {
     if (!res.ok) setItems(before);
   }
 
-  const line = (n: Notification) =>
-    n.type === "reaction"
-      ? `${n.actorName}님이 내 댓글에 ${n.emoji ?? "반응"}을 남겼어요`
-      : n.type === "reply"
-        ? `${n.actorName}님이 내 댓글에 답글을 남겼어요`
-        : `${n.actorName}님이 내 글에 댓글을 남겼어요`;
+  const line = (n: Notification) => {
+    switch (n.type) {
+      case "signup":
+        return `${n.actorName}님이 가입했어요`;
+      case "membership_request":
+        return `${n.actorName}님이 멤버 신청을 보냈어요`;
+      case "reaction":
+        return `${n.actorName}님이 내 댓글에 ${n.emoji ?? "반응"}을 남겼어요`;
+      case "reply":
+        return `${n.actorName}님이 내 댓글에 답글을 남겼어요`;
+      default:
+        return `${n.actorName}님이 내 글에 댓글을 남겼어요`;
+    }
+  };
 
-  // Land on the remark itself; the section is the fallback when a comment has
-  // since been deleted.
-  const href = (n: Notification) =>
-    `/articles/${encodeURIComponent(n.articleSlug)}#${n.commentId ? `comment-${n.commentId}` : "discussion"}`;
+  /** The second line: an article for the ones about writing, and what to do
+   *  next for the ones about people. */
+  const detail = (n: Notification) =>
+    n.type === "signup"
+      ? "게스트로 시작합니다"
+      : n.type === "membership_request"
+        ? "관리자 페이지에서 승인할 수 있어요"
+        : n.articleTitle;
+
+  // Land where the notification can actually be acted on: the remark itself,
+  // the screen that approves people, or the new member's page.
+  const href = (n: Notification) => {
+    if (n.type === "membership_request") return "/studio/admin";
+    if (n.type === "signup") {
+      return n.actorHandle ? `/members/${encodeURIComponent(n.actorHandle)}` : "/studio/admin";
+    }
+    return `/articles/${encodeURIComponent(n.articleSlug)}#${
+      n.commentId ? `comment-${n.commentId}` : "discussion"
+    }`;
+  };
 
   return (
     <div ref={wrap} className="relative">
@@ -198,7 +223,7 @@ export function NotificationBell() {
                           {line(n)}
                         </span>
                         <span className="t-caption mt-0.5 block truncate text-ink-faint">
-                          {n.articleTitle}
+                          {detail(n)}
                         </span>
                         <span className="t-caption mt-0.5 block text-ink-faint">
                           {relativeTime(n.createdAt)}

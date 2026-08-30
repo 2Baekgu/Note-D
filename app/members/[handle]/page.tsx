@@ -5,6 +5,7 @@ import { getMemberByHandle, listArticles, memberHandles, toListItem } from "@/li
 import { ArticleMasonry } from "@/components/article/ArticleMasonry";
 import { ChipLink } from "@/components/ui/Chip";
 import { ProfileIdentity } from "@/components/members/ProfileIdentity";
+import { LeaveStudy } from "@/components/members/LeaveStudy";
 import { PostingStreak } from "@/components/members/PostingStreak";
 import { PageFrame } from "@/components/site/PageFrame";
 import { GridRule } from "@/components/site/GridRule";
@@ -120,6 +121,9 @@ export default async function MemberPage({
             </p>
           )}
         </div>
+
+        {/* Renders for nobody but the person whose page this is. */}
+        <LeaveStudy memberId={member.id} />
       </section>
     </PageFrame>
   );

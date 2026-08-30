@@ -68,7 +68,9 @@ export function AdminPanel({
     return acc;
   }, {});
 
-  const waiting = members.filter((m) => m.role === "guest");
+  // A guest who never asked is not waiting for anything — they signed up to
+  // read. Only the ones who applied belong in the count.
+  const waiting = members.filter((m) => m.role === "guest" && m.appliedAt);
 
   return (
     <>
@@ -116,6 +118,18 @@ export function AdminPanel({
                       {m.email} · 가입 {formatDate(m.joinedAt)} · 글{" "}
                       {counts[m.id] ?? 0}편
                     </p>
+                    {/* An application is the whole reason this screen exists:
+                        show what they wrote, not just that they knocked. */}
+                    {m.appliedAt && m.role === "guest" && (
+                      <div className="mt-3 border-l-2 border-accent pl-3">
+                        <p className="t-label text-accent">
+                          멤버 신청 · {formatDate(m.appliedAt.slice(0, 10))}
+                        </p>
+                        <p className="t-caption mt-1.5 whitespace-pre-wrap text-ink-muted">
+                          {m.membershipNote}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 

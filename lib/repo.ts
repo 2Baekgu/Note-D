@@ -62,6 +62,8 @@ function rowToUser(row: ArticleRow): User {
     title: s(row.title),
     bio: s(row.bio),
     joinedAt: s(row.joined_at).slice(0, 10),
+    membershipNote: (row.membership_note as string | null) ?? null,
+    appliedAt: (row.applied_at as string | null) ?? null,
   };
 }
 
@@ -75,6 +77,8 @@ const unknownAuthor = (id: string): User => ({
   title: "",
   bio: "",
   joinedAt: "",
+  membershipNote: null,
+  appliedAt: null,
 });
 
 function join(articles: Article[], users: User[]): ArticleWithAuthor[] {
@@ -93,7 +97,7 @@ function join(articles: Article[], users: User[]): ArticleWithAuthor[] {
  *  database refuses the column to anonymous readers now too — this list is
  *  what keeps the roster readable for them at all. */
 const PUBLIC_PROFILE_COLUMNS =
-  "id, name, handle, profile_image, role, title, bio, joined_at";
+  "id, name, handle, profile_image, role, title, bio, joined_at, membership_note, applied_at";
 
 /** Memoised per request. A single page can ask for the roster three or four
  *  times over — the author of the article, the related cards, the header —

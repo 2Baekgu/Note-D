@@ -19,6 +19,9 @@ export interface SessionUser {
   image: string | null;
   handle: string;
   role: Role;
+  /** Set once a guest has asked to write, cleared when the answer is no. */
+  appliedAt: string | null;
+  membershipNote: string | null;
 }
 
 type Mode = "supabase" | "demo";
@@ -111,6 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       image: m.profileImage,
       handle: m.handle,
       role: m.role,
+      appliedAt: m.appliedAt,
+      membershipNote: m.membershipNote,
     };
     setUser(next);
     try {
@@ -158,7 +163,7 @@ async function resolveUser(
 
   const { data } = await supabase
     .from("profiles")
-    .select("id, name, handle, email, profile_image, role, title, bio")
+    .select("id, name, handle, email, profile_image, role, title, bio, membership_note, applied_at")
     .eq("id", fallback.id)
     .maybeSingle();
 
@@ -174,6 +179,8 @@ async function resolveUser(
     role: string;
     title: string | null;
     bio: string | null;
+    membership_note: string | null;
+    applied_at: string | null;
   };
   // Whatever a fresh profile is missing, fill in once. Google hands us a
   // picture; the title and bio just need to not be blank, since a member page
@@ -196,6 +203,8 @@ async function resolveUser(
     image: row.profile_image ?? fallback.image,
     handle: row.handle || fallback.handle,
     role: (row.role as Role) ?? "guest",
+    appliedAt: row.applied_at,
+    membershipNote: row.membership_note,
   };
 }
 
@@ -213,6 +222,8 @@ function fromAuthUser(u: AuthUser | undefined | null): SessionUser | null {
     email: u.email ?? "",
     image: (meta.avatar_url as string) ?? null,
     handle: (meta.handle as string) ?? name.toLowerCase(),
+    appliedAt: null,
+    membershipNote: null,
     role: "guest",
   };
 }

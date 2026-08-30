@@ -16,6 +16,11 @@ export interface User {
   title: string;
   bio: string;
   joinedAt: string;
+  /** What they said about themselves when asking to write, and when they
+   *  asked. Both null until a guest applies; kept after approval as a record
+   *  of why. */
+  membershipNote: string | null;
+  appliedAt: string | null;
   links?: { label: string; url: string }[];
 }
 
@@ -78,11 +83,14 @@ export interface Reaction {
 /** Something that happened on your writing while you were away. */
 export interface Notification {
   id: string;
-  type: "comment" | "reply" | "reaction";
+  type: "comment" | "reply" | "reaction" | "signup" | "membership_request";
   actorName: string;
   actorImage: string | null;
+  /** Empty for `signup` and `membership_request`, which are about a person. */
   articleTitle: string;
   articleSlug: string;
+  /** Who the notification is about, for the ones that name a person. */
+  actorHandle: string;
   /** The comment to land on, so the link goes to the remark and not the page. */
   commentId: string | null;
   emoji: string | null;

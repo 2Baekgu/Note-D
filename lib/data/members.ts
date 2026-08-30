@@ -18,6 +18,8 @@ export const members: User[] = [
     title: "UX Designer",
     bio: "UX 심리학과 사용자 리서치를 중심으로 씁니다. 사람들이 왜 그렇게 행동하는지 오래 붙잡고 보는 편이에요.",
     joinedAt: "2025-01-17",
+    membershipNote: null,
+    appliedAt: null,
     links: [{ label: "Doodle Day", url: "https://dooday.tistory.com" }],
   },
   {
@@ -30,6 +32,8 @@ export const members: User[] = [
     title: "UX Designer",
     bio: "UX 법칙과 인지 원리를 정리합니다. 화면 위의 결정을 설명할 수 있는 언어를 찾는 일에 관심이 있어요.",
     joinedAt: "2025-01-18",
+    membershipNote: null,
+    appliedAt: null,
   },
 ];
 
