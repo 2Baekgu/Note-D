@@ -60,8 +60,10 @@ export function StatsPanel({ data }: { data: Analytics }) {
 
       <section aria-label="요약">
         <div className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          <Tile label="전체 조회" value={totals.views} note="집계 시작부터" />
-          <Tile label="순 방문자" value={totals.visitors} note="집계 시작부터" />
+          {/* Not "since the site began": Vercel counts from the day it was
+              switched on, and a Hobby plan only guarantees a month of it. */}
+          <Tile label="전체 조회" value={totals.views} note="Vercel 보관 기간 내" />
+          <Tile label="순 방문자" value={totals.visitors} note="Vercel 보관 기간 내" />
           <Tile label="오늘" value={totals.today} note="오늘 하루" />
           <Tile
             label="지난 7일"
@@ -115,8 +117,9 @@ export function StatsPanel({ data }: { data: Analytics }) {
 
       <p className="t-caption border-t border-line pt-6 text-ink-faint">
         숫자는 Vercel Web Analytics 가 셉니다. 쿠키를 쓰지 않고 봇은 제외되며, 모바일과
-        데스크톱을 같은 방식으로 셉니다. 5분마다 새로 읽어오고, Hobby 요금제는 최근 한 달치를
-        보관하므로 기간별 수치는{` ${range}`}까지 보여줍니다.
+        데스크톱을 같은 방식으로 셉니다. 5분마다 새로 읽어옵니다. 집계는 Vercel에서 기능을 켠
+        날부터 시작하며, Hobby 요금제가 보관을 보장하는 기간은 한 달입니다 — 그보다 오래된
+        방문은 위 합계에서도 빠질 수 있습니다.
       </p>
     </div>
   );
