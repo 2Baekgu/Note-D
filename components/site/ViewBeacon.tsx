@@ -56,12 +56,24 @@ export function ViewBeacon() {
       /* an unparseable referrer is simply no referrer */
     }
 
-    void supabase.from("page_views").insert({
-      path: pathname.slice(0, 300),
-      visitor: visitorId(),
-      is_member: Boolean(user),
-      referrer_host: host,
-    });
+    // `.then` is what sends it. A Supabase query builds on construction and
+    // only goes out when something awaits it, so `void insert(...)` filled in
+    // a request and dropped it — the visits of a whole day, never recorded.
+    supabase
+      .from("page_views")
+      .insert({
+        path: pathname.slice(0, 300),
+        visitor: visitorId(),
+        is_member: Boolean(user),
+        referrer_host: host,
+      })
+      .then(({ error }: { error: { message: string } | null }) => {
+        // A reader is here to read; a counter that cannot count is not their
+        // problem. It is ours, so say so where we would look.
+        if (error && process.env.NODE_ENV !== "production") {
+          console.warn("[page_views]", error.message);
+        }
+      });
   }, [pathname, user, loading]);
 
   return null;
