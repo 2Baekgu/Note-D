@@ -65,6 +65,11 @@ const blank = (missing: Analytics["missing"], error: string | null = null): Anal
 const iso = (back: number) =>
   new Date(Date.now() - back * 86_400_000).toISOString().slice(0, 10);
 
+/** Tomorrow, as the far end of a range. Whether `until` is inclusive is not
+ *  stated, and clipping today off every breakdown would be the quiet kind of
+ *  wrong — a day past the end costs nothing either way. */
+const tomorrow = () => iso(-1);
+
 type Row = Record<string, unknown>;
 
 /** The token is ours to supply; the project id Vercel already provides to
@@ -117,7 +122,7 @@ async function grouped(
 ): Promise<{ rows: Ranked[]; error?: string }> {
   const { data, error } = await ask("visits/aggregate", {
     since: iso(DAYS),
-    until: iso(0),
+    until: tomorrow(),
     by,
     limit: String(limit),
   });
@@ -145,7 +150,7 @@ export async function dailyFromVercel(
 ): Promise<{ days: Point[]; error?: string }> {
   const { data, error } = await ask("visits/aggregate", {
     since: iso(days),
-    until: iso(0),
+    until: tomorrow(),
     by: "day",
   });
   if (error) return { days: [], error };
@@ -195,7 +200,7 @@ export async function getAnalytics(): Promise<Analytics> {
   const [totalsRes, dailyRes, paths, referrers, devices, countries, browsers, articles] =
     await Promise.all([
       ask("visits/count", {}),
-      ask("visits/aggregate", { since: iso(DAYS), until: iso(0), by: "day" }),
+      ask("visits/aggregate", { since: iso(DAYS), until: tomorrow(), by: "day" }),
       grouped("requestPath", 40),
       grouped("referrerHostname", 8),
       grouped("deviceType", 6),
