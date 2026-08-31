@@ -34,9 +34,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "잘못된 요청입니다." }, { status: 400 });
   }
 
+  // Every address in use, so the model can steer around them rather than
+  // land on one and leave the database to append a number.
+  const { data: rows } = await supabase.from("articles").select("slug");
+  const taken = (rows ?? []).map((r) => String((r as { slug: string }).slug));
+
   const { slug, error } = await suggestSlug(
     String(body.title ?? "").slice(0, 200),
     String(body.subtitle ?? "").slice(0, 300),
+    taken,
   );
   return NextResponse.json({ slug, error: error ?? null });
 }

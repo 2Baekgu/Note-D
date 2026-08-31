@@ -94,6 +94,10 @@ export interface SaveResult {
   ok: boolean;
   storage: "supabase" | "local";
   error?: string;
+  /** The address the article ended up at. `freeSlug` may have stepped aside
+   *  from one already taken, and the caller has to know where to send the
+   *  reader — otherwise it links to a page that was never created. */
+  slug?: string;
 }
 
 /** Writes to Supabase when configured, otherwise to this browser. */
@@ -145,11 +149,11 @@ export async function persistArticle(article: Article): Promise<SaveResult> {
       { onConflict: "slug" },
     );
     if (error) return { ok: false, storage: "supabase", error: error.message };
-    return { ok: true, storage: "supabase" };
+    return { ok: true, storage: "supabase", slug };
   }
 
   saveLocalArticle(clean);
-  return { ok: true, storage: "local" };
+  return { ok: true, storage: "local", slug: clean.slug };
 }
 
 /** 10MB. Body images go into the article text, and in demo mode that means a

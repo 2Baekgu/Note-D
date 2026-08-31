@@ -178,13 +178,16 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
           ? "발행했습니다."
           : "초안을 저장했습니다.",
     );
-    patch({ status });
+    // `freeSlug` may have stepped aside from an address already in use, so
+    // the piece lives wherever it says, not where we asked.
+    const finalSlug = result.slug ?? slug;
+    patch({ status, slug: finalSlug });
 
     // Published means done writing: go and read it. The pause is the length
     // of the toast, so the word lands before the page changes under it.
     if (status === "published" && result.storage !== "local") {
       window.setTimeout(
-        () => router.push(`/articles/${encodeURIComponent(slug)}`),
+        () => router.push(`/articles/${encodeURIComponent(finalSlug)}`),
         900,
       );
       return;

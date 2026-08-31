@@ -27,7 +27,13 @@ Rules:
   ("배달의민족 주소 설정 뜯어보기" -> baemin-address-setting)
 - never transliterate Korean sounds into Latin letters
 - no articles (a/the), no filler words, no dates, no site name
-- reply with the slug alone and nothing else`;
+- reply with the slug alone and nothing else
+
+A list of addresses already in use may follow. Never return one of them, and
+do not return a near-miss of one either — no plurals, no added or dropped
+word, nothing that would read as the same piece. Two articles on neighbouring
+ideas need names that tell them apart at a glance, so name what makes this one
+different.`;
 
 export interface SlugResult {
   slug: string;
@@ -50,7 +56,11 @@ const clean = (raw: string) =>
     .slice(0, 50)
     .replace(/-+$/, "");
 
-export async function suggestSlug(title: string, subtitle = ""): Promise<SlugResult> {
+export async function suggestSlug(
+  title: string,
+  subtitle = "",
+  taken: string[] = [],
+): Promise<SlugResult> {
   const name = title.trim();
   if (!name) return { slug: "" };
 
@@ -65,7 +75,15 @@ export async function suggestSlug(title: string, subtitle = ""): Promise<SlugRes
       body: JSON.stringify({
         model: MODEL,
         instructions: INSTRUCTIONS,
-        input: subtitle.trim() ? `제목: ${name}\n부제: ${subtitle.trim()}` : `제목: ${name}`,
+        input: [
+          `제목: ${name}`,
+          subtitle.trim() ? `부제: ${subtitle.trim()}` : "",
+          // The whole archive, so a neighbouring idea gets a name that tells
+          // the two apart rather than one the database has to number.
+          taken.length ? `\n이미 사용 중인 주소:\n${taken.join("\n")}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
         reasoning: { effort: "low" },
         text: { verbosity: "low" },
         max_output_tokens: 200,
@@ -89,9 +107,15 @@ export async function suggestSlug(title: string, subtitle = ""): Promise<SlugRes
     const slug = clean(raw);
     // A model that answers with a sentence, or with nothing, is no better
     // than not asking.
-    return slug && slug.length >= 3
-      ? { slug }
-      : { slug: fallback(name), error: "모델이 주소를 만들지 못했습니다." };
+    if (!slug || slug.length < 3) {
+      return { slug: fallback(name), error: "모델이 주소를 만들지 못했습니다." };
+    }
+    // It was told which addresses are taken; if it used one anyway, say so
+    // rather than letting the database quietly append a number.
+    if (taken.includes(slug)) {
+      return { slug, error: "이미 쓰이는 주소를 골랐습니다. 직접 고쳐주세요." };
+    }
+    return { slug };
   } catch (error) {
     return {
       slug: fallback(name),
