@@ -30,10 +30,17 @@ export function StatsPanel({ data }: { data: Analytics }) {
       <div className="surface-dashed px-6 py-24 text-center">
         <p className="t-h2">연결이 아직 남았습니다</p>
         <p className="t-body mx-auto mt-4 max-w-[52ch] text-ink-muted">
-          {data.missing === "token"
-            ? "Vercel 액세스 토큰을 환경변수 VERCEL_API_TOKEN 으로 넣어주세요."
-            : "프로젝트 ID를 환경변수 VERCEL_PROJECT_ID 로 넣어주세요."}{" "}
-          숫자는 Vercel Web Analytics 가 세고, 이 화면은 그것을 가져와 보여줍니다.
+          {data.missing === "token" ? (
+            <>
+              Vercel 액세스 토큰을 환경변수 <code>ANALYTICS_API_TOKEN</code> 으로 넣고
+              재배포해주세요. 환경변수는 저장만으로는 적용되지 않고, 새 배포부터 반영됩니다.
+            </>
+          ) : (
+            <>
+              프로젝트 ID를 찾지 못했습니다. 보통 Vercel이 자동으로 넣어주지만, 필요하면{" "}
+              <code>ANALYTICS_PROJECT_ID</code> 로 직접 지정할 수 있습니다.
+            </>
+          )}
         </p>
       </div>
     );
@@ -107,9 +114,9 @@ export function StatsPanel({ data }: { data: Analytics }) {
       />
 
       <p className="t-caption border-t border-line pt-6 text-ink-faint">
-        숫자는 Vercel Web Analytics 가 셉니다. 쿠키를 쓰지 않고 봇은 제외되며, 다섯 달마다가
-        아니라 5분마다 새로 읽어옵니다. Hobby 요금제는 최근 한 달치를 보관하므로 기간별 수치는
-        {` ${range}`}까지 보여줍니다.
+        숫자는 Vercel Web Analytics 가 셉니다. 쿠키를 쓰지 않고 봇은 제외되며, 모바일과
+        데스크톱을 같은 방식으로 셉니다. 5분마다 새로 읽어오고, Hobby 요금제는 최근 한 달치를
+        보관하므로 기간별 수치는{` ${range}`}까지 보여줍니다.
       </p>
     </div>
   );

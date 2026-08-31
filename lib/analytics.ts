@@ -63,21 +63,30 @@ const iso = (back: number) =>
 
 type Row = Record<string, unknown>;
 
+/** The token is ours to supply; the project id Vercel already provides to
+ *  every deployment, so only the token normally has to be set by hand.
+ *
+ *  Deliberately not named `VERCEL_…`: that prefix is Vercel's own namespace
+ *  for the variables it injects, and a custom one sharing it is asking for a
+ *  collision with a name they add later. */
+const token = () => process.env.ANALYTICS_API_TOKEN;
+const project = () => process.env.ANALYTICS_PROJECT_ID || process.env.VERCEL_PROJECT_ID;
+
 async function ask(
   endpoint: "visits/count" | "visits/aggregate",
   params: Record<string, string>,
 ): Promise<{ data?: unknown; error?: string }> {
-  const token = process.env.VERCEL_API_TOKEN;
-  const projectId = process.env.VERCEL_PROJECT_ID;
-  if (!token || !projectId) return { error: "not configured" };
+  const key = token();
+  const projectId = project();
+  if (!key || !projectId) return { error: "not configured" };
 
   const search = new URLSearchParams({ projectId, ...params });
-  const team = process.env.VERCEL_TEAM_ID;
+  const team = process.env.ANALYTICS_TEAM_ID;
   if (team) search.set("teamId", team);
 
   try {
     const res = await fetch(`${API}/${endpoint}?${search}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${key}` },
       // Five minutes is fresh enough for a reading count and keeps a reload
       // from spending an API call every time.
       next: { revalidate: 300 },
@@ -112,8 +121,8 @@ async function grouped(by: string, limit: number, key = by): Promise<Ranked[]> {
 }
 
 export async function getAnalytics(): Promise<Analytics> {
-  if (!process.env.VERCEL_API_TOKEN) return blank("token");
-  if (!process.env.VERCEL_PROJECT_ID) return blank("project");
+  if (!token()) return blank("token");
+  if (!project()) return blank("project");
 
   const [totalsRes, dailyRes, paths, referrers, devices, countries, browsers, articles] =
     await Promise.all([
