@@ -1,5 +1,6 @@
 import "server-only";
 import { listArticles } from "@/lib/repo";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 
 /** Reading figures, read back out of Vercel Web Analytics.
  *
@@ -34,6 +35,8 @@ export interface Analytics {
   /** Set when Vercel answered with an error rather than data. */
   error: string | null;
   totals: { views: number; visitors: number; today: number; last7: number; previous7: number };
+  /** Summed from our own daily copies, so it outlives Vercel's retention. */
+  allTime: { views: number; days: number; since: string | null };
   daily: Point[];
   articles: Ranked[];
   pages: Ranked[];
@@ -48,6 +51,7 @@ const blank = (missing: Analytics["missing"], error: string | null = null): Anal
   missing,
   error,
   totals: { views: 0, visitors: 0, today: 0, last7: 0, previous7: 0 },
+  allTime: { views: 0, days: 0, since: null },
   daily: [],
   articles: [],
   pages: [],
@@ -120,6 +124,56 @@ async function grouped(by: string, limit: number, key = by): Promise<Ranked[]> {
     .sort((a, b) => b.views - a.views);
 }
 
+/** The last `days` days as Vercel has them. Shared with the cron job that
+ *  writes them down, so both ask the same question the same way. */
+export async function dailyFromVercel(
+  days: number,
+): Promise<{ days: Point[]; error?: string }> {
+  const { data, error } = await ask("visits/aggregate", {
+    since: iso(days),
+    until: iso(0),
+    by: "day",
+  });
+  if (error) return { days: [], error };
+  if (!Array.isArray(data)) return { days: [] };
+
+  return {
+    days: (data as Row[])
+      .map((r) => ({
+        day: String(r.timestamp ?? "").slice(0, 10),
+        views: Number(r.pageviews) || 0,
+        visitors: Number(r.visitors) || 0,
+      }))
+      .filter((d) => d.day),
+  };
+}
+
+/** Everything ever counted, from our own copy of each day.
+ *
+ *  Views add up across days; visitors do not — the same person on two days is
+ *  two rows and one person — so only the total that survives the arithmetic
+ *  is reported as a lifetime figure. */
+async function lifetime(): Promise<{ views: number; days: number; since: string | null }> {
+  const admin = getSupabaseAdminClient();
+  if (!admin) return { views: 0, days: 0, since: null };
+
+  const { data, error } = await admin
+    .from("analytics_daily")
+    .select("day, views")
+    .order("day", { ascending: true });
+
+  if (error || !data?.length) return { views: 0, days: 0, since: null };
+  const rows = data as { day: string; views: number }[];
+  const today = iso(0);
+  // Today's row is a partial day; the live figure is used for it instead.
+  const past = rows.filter((r) => r.day < today);
+  return {
+    views: past.reduce((n, r) => n + (Number(r.views) || 0), 0),
+    days: past.length,
+    since: rows[0]?.day ?? null,
+  };
+}
+
 export async function getAnalytics(): Promise<Analytics> {
   if (!token()) return blank("token");
   if (!project()) return blank("project");
@@ -135,6 +189,8 @@ export async function getAnalytics(): Promise<Analytics> {
       grouped("browserName", 6),
       listArticles({ includeDrafts: true }),
     ]);
+
+  const ever = await lifetime();
 
   if (totalsRes.error && dailyRes.error) return blank(null, totalsRes.error);
 
@@ -160,6 +216,10 @@ export async function getAnalytics(): Promise<Analytics> {
     daily.push(byDay.get(day) ?? { day, views: 0, visitors: 0 });
   }
 
+  // Today is still being counted, so it comes from Vercel rather than from a
+  // row written last night.
+  const byDayToday = byDay.get(iso(0))?.views ?? 0;
+
   const sum = (from: number, to: number) =>
     daily.slice(daily.length - from, daily.length - to).reduce((n, d) => n + d.views, 0);
 
@@ -180,6 +240,7 @@ export async function getAnalytics(): Promise<Analytics> {
       last7: sum(7, 0),
       previous7: sum(14, 7),
     },
+    allTime: { ...ever, views: ever.views + (byDayToday ?? 0) },
     daily,
     articles: paths.flatMap<Ranked>((r) => {
       const article = asArticle(r.label);

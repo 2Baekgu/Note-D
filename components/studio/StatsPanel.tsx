@@ -60,9 +60,19 @@ export function StatsPanel({ data }: { data: Analytics }) {
 
       <section aria-label="요약">
         <div className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
-          {/* Not "since the site began": Vercel counts from the day it was
-              switched on, and a Hobby plan only guarantees a month of it. */}
-          <Tile label="전체 조회" value={totals.views} note="Vercel 보관 기간 내" />
+          {/* The lifetime figure is ours — summed from a row written each
+              night — so it outlives what Vercel keeps. Visitors stay
+              Vercel's: the same person on two days is one visitor, and a sum
+              of days cannot know that. */}
+          <Tile
+            label="누적 조회"
+            value={data.allTime.views || totals.views}
+            note={
+              data.allTime.since
+                ? `${data.allTime.since.slice(5).replace("-", "월 ")}일부터 기록`
+                : "기록 시작 전 — Vercel 보관 기간 내"
+            }
+          />
           <Tile label="순 방문자" value={totals.visitors} note="Vercel 보관 기간 내" />
           <Tile label="오늘" value={totals.today} note="오늘 하루" />
           <Tile
@@ -117,9 +127,10 @@ export function StatsPanel({ data }: { data: Analytics }) {
 
       <p className="t-caption border-t border-line pt-6 text-ink-faint">
         숫자는 Vercel Web Analytics 가 셉니다. 쿠키를 쓰지 않고 봇은 제외되며, 모바일과
-        데스크톱을 같은 방식으로 셉니다. 5분마다 새로 읽어옵니다. 집계는 Vercel에서 기능을 켠
-        날부터 시작하며, Hobby 요금제가 보관을 보장하는 기간은 한 달입니다 — 그보다 오래된
-        방문은 위 합계에서도 빠질 수 있습니다.
+        데스크톱을 같은 방식으로 셉니다. 5분마다 새로 읽어옵니다. Vercel이 보관을 보장하는
+        기간은 한 달이라, 매일 새벽 그날의 수치를 우리 쪽에 한 줄씩 적어둡니다. 누적 조회는
+        그 줄들을 더한 값이라 한 달이 지나도 줄어들지 않습니다. 순 방문자는 같은 사람이 이틀
+        오면 한 명이므로 날짜별로 더할 수 없어, Vercel이 보관 중인 기간의 값입니다.
       </p>
     </div>
   );
