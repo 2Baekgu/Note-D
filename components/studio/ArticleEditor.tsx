@@ -78,7 +78,37 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
 
   // A published article keeps the slug it went out with — changing it would
   // break its URL — so only a new one takes its slug from the title.
-  const computedSlug = initial?.slug ? article.slug : slugify(article.title);
+  const computedSlug = initial?.slug ? article.slug : article.slug || slugify(article.title);
+  const [naming, setNaming] = useState(false);
+  /** An address with Hangul in it works, but becomes forty percent-signs the
+   *  moment anyone copies it — and every other article here is English. */
+  const koreanSlug = /[^\u0000-\u007f]/.test(computedSlug);
+
+  /** Ask for an English address. Used by the button, and once on publish when
+   *  the writer never touched the field. */
+  async function nameUrl(): Promise<string | null> {
+    if (!article.title.trim()) return null;
+    setNaming(true);
+    try {
+      const res = await fetch("/api/slug", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title: article.title, subtitle: article.subtitle }),
+      });
+      const body = (await res.json()) as { slug?: string; error?: string };
+      if (body.slug) {
+        patch({ slug: body.slug });
+        return body.slug;
+      }
+      say(body.error ?? "주소를 짓지 못했습니다.", "error");
+      return null;
+    } catch {
+      say("주소를 짓지 못했습니다.", "error");
+      return null;
+    } finally {
+      setNaming(false);
+    }
+  }
 
   /** Covers come from the article's own pictures — uploading a separate file
    *  only ever produced a cover that appeared nowhere in the piece. */
@@ -117,10 +147,18 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
       return;
     }
 
+    // A new piece with a Hangul address gets an English one first. Left to
+    // the writer this is a decision at the worst possible moment; asked for
+    // here, it is simply done, and the field above shows the answer.
+    let slug = computedSlug;
+    if (!initial?.slug && (!slug || koreanSlug)) {
+      slug = (await nameUrl()) ?? slug;
+    }
+
     const result = await persistArticle({
       ...article,
       authorId,
-      slug: computedSlug,
+      slug,
       status,
       // Nothing chosen? Lead with the first picture in the piece.
       coverImage: article.coverImage ?? bodyImages[0] ?? null,
@@ -146,7 +184,7 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
     // of the toast, so the word lands before the page changes under it.
     if (status === "published" && result.storage !== "local") {
       window.setTimeout(
-        () => router.push(`/articles/${encodeURIComponent(computedSlug)}`),
+        () => router.push(`/articles/${encodeURIComponent(slug)}`),
         900,
       );
       return;
@@ -379,6 +417,36 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                       </div>
                     </div>
                   </Field>
+
+                  {!initial?.slug && (
+                    <Field label="URL 주소">
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={article.slug}
+                          onChange={(e) => patch({ slug: e.target.value })}
+                          placeholder={slugify(article.title) || "제목에서 자동으로"}
+                          className="field w-full font-mono text-[0.8125rem]"
+                        />
+                        <ChipButton
+                          size="sm"
+                          tone="outline"
+                          disabled={naming || !article.title.trim()}
+                          onClick={() => void nameUrl()}
+                        >
+                          {naming ? "짓는 중…" : "AI로 짓기"}
+                        </ChipButton>
+                      </div>
+                      <p className="t-caption mt-2 break-all text-ink-faint">
+                        note-d.co.kr/articles/{computedSlug || "…"}
+                      </p>
+                      {koreanSlug && (
+                        <p className="t-caption mt-1 text-ink-faint">
+                          한글 주소는 링크를 복사하면 깨져 보입니다. 비워두고 발행하면 영문
+                          주소를 지어 넣습니다.
+                        </p>
+                      )}
+                    </Field>
+                  )}
 
                   <Field label="Published date">
                     <input
