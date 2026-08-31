@@ -7,11 +7,10 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/studio/admin", label: "멤버 관리" },
   { href: "/studio/admin/reports", label: "버그 리포트" },
-  { href: "/studio/admin/stats", label: "통계" },
 ];
 
-/** The admin screens are one place with several rooms. This is the door
- *  between them, so none has to be reached through the avatar menu twice. */
+/** The admin screens are one place with two rooms. This is the door between
+ *  them, so neither has to be reached through the avatar menu twice. */
 export function AdminNav() {
   const pathname = usePathname();
 
