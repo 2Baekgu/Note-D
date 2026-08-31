@@ -15,6 +15,10 @@
 
   --ink: #16150f;
   --ink-muted: rgba(22, 21, 15, 0.62);
+  /* Article prose sits between the two: darker than the muted ink used for
+     labels and captions, a shade softer than a heading. Long-form reading is
+     the one place on the site where the text is the whole point. */
+  --ink-body: rgba(22, 21, 15, 0.88);
   --ink-faint: rgba(22, 21, 15, 0.4);
 
   --line: rgba(22, 21, 15, 0.12);
@@ -1593,7 +1597,7 @@ a.bookmark:hover {
   font-size: var(--doc-body-2);
   /* 1.75 with a 1.5rem gap made one Enter look like two. */
   line-height: 1.7;
-  color: var(--ink-muted);
+  color: var(--ink-body);
   margin-bottom: 0.9rem;
 }
 
@@ -1649,7 +1653,7 @@ so headings inside a piece have always been Pretendard. */
   margin-bottom: 1.25rem;
   font-size: var(--doc-body-2);
   line-height: 1.65;
-  color: var(--ink-muted);
+  color: var(--ink-body);
 }
 
 .tiptap ul,
