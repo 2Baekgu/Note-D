@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { Analytics } from "@vercel/analytics/next";
+import { PageAnalytics } from "@/components/site/PageAnalytics";
 import { site } from "@/lib/site";
 
 /* Pretendard is the only typeface in the system — Korean, Latin and numerals.
@@ -66,7 +66,7 @@ export default function RootLayout({
         </AuthProvider>
         {/* Counts page views on Vercel: no cookies, bots filtered out, and
             nothing of ours to keep running. */}
-        <Analytics />
+        <PageAnalytics />
       </body>
     </html>
   );

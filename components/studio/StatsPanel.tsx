@@ -122,7 +122,6 @@ export function StatsPanel({ data }: { data: Analytics }) {
         caption={`${range} · 글이 아닌 화면까지 포함`}
         rows={data.pages}
         empty="기록이 없습니다."
-        mono
       />
 
       <p className="t-caption border-t border-line pt-6 text-ink-faint">

@@ -258,6 +258,29 @@ export async function getAnalytics(): Promise<Analytics> {
     return m ? bySlug.get(decodeURIComponent(m[1])) : undefined;
   };
 
+  /** What a path is called, rather than what it is spelled. An address is
+   *  what a browser needs; a name is what a person reads. */
+  const NAMED: Record<string, string> = {
+    "/": "홈",
+    "/articles": "아티클 목록",
+    "/members": "멤버 목록",
+    "/about": "About",
+    "/login": "로그인",
+  };
+  const nameOf = (path: string) => {
+    const clean = path.replace(/\/$/, "") || "/";
+    const article = asArticle(path);
+    if (article) return article.title;
+    if (NAMED[clean]) return NAMED[clean];
+
+    const member = clean.match(/^\/members\/(.+)$/);
+    if (member) return `멤버 · ${decodeURIComponent(member[1])}`;
+    const topic = clean.match(/^\/articles\?topic=(.+)$/);
+    if (topic) return `주제 · ${decodeURIComponent(topic[1])}`;
+    // Anything unnamed keeps its address, which is better than a wrong name.
+    return clean;
+  };
+
   return {
     missing: null,
     error: failures.length ? failures.join(" · ") : null,
@@ -274,7 +297,9 @@ export async function getAnalytics(): Promise<Analytics> {
       const article = asArticle(r.label);
       return article ? [{ ...r, label: article.title, href: `/articles/${article.slug}` }] : [];
     }).slice(0, 10),
-    pages: paths.rows.slice(0, 10).map((r) => ({ ...r, href: r.label })),
+    pages: paths.rows
+      .slice(0, 10)
+      .map((r) => ({ ...r, href: r.label, label: nameOf(r.label) })),
     referrers: referrers.rows,
     devices: devices.rows,
     countries: countries.rows,
