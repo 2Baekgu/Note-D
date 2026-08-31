@@ -105,23 +105,37 @@ async function ask(
   }
 }
 
-/** One grouped query, flattened into rows this screen can draw. */
-async function grouped(by: string, limit: number, key = by): Promise<Ranked[]> {
-  const { data } = await ask("visits/aggregate", {
+/** One grouped query, flattened into rows this screen can draw.
+ *
+ *  The failure is carried back rather than swallowed. An empty list and a
+ *  refused query look identical on screen, and telling them apart afterwards
+ *  costs a day. */
+async function grouped(
+  by: string,
+  limit: number,
+  key = by,
+): Promise<{ rows: Ranked[]; error?: string }> {
+  const { data, error } = await ask("visits/aggregate", {
     since: iso(DAYS),
     until: iso(0),
     by,
     limit: String(limit),
   });
-  if (!Array.isArray(data)) return [];
-  return (data as Row[])
-    .map((r) => ({
-      label: String(r[key] ?? "(알 수 없음)"),
-      views: Number(r.pageviews) || 0,
-      visitors: Number(r.visitors) || 0,
-    }))
-    .filter((r) => r.views > 0)
-    .sort((a, b) => b.views - a.views);
+  if (error) return { rows: [], error: `${by}: ${error}` };
+  if (!Array.isArray(data)) return { rows: [] };
+
+  return {
+    rows: (data as Row[])
+      .map((r) => ({
+        // Vercel names the column after the dimension; fall back to the one
+        // field every row has if it ever names it something else.
+        label: String(r[key] ?? r[by] ?? "(알 수 없음)"),
+        views: Number(r.pageviews) || 0,
+        visitors: Number(r.visitors) || 0,
+      }))
+      .filter((r) => r.views > 0)
+      .sort((a, b) => b.views - a.views),
+  };
 }
 
 /** The last `days` days as Vercel has them. Shared with the cron job that
@@ -192,6 +206,15 @@ export async function getAnalytics(): Promise<Analytics> {
 
   const ever = await lifetime();
 
+  const failures = [
+    totalsRes.error,
+    dailyRes.error,
+    paths.error,
+    referrers.error,
+    devices.error,
+    countries.error,
+    browsers.error,
+  ].filter(Boolean);
   if (totalsRes.error && dailyRes.error) return blank(null, totalsRes.error);
 
   const count = (totalsRes.data ?? {}) as Row;
@@ -232,7 +255,7 @@ export async function getAnalytics(): Promise<Analytics> {
 
   return {
     missing: null,
-    error: totalsRes.error ?? dailyRes.error ?? null,
+    error: failures.length ? failures.join(" · ") : null,
     totals: {
       views: Number(count.pageviews) || 0,
       visitors: Number(count.visitors) || 0,
@@ -242,15 +265,15 @@ export async function getAnalytics(): Promise<Analytics> {
     },
     allTime: { ...ever, views: ever.views + (byDayToday ?? 0) },
     daily,
-    articles: paths.flatMap<Ranked>((r) => {
+    articles: paths.rows.flatMap<Ranked>((r) => {
       const article = asArticle(r.label);
       return article ? [{ ...r, label: article.title, href: `/articles/${article.slug}` }] : [];
     }).slice(0, 10),
-    pages: paths.slice(0, 10).map((r) => ({ ...r, href: r.label })),
-    referrers,
-    devices,
-    countries,
-    browsers,
+    pages: paths.rows.slice(0, 10).map((r) => ({ ...r, href: r.label })),
+    referrers: referrers.rows,
+    devices: devices.rows,
+    countries: countries.rows,
+    browsers: browsers.rows,
     days: DAYS,
   };
 }
