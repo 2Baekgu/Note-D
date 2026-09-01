@@ -9,10 +9,15 @@ import { toPlainText } from "@/lib/content/doc";
 const MODEL = "gpt-5.6-sol";
 const ENDPOINT = "https://api.openai.com/v1/responses";
 const TIMEOUT_MS = 30_000;
-/** Enough of the article to summarise. One of the fifty runs to 8,400
- *  characters and was losing its last quarter — the part a piece usually
- *  spends arriving somewhere. Still well under a cent a call. */
-const MAX_ARTICLE_CHARS = 10_000;
+/** A runaway guard, not an editorial limit.
+ *
+ *  It once sat at 6,000 and quietly cut the last quarter off the longest
+ *  piece in the archive — the part an article usually spends arriving
+ *  somewhere — and nothing said so. The longest of the fifty runs to 8,400
+ *  characters and the median to 1,600, so this is far past anything a study
+ *  post will reach; it exists only so a pasted book cannot bill for itself.
+ *  Reaching it is now written to the log rather than passed over. */
+const MAX_ARTICLE_CHARS = 40_000;
 
 const SYSTEM_TEMPLATE = `너는 방금 읽은 글을 UX/UI 스터디 단톡방에 소개하는 알리미다.
 읽지 않은 사람도 소개문만 읽으면 이 글이 무슨 이야기이고, 왜 흥미로운지 자연스럽게 이해할 수 있어야 한다.
@@ -157,8 +162,14 @@ export async function summarise(
   const key = process.env.OPENAI_API_KEY;
   if (!key) return { text: null, error: "OPENAI_API_KEY is not set" };
 
-  const body = toPlainText(content).trim().slice(0, MAX_ARTICLE_CHARS);
-  if (!body) return { text: null, error: "article body is empty" };
+  const whole = toPlainText(content).trim();
+  if (!whole) return { text: null, error: "article body is empty" };
+  if (whole.length > MAX_ARTICLE_CHARS) {
+    console.warn(
+      `daily-pick: "${title}" is ${whole.length} characters; summarising the first ${MAX_ARTICLE_CHARS}.`,
+    );
+  }
+  const body = whole.slice(0, MAX_ARTICLE_CHARS);
 
   try {
     const res = await fetch(ENDPOINT, {
