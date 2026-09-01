@@ -64,6 +64,12 @@ const arg = process.argv[2] ?? "1";
 const dayKey = (d: Date) =>
   new Date(d.getTime() + 9 * 3600_000).toISOString().slice(0, 10);
 
+// The next message is this morning's if it has not gone yet, and tomorrow's
+// once it has. Counting a day forward from now instead put the whole preview
+// a day late whenever it was run before eight.
+const sentDays = new Set((sent as { sent_on: string }[]).map((r) => r.sent_on));
+const base = sentDays.has(dayKey(new Date())) ? 1 : 0;
+
 let pick: DailyArticle | null = null;
 
 if (arg && !/^\d+$/.test(arg)) {
@@ -87,7 +93,7 @@ if (arg && !/^\d+$/.test(arg)) {
 // marking each pick as sent, or every day would choose the same article.
 const ahead = pick ? 0 : Math.max(1, Number(arg));
 for (let n = 1; n <= ahead; n += 1) {
-  const when = new Date(Date.now() + n * 86_400_000);
+  const when = new Date(Date.now() + (base + n - 1) * 86_400_000);
   pick = pickDaily(articles, lastSent, when);
   if (!pick) break;
   if (n < ahead) {
