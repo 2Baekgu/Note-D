@@ -103,9 +103,14 @@ export async function summarise(
         // The title is here so the "do not repeat it" rule has something to
         // avoid, not so it can be quoted back — the code owns the title line.
         input: `### 아티클\n제목: ${title}\n\n"""\n${body}\n"""`,
-        reasoning: { effort: "medium" },
+        // Reasoning tokens bill as output, so the ceiling is what a call can
+        // cost — not what it usually costs. 500 Korean characters is about
+        // 600 tokens; 1,600 leaves room to think without leaving room to
+        // spend. `low` because the prompt now says what to write, and the
+        // model was doing the deciding the prompt should have done.
+        reasoning: { effort: "low" },
         text: { verbosity: "medium" },
-        max_output_tokens: 4000,
+        max_output_tokens: 1600,
       }),
     });
 
