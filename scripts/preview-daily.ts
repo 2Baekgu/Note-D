@@ -56,15 +56,52 @@ const articles: DailyArticle[] = (rows as Record<string, unknown>[]).map((a) => 
   author: String((a.profiles as { name?: string })?.name ?? ""),
 }));
 
-// Tomorrow, since that is the message being previewed.
-const when = new Date(Date.now() + 86_400_000);
-const pick = pickDaily(articles, lastSent, when);
+// A number is how many days ahead to look — `1` is tomorrow, the next message
+// nobody has seen. Anything else is words from a title, for reading a
+// particular piece out of turn.
+const arg = process.argv[2] ?? "1";
+const dayKey = (d: Date) =>
+  new Date(d.getTime() + 9 * 3600_000).toISOString().slice(0, 10);
+
+let pick: DailyArticle | null = null;
+
+if (arg && !/^\d+$/.test(arg)) {
+  const needle = arg.toLowerCase();
+  const found = articles.filter(
+    (a) => a.title.toLowerCase().includes(needle) || a.slug.includes(needle),
+  );
+  if (found.length !== 1) {
+    console.log(
+      found.length
+        ? `여러 글이 걸립니다:\n${found.map((a) => `  ${a.title}`).join("\n")}`
+        : `"${arg}"에 맞는 글이 없습니다.`,
+    );
+    process.exit(1);
+  }
+  pick = found[0];
+  console.log(`${pick.title}   ← 이 글을 미리 봅니다\n`);
+}
+
+// Anything further ahead than tomorrow has to walk the days in between,
+// marking each pick as sent, or every day would choose the same article.
+const ahead = pick ? 0 : Math.max(1, Number(arg));
+for (let n = 1; n <= ahead; n += 1) {
+  const when = new Date(Date.now() + n * 86_400_000);
+  pick = pickDaily(articles, lastSent, when);
+  if (!pick) break;
+  if (n < ahead) {
+    // Pretend it went out, so the next day picks something else.
+    lastSent.set(pick.id, dayKey(when));
+    console.log(`${dayKey(when)}  ${pick.title}`);
+  } else {
+    console.log(`${dayKey(when)}  ${pick.title}   ← 이 글을 미리 봅니다\n`);
+  }
+}
+
 if (!pick) {
   console.log("보낼 아티클이 없습니다.");
   process.exit(0);
 }
-
-console.log(`고른 글: ${pick.title}\n발행일: ${pick.publishedAt}\n`);
 const { text, error } = await summarise(pick.title, pick.content, 500);
 if (error) console.log(`⚠️ ${error}\n`);
 
