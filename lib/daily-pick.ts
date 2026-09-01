@@ -10,6 +10,7 @@ export interface DailyArticle {
   content: string;
   publishedAt: string;
   author: string;
+  topics: string[];
 }
 
 /** Korea keeps no daylight saving, so a fixed offset is exact. */
@@ -17,6 +18,14 @@ const SEOUL_OFFSET_MS = 9 * 60 * 60 * 1000;
 
 /** How long an article rests before it may come round again. */
 export const REST_DAYS = 30;
+
+/** How long two pieces on the same subject stay apart.
+ *
+ *  The archive returns to the same ideas — that is what a study does — and
+ *  the queue, left to publication order, was putting `기억의 방식은 UX를…`
+ *  and `기억의 궁전…` on consecutive mornings. Two weeks is long enough that
+ *  the second reads as a return rather than a repeat. */
+export const KINSHIP_DAYS = 14;
 
 /** A blank line between every block, so the message breathes on a phone. */
 const BLOCK_GAP = "\n\n";
@@ -119,6 +128,40 @@ export function fitIntro(intro: string, budget: number): string {
   return (space > budget * 0.6 ? hard.slice(0, space) : hard).trimEnd();
 }
 
+/** Words that say what kind of piece this is rather than what it is about.
+ *  Nearly every title here carries one, so matching on them would make every
+ *  article kin to every other. */
+const GENERIC = new Set([
+  "효과", "법칙", "원리", "이론", "모형", "방법", "방식", "차이", "전환", "진화",
+  "사용자", "디자인", "경험", "설계", "서비스", "화면", "인터페이스", "우리",
+]);
+
+/** Korean marks a word's role with a suffix, so the same word arrives spelled
+ *  three ways. Dropping the common ones lets `기억의` meet `기억을`. */
+const PARTICLE = /(?:은|는|이|가|을|를|의|에|도|로|과|와|만|부터|까지)$/;
+
+/** What a title names its subject with. */
+function keywords(title: string): Set<string> {
+  const found = new Set<string>();
+  for (const raw of title.toLowerCase().match(/[가-힣]+|[a-z]{4,}/g) ?? []) {
+    const word = /[가-힣]/.test(raw) ? raw.replace(PARTICLE, "") : raw;
+    if (word.length >= 2 && !GENERIC.has(word)) found.add(word);
+  }
+  return found;
+}
+
+/** Two articles are about the same thing when they share both a topic and a
+ *  word naming their subject. Either alone is too loose: half the archive is
+ *  filed under Cognitive Science, and a shared word with no shared topic is
+ *  usually a coincidence of phrasing. */
+function areKin(a: DailyArticle, b: DailyArticle): boolean {
+  if (a.id === b.id) return false;
+  if (!a.topics.some((t) => b.topics.includes(t))) return false;
+  const theirs = keywords(b.title);
+  for (const word of keywords(a.title)) if (theirs.has(word)) return true;
+  return false;
+}
+
 /** Among articles nobody has seen yet, the newest goes first. That is what
  *  carries a just-published piece to the front of the queue on its own, with
  *  no special handling — swap the operands for oldest-first. */
@@ -141,19 +184,33 @@ export function pickDaily(
   if (!articles.length) return null;
 
   const unsent = articles.filter((a) => !lastSent.has(a.id));
-  if (unsent.length) return [...unsent].sort(byNewestPublished)[0];
 
-  const cutoff = new Date(now.getTime() - REST_DAYS * 86_400_000).toISOString();
-  const rested = articles.filter((a) => (lastSent.get(a.id) ?? "") < cutoff);
+  let queue: DailyArticle[];
+  if (unsent.length) {
+    queue = [...unsent].sort(byNewestPublished);
+  } else {
+    const cutoff = new Date(now.getTime() - REST_DAYS * 86_400_000).toISOString();
+    const rested = articles.filter((a) => (lastSent.get(a.id) ?? "") < cutoff);
 
-  // Everything has gone out inside the window, i.e. there are fewer articles
-  // than days. Sending nothing would be worse than sending the oldest.
-  const pool = rested.length ? rested : articles;
+    // Everything has gone out inside the window, i.e. there are fewer
+    // articles than days. Sending nothing would be worse than sending the
+    // oldest.
+    queue = [...(rested.length ? rested : articles)].sort(
+      (a, b) =>
+        (lastSent.get(a.id) ?? "").localeCompare(lastSent.get(b.id) ?? "") ||
+        a.publishedAt.localeCompare(b.publishedAt) ||
+        a.id.localeCompare(b.id),
+    );
+  }
 
-  return [...pool].sort(
-    (a, b) =>
-      (lastSent.get(a.id) ?? "").localeCompare(lastSent.get(b.id) ?? "") ||
-      a.publishedAt.localeCompare(b.publishedAt) ||
-      a.id.localeCompare(b.id),
-  )[0];
+  // A date, so it compares cleanly against either shape a send is recorded
+  // in — the day alone, or the full instant.
+  const since = new Date(now.getTime() - KINSHIP_DAYS * 86_400_000)
+    .toISOString()
+    .slice(0, 10);
+  const lately = articles.filter((a) => (lastSent.get(a.id) ?? "") >= since);
+
+  // A preference, not a rule: if every candidate has a neighbour in the last
+  // fortnight, the queue still moves rather than stalling on a technicality.
+  return queue.find((a) => !lately.some((sent) => areKin(a, sent))) ?? queue[0];
 }

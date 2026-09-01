@@ -31,7 +31,7 @@ const H = { apikey: KEY, Authorization: `Bearer ${KEY}` };
 
 const rows = await (
   await fetch(
-    `${URL_BASE}/rest/v1/articles?select=id,title,slug,subtitle,content,published_at,profiles(name)&status=eq.published`,
+    `${URL_BASE}/rest/v1/articles?select=id,title,slug,subtitle,content,topics,published_at,profiles(name)&status=eq.published`,
     { headers: H },
   )
 ).json();
@@ -54,6 +54,7 @@ const articles: DailyArticle[] = (rows as Record<string, unknown>[]).map((a) => 
   content: String(a.content ?? ""),
   publishedAt: String(a.published_at ?? ""),
   author: String((a.profiles as { name?: string })?.name ?? ""),
+  topics: Array.isArray(a.topics) ? (a.topics as string[]) : [],
 }));
 
 // A number is how many days ahead to look — `1` is tomorrow, the next message

@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   const [{ data: articleRows }, { data: sendRows }] = await Promise.all([
     supabase
       .from("articles")
-      .select("id, title, slug, subtitle, content, published_at, profiles(name)")
+      .select("id, title, slug, subtitle, content, published_at, topics, profiles(name)")
       .eq("status", "published"),
     supabase.from("daily_sends").select("article_id, sent_on"),
   ]);
@@ -54,6 +54,7 @@ export async function GET(request: Request) {
       content: String(r.content ?? ""),
       publishedAt: String(r.published_at ?? "").slice(0, 10),
       author: profileRow.name ?? "Note:D",
+      topics: Array.isArray(r.topics) ? (r.topics as string[]) : [],
     };
   });
   if (!articles.length) {
