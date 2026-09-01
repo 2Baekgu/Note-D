@@ -58,6 +58,8 @@ export function FeaturedArticle({ article }: { article: ArticleWithAuthor }) {
                 alt=""
                 seed={article.slug}
                 topic={article.topics[0]}
+                sizes="(min-width: 1024px) 58vw, 100vw"
+                priority
               />
               <div className="media-scrim" aria-hidden="true" />
               <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">

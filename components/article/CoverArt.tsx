@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { toneFor } from "@/lib/data/topics";
 
 /* ────────────────────────────────────────────────────────────
@@ -238,23 +240,44 @@ export function CoverArt({ seed, topic, tone, className }: CoverArtProps) {
   );
 }
 
-/** Cover image if present, generative art otherwise. */
+/** Cover image if present, generative art otherwise.
+ *
+ *  The covers are full-resolution PNGs — three of them over 1.5MB — and the
+ *  home page was sending 6.8MB of them to show thumbnails a few hundred
+ *  pixels wide. `next/image` serves each one resized and re-encoded, so
+ *  `sizes` has to say how wide it will actually be drawn; guess high and the
+ *  saving goes with it.
+ *
+ *  `priority` for the one cover that is on screen before anyone scrolls.
+ *  Everything else stays lazy. */
 export function CoverMedia({
   src,
   alt,
   seed,
   topic,
   className,
+  sizes = "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw",
+  priority = false,
 }: {
   src?: string | null;
   alt: string;
   seed: string;
   topic?: string;
   className?: string;
+  sizes?: string;
+  priority?: boolean;
 }) {
   if (src) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={src} alt={alt} loading="lazy" className={`h-full w-full object-cover ${className ?? ""}`} />;
+    return (
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        className={`object-cover ${className ?? ""}`}
+      />
+    );
   }
   return <CoverArt seed={seed} topic={topic} className={className} />;
 }
