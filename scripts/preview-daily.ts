@@ -14,6 +14,17 @@ for (const line of fs.readFileSync(".env.local", "utf8").split("\n")) {
 }
 for (const [k, v] of Object.entries(env)) process.env[k] ??= v;
 
+// The point of a preview is the message that will actually go out, so it uses
+// the address the article will actually live at. Locally that variable points
+// at the dev server, which would print a link nobody can open.
+if (!process.env.SITE_URL) {
+  const live = env.NEXT_PUBLIC_SITE_URL ?? "";
+  process.env.SITE_URL = /localhost|127\.0\.0\.1/.test(live) || !live
+    ? "https://note-d.co.kr"
+    : live;
+}
+console.log(`사이트 주소: ${process.env.SITE_URL}\n`);
+
 const URL_BASE = env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = env.SUPABASE_SERVICE_ROLE_KEY;
 const H = { apikey: KEY, Authorization: `Bearer ${KEY}` };
