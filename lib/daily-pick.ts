@@ -41,12 +41,21 @@ export function seoulDay(now: Date): string {
   return new Date(now.getTime() + SEOUL_OFFSET_MS).toISOString().slice(0, 10);
 }
 
+/** The one address the site answers at.
+ *
+ *  This used to try `SITE_URL`, then `NEXT_PUBLIC_SITE_URL`, then
+ *  `VERCEL_URL` — three names for a single fact, which is three chances for
+ *  them to disagree. They did: the pages said note-d.co.kr while every
+ *  morning's link said notes-d.vercel.app, because a `SITE_URL` set before
+ *  the domain was bought was still sitting in the project's settings and won
+ *  the tie. Nobody would see it, either — the message is read in a chat room
+ *  the site knows nothing about.
+ *
+ *  One name now, and the same one the pages set their own canonical URL
+ *  from, so a link in the chat cannot point somewhere the page it opens
+ *  disagrees with. */
 export function siteUrl(): string {
-  const raw =
-    process.env.SITE_URL ||
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
-    "http://localhost:3000";
+  const raw = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
   return raw.replace(/\/+$/, "");
 }
 

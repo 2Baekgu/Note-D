@@ -17,13 +17,11 @@ for (const [k, v] of Object.entries(env)) process.env[k] ??= v;
 // The point of a preview is the message that will actually go out, so it uses
 // the address the article will actually live at. Locally that variable points
 // at the dev server, which would print a link nobody can open.
-if (!process.env.SITE_URL) {
-  const live = env.NEXT_PUBLIC_SITE_URL ?? "";
-  process.env.SITE_URL = /localhost|127\.0\.0\.1/.test(live) || !live
-    ? "https://note-d.co.kr"
-    : live;
+const local = env.NEXT_PUBLIC_SITE_URL ?? "";
+if (/localhost|127\.0\.0\.1/.test(local) || !local) {
+  process.env.NEXT_PUBLIC_SITE_URL = "https://note-d.co.kr";
 }
-console.log(`사이트 주소: ${process.env.SITE_URL}\n`);
+console.log(`사이트 주소: ${process.env.NEXT_PUBLIC_SITE_URL}\n`);
 
 const URL_BASE = env.NEXT_PUBLIC_SUPABASE_URL;
 const KEY = env.SUPABASE_SERVICE_ROLE_KEY;
