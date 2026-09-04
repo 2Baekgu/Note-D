@@ -20,6 +20,9 @@ import {
  *  double-run returns the same text instead of burning a second article. */
 
 export const runtime = "nodejs";
+/** The model does the reading at length now. Nobody is on the other end
+ *  waiting — the scheduler calls at six for a message due at eight. */
+export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 /** Constant-time, and length-safe: `timingSafeEqual` throws on a mismatch. */

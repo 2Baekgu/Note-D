@@ -8,7 +8,10 @@ import { toPlainText } from "@/lib/content/doc";
  *  Drop to "gpt-5.6-terra" to roughly halve that. */
 const MODEL = "gpt-5.6-sol";
 const ENDPOINT = "https://api.openai.com/v1/responses";
-const TIMEOUT_MS = 30_000;
+/** Generous, because nothing is waiting on it any more: the scheduler asks
+ *  two hours before the message is due. Kept under the route's own ceiling so
+ *  a slow call degrades to the subtitle rather than killing the request. */
+const TIMEOUT_MS = 50_000;
 /** A runaway guard, not an editorial limit.
  *
  *  It once sat at 6,000 and quietly cut the last quarter off the longest
@@ -189,13 +192,16 @@ export async function summarise(
         // cost — not what it usually costs. 500 Korean characters is about
         // 600 tokens, and the rest is thinking room.
         //
-        // `medium` because the work here is reading, not writing: an article
-        // that sets one thing against another has to be held whole, and at
-        // `low` a contrast came back with the same word on both sides of it.
-        // One call a day makes the difference a few hundred won a month.
-        reasoning: { effort: "medium" },
+        // The work here is reading before it is writing: an article that
+        // sets one thing against another has to be held whole, and at `low`
+        // a contrast came back with the same word on both sides of it. The
+        // effort was capped by the Shortcut's patience until the scheduler
+        // started writing the message two hours early; nothing waits on this
+        // call now, so it gets the time the reading deserves. One call a day
+        // makes the difference a few hundred won a month.
+        reasoning: { effort: "high" },
         text: { verbosity: "medium" },
-        max_output_tokens: 3000,
+        max_output_tokens: 6000,
       }),
     });
 
