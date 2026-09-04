@@ -30,15 +30,19 @@ function tokenMatches(given: string, expected: string): boolean {
 }
 
 function authorise(request: Request): boolean {
-  const expected = process.env.DAILY_PICK_TOKEN ?? "";
-  if (!expected) return false;
-
   const header = request.headers.get("authorization") ?? "";
   const bearer = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
   const query = new URL(request.url).searchParams.get("token") ?? "";
   const given = bearer || query;
+  if (!given) return false;
 
-  return Boolean(given) && tokenMatches(given, expected);
+  // The Shortcut carries DAILY_PICK_TOKEN; Vercel's scheduler sends
+  // CRON_SECRET, which is the only header it can be given. Both ask for the
+  // same thing — this morning's message — and whichever arrives second is
+  // handed what the first one wrote.
+  return [process.env.DAILY_PICK_TOKEN, process.env.CRON_SECRET]
+    .filter((expected): expected is string => Boolean(expected))
+    .some((expected) => tokenMatches(given, expected));
 }
 
 /** `?format=text` answers with the message alone, so a Shortcut can copy the

@@ -4,6 +4,10 @@
   ],
   "crons": [
     {
+      "path": "/api/daily-pick",
+      "schedule": "0 21 * * *"
+    },
+    {
       "path": "/api/analytics-snapshot",
       "schedule": "20 3 * * *"
     }
