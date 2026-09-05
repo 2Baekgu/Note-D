@@ -216,8 +216,10 @@ export function RichEditor({
   const rowMark = useRef<HTMLDivElement>(null);
 
   function imagesFrom(data: DataTransfer | null) {
-    return Array.from(data?.files ?? []).filter((f) =>
-      f.type.startsWith("image/"),
+    // A HEIC dragged out of Photos can arrive with no type at all, and the
+    // upload converts it — so the name counts as much as the type here.
+    return Array.from(data?.files ?? []).filter(
+      (f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name),
     );
   }
 
@@ -587,7 +589,7 @@ function ImageOnlyToolbar({
         + 이미지
         <input
           type="file"
-          accept="image/*"
+          accept="image/*,.heic,.heif"
           multiple
           className="sr-only"
           onChange={(e) => {

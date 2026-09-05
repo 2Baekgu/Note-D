@@ -519,6 +519,23 @@ details[open] > summary .report-arrow {
   line-height: 1.28;
 }
 
+/* The title while it is being written.
+ *
+ *  Smaller than the published --text-h1, and wrapping. A title long enough
+ *  to need two lines on the page was being typed into one line that could
+ *  not show its end: "UX Korea 2026 : AI가 디자인하는 시대의 디자…" with the
+ *  rest off the edge. The face and the axes are the published title's, so it
+ *  still reads as the thing it will become. */
+.editor-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.2vw, 1.9375rem);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variation-settings: "SOFT" 0, "WONK" 0, "opsz" 100;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
 /* A row measured to the frame, not to the shell's content box. Cells inside
    it carry --cell-pad, so their content lines up with every other section. */
 .frame-row {

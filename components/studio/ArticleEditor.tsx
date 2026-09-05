@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Article, Reference } from "@/lib/types";
 import { topics } from "@/lib/data/topics";
@@ -109,6 +109,16 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
       setNaming(false);
     }
   }
+
+  /** A textarea does not size itself. Reset before measuring, or it can only
+   *  ever get taller. */
+  const titleRef = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [article.title, mode]);
 
   /** Covers come from the article's own pictures — uploading a separate file
    *  only ever produced a cover that appeared nowhere in the piece. */
@@ -315,12 +325,21 @@ export function ArticleEditor({ initial }: { initial?: Article }) {
                     <label htmlFor="title" className="sr-only">
                       Title
                     </label>
-                    <input
+                    {/* A textarea, not an input: a title is one line of
+                        meaning but not always one line of screen, and an
+                        input hides whatever runs past its right edge. Enter
+                        is swallowed so the one line stays one line. */}
+                    <textarea
                       id="title"
+                      ref={titleRef}
+                      rows={1}
                       value={article.title}
                       onChange={(e) => patch({ title: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") e.preventDefault();
+                      }}
                       placeholder="제목을 입력하세요"
-                      className="t-h1 serif-heads w-full border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
+                      className="editor-title w-full resize-none overflow-hidden border-0 bg-transparent p-0 outline-none placeholder:text-ink-faint"
                     />
                   </>
                 }

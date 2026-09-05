@@ -356,7 +356,7 @@ export function EditorToolbar({
           </svg>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             multiple
             className="sr-only"
             onChange={(e) => {

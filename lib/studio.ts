@@ -170,18 +170,71 @@ const asciiSlug = (value: string) =>
     .replace(/^-+|-+$/g, "")
     .slice(0, 40);
 
+/** What an iPhone hands over. The camera roll is HEIC by default, the file
+ *  uploads like any other, and then no browser but Safari can draw it — the
+ *  picture went into the article as a broken icon with the filename beside
+ *  it, and nothing anywhere said why. Some browsers also hand it over with
+ *  an empty type, so the name is worth checking too. */
+const isHeic = (file: File) =>
+  /^image\/heic|^image\/heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
+
+/** A HEIC re-encoded to JPEG, while it is still a file and not yet a URL.
+ *  Whether this works is the browser's decode, not ours: Safari reads HEIC,
+ *  Chrome does not. When it cannot, the upload is refused with a reason
+ *  rather than storing something that will not render. */
+async function toDisplayable(file: File): Promise<File | { error: string }> {
+  if (!isHeic(file)) return file;
+
+  try {
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    canvas.getContext("2d")?.drawImage(bitmap, 0, 0);
+    bitmap.close();
+
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.9),
+    );
+    if (!blob) throw new Error("re-encode produced nothing");
+
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, {
+      type: "image/jpeg",
+    });
+  } catch {
+    return {
+      error: `${file.name}은(는) HEIC 사진이라 이 브라우저에서 변환하지 못했습니다. JPEG나 PNG로 바꿔서 올려주세요.`,
+    };
+  }
+}
+
 /** Uploads an image to Supabase Storage; falls back to a data URL locally.
  *  `folder` separates covers from the images dropped into a body. */
 export async function uploadImage(
-  file: File,
+  original: File,
   folder: "covers" | "body" | "avatars" | "bug-reports" = "covers",
 ): Promise<{ url?: string; error?: string }> {
-  if (!file.type.startsWith("image/")) {
-    return { error: `${file.name}은(는) 이미지 파일이 아닙니다.` };
+  // HEIC is checked by name as well as type, so a file the browser gave no
+  // type to still reaches the converter instead of being called "not an
+  // image".
+  if (!original.type.startsWith("image/") && !isHeic(original)) {
+    return { error: `${original.name}은(는) 이미지 파일이 아닙니다.` };
   }
+  if (original.size > MAX_IMAGE_BYTES) {
+    const mb = (original.size / 1024 / 1024).toFixed(1);
+    return { error: `${original.name}이(가) 너무 큽니다 (${mb}MB). 10MB 이하로 줄여주세요.` };
+  }
+
+  const converted = await toDisplayable(original);
+  if ("error" in converted) return { error: converted.error };
+  const file = converted;
+
+  // A HEIC grows when it becomes a JPEG, so the size is worth asking again.
   if (file.size > MAX_IMAGE_BYTES) {
     const mb = (file.size / 1024 / 1024).toFixed(1);
-    return { error: `${file.name}이(가) 너무 큽니다 (${mb}MB). 10MB 이하로 줄여주세요.` };
+    return {
+      error: `${original.name}은(는) 변환하면 ${mb}MB가 되어 너무 큽니다. 크기를 줄여서 올려주세요.`,
+    };
   }
 
   const supabase = getSupabaseBrowserClient();

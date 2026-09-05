@@ -113,7 +113,7 @@ export function ProfileIdentity({ member }: { member: User }) {
           </span>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,.heic,.heif"
             className="sr-only"
             onChange={(e) => {
               void pickPhoto(e.target.files?.[0]);

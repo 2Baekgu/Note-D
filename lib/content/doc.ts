@@ -148,6 +148,19 @@ export function docToBlocks(doc: DocNode): Block[] {
         break;
       }
 
+      // A row is a layout, and the block model has no layout in it — but the
+      // pictures inside one are still the article's pictures. Left out, they
+      // were invisible to everything that reads blocks: the cover picker
+      // offered an article eight images and said it had none.
+      case "imageRow": {
+        for (const child of node.content ?? []) {
+          const src = String(child.attrs?.src ?? "");
+          if (!src) continue;
+          blocks.push({ type: "image", src, alt: String(child.attrs?.alt ?? "") });
+        }
+        break;
+      }
+
       case "bookmark": {
         const url = String(node.attrs?.url ?? "");
         if (!url) break;
@@ -298,10 +311,26 @@ export const readingTime = (content: string): number =>
 
 /** The opening sentence of a document. The editor no longer asks for a
  *  subtitle, so an article without one is summarised by its first line. */
+/** The inline dialect, taken back out.
+ *
+ *  `inlineOf` puts `**` and `==` around marked words on purpose — a block's
+ *  text is the editor's own shorthand, and reading it back has to give the
+ *  marks again. A subtitle is not read back: it is printed under the title,
+ *  put in the page's description, and sent to a chat room, so what arrives
+ *  there should be the sentence and not its markup. */
+function withoutMarkers(text: string): string {
+  return text
+    .replace(/\[([^\]]+)\]\([^)\s]+\)/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/==([^=]+)==/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1");
+}
+
 export function firstLine(content: string): string {
   for (const block of toBlocks(content)) {
     if (block.type !== "paragraph") continue;
-    const text = block.text.trim();
+    const text = withoutMarkers(block.text).trim();
     if (text) return text;
   }
   return "";
