@@ -517,6 +517,11 @@ details[open] > summary .report-arrow {
 
 .serif-heads .t-h1 {
   line-height: 1.28;
+  /* Heavier than the 600 the block above sets. At 42px a 600 lets the Hangul
+     go thin next to Fraunces — the same weight the editor's own title wears
+     at 31px reads solid there and hollow here. Weight is not size-invariant,
+     so the page picks its own. */
+  font-weight: 700;
 }
 
 /* The title while it is being written.

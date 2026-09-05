@@ -178,13 +178,12 @@ const asciiSlug = (value: string) =>
 const isHeic = (file: File) =>
   /^image\/heic|^image\/heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name);
 
-/** A HEIC re-encoded to JPEG, while it is still a file and not yet a URL.
- *  Whether this works is the browser's decode, not ours: Safari reads HEIC,
- *  Chrome does not. When it cannot, the upload is refused with a reason
- *  rather than storing something that will not render. */
-async function toDisplayable(file: File): Promise<File | { error: string }> {
-  if (!isHeic(file)) return file;
+const asJpeg = (blob: Blob, name: string) =>
+  new File([blob], `${name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" });
 
+/** The browser's own decoder, which Safari has for HEIC and Chrome has not.
+ *  Free when it works — no download, no wasm — so it is worth asking first. */
+async function nativeJpeg(file: File): Promise<File | null> {
   try {
     const bitmap = await createImageBitmap(file);
     const canvas = document.createElement("canvas");
@@ -196,14 +195,32 @@ async function toDisplayable(file: File): Promise<File | { error: string }> {
     const blob = await new Promise<Blob | null>((resolve) =>
       canvas.toBlob(resolve, "image/jpeg", 0.9),
     );
-    if (!blob) throw new Error("re-encode produced nothing");
+    return blob ? asJpeg(blob, file.name) : null;
+  } catch {
+    return null;
+  }
+}
 
-    return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, {
-      type: "image/jpeg",
-    });
+/** A HEIC re-encoded to JPEG, while it is still a file and not yet a URL.
+ *
+ *  Refusing what the browser could not decode was worse than the bug it
+ *  replaced: on Chrome that is every HEIC, so the photo simply would not go
+ *  in. A decoder is carried instead, and only fetched when a HEIC actually
+ *  turns up — Safari never pays for it, and elsewhere it is one download the
+ *  first time somebody drops a photo from an iPhone. */
+async function toDisplayable(file: File): Promise<File | { error: string }> {
+  if (!isHeic(file)) return file;
+
+  const native = await nativeJpeg(file);
+  if (native) return native;
+
+  try {
+    const { heicTo } = await import("heic-to");
+    const blob = await heicTo({ blob: file, type: "image/jpeg", quality: 0.9 });
+    return asJpeg(blob, file.name);
   } catch {
     return {
-      error: `${file.name}은(는) HEIC 사진이라 이 브라우저에서 변환하지 못했습니다. JPEG나 PNG로 바꿔서 올려주세요.`,
+      error: `${file.name}을(를) 변환하지 못했습니다. JPEG나 PNG로 바꿔서 올려주세요.`,
     };
   }
 }
