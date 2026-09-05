@@ -517,11 +517,6 @@ details[open] > summary .report-arrow {
 
 .serif-heads .t-h1 {
   line-height: 1.28;
-  /* Heavier than the 600 the block above sets. At 42px a 600 lets the Hangul
-     go thin next to Fraunces — the same weight the editor's own title wears
-     at 31px reads solid there and hollow here. Weight is not size-invariant,
-     so the page picks its own. */
-  font-weight: 700;
 }
 
 /* The title while it is being written.
@@ -1047,8 +1042,17 @@ select.field {
   background-color: var(--accent-soft);
 }
 
+/* Bold, as heavy as the editor draws it.
+ *
+ *  This was a flat 600, and a heading is already 600 — so bolding a 제목1
+ *  did nothing at all once the article was published, while the same words
+ *  in the editor came out at 900. `bolder` is what the editor's own surface
+ *  falls back to, and it is relative: 700 against body text, 900 inside a
+ *  heading. Bold is heavier than whatever it sits in, which is the only
+ *  definition that survives being used in both places. */
+.tiptap strong,
 .prose-body strong {
-  font-weight: 600;
+  font-weight: bolder;
 }
 
 .prose-body code {
