@@ -30,7 +30,9 @@ export function ImageZoom() {
       event.preventDefault();
       const figure = img.closest("figure");
       setShown({
-        src: img.currentSrc || img.src,
+        // The body's pictures are served resized; `data-full` is the one
+        // that was uploaded.
+        src: img.dataset.full || img.currentSrc || img.src,
         alt: img.alt,
         // A row's caption belongs to the row, so look outward for it.
         caption:
