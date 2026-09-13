@@ -37,7 +37,10 @@ const WIDTHS = [640, 828, 1080, 1200, 1920];
 function throughOptimiser(html: string): string {
   return html.replace(/<img\b([^>]*)>/g, (tag, attrs: string) => {
     const src = /(?:^|\s)src="([^"]*)"/.exec(attrs)?.[1];
-    if (!src || /^(data:|art:)/.test(src) || src.includes("/_next/image")) return tag;
+    // An SVG has no pixels to resize, and the optimizer refuses one unless
+    // told to allow it — which would let a script in an upload run on our
+    // origin. Served as it is.
+    if (!src || /^(data:|art:)/.test(src) || /\.svg(\?|$)/i.test(src) || src.includes("/_next/image")) return tag;
 
     const at = (w: number) =>
       `/_next/image?url=${encodeURIComponent(src)}&amp;w=${w}&amp;q=75`;
